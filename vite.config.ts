@@ -31,6 +31,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,json}'],
         maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
+        runtimeCaching: [{
+          urlPattern: ({ url }: { url: URL }) => url.hostname === 'raw.githubusercontent.com' && url.pathname.startsWith('/PokeAPI/sprites/'),
+          handler: 'CacheFirst',
+          options: { cacheName: 'sprites', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // images PokéAPI : cache à la demande
+        }],
       },
     }),
   ],

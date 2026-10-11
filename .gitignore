@@ -27,3 +27,6 @@ dist-ssr
 
 # Sorties de analyze_sprites.py
 out
+
+# Archives PokéAPI extraites en local (25 000 fichiers, 113 Mo) : inutiles, les images sont lues depuis PokéAPI/sprites
+src/assets/sprites/

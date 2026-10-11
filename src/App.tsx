@@ -19,6 +19,7 @@ import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
 import { Admin, Auth, Generations, Onboarding } from './screens/Account'
 import type { Ctx } from './screens/types'
+import { setSpriteGen } from './game/officialSprites'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
 function loadChoices(day: string): string[] {
@@ -84,6 +85,7 @@ export default function App() {
       playerPreview: order.map((i) => baseChallenge.playerPreview[i]),
     }
   }, [baseChallenge, order])
+  setSpriteGen(challenge?.gen) // les écrans lisent la génération courante pour choisir le pack de sprites
 
   // Thème : clair / sombre / auto (suit le système).
   useEffect(() => {

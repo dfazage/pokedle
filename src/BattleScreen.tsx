@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { BattleView, MonView } from './game/session'
 import '@fontsource/press-start-2p'
 import { TYPE_FR, mvFr, spFr } from './game/fr'
-import { spriteUrl } from './game/sprites'
+import { MonImg } from './game/officialSprites'
 import './Battle.css'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -29,10 +29,9 @@ function HpBox({ mon, own }: { mon: MonView | null; own?: boolean }) {
 }
 
 function Sprite({ mon, back }: { mon: MonView | null; back?: boolean }) {
-  const url = useMemo(() => (mon ? spriteUrl(mon, back) : ''), [mon?.num, mon?.types.join('/'), back]) // eslint-disable-line react-hooks/exhaustive-deps
   if (!mon || mon.fainted) return null
-  // Sprite 100 % original généré par code (voir game/sprites.ts) : aucun asset officiel.
-  return <img className={`sprite ${back ? 'back' : 'front'}`} src={url} alt={spFr(mon.name)} draggable={false} />
+  // Sprite de la génération en cours (public/sprites), repli sur le sprite généré par code (game/sprites.ts).
+  return <MonImg spec={mon} back={back} className={`sprite ${back ? 'back' : 'front'}`} alt={spFr(mon.name)} draggable={false} />
 }
 
 interface Props {

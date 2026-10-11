@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react'
 import type { PreviewMon } from '../game/daily'
-import { spriteUrl } from '../game/sprites'
+import { MonImg } from '../game/officialSprites'
 import { mvFr, spFr, TYPE_FR } from '../game/fr'
 import { TypeBadge, monCardStyle } from '../ui/kit'
 import { GEN_INFO } from '../game/fr'
@@ -12,8 +12,8 @@ const STAT_LABELS: [keyof PreviewMon['stats'], string][] = [
 ]
 
 export function MonSprite({ m, back = false, size = 64 }: { m: PreviewMon; back?: boolean; size?: number }) {
-  const url = useMemo(() => spriteUrl(m, back), [m.num, m.types.join('/'), back]) // eslint-disable-line react-hooks/exhaustive-deps
-  return <img src={url} alt={spFr(m.species)} width={size} height={size} draggable={false} style={{ imageRendering: 'pixelated', width: size, height: size }} />
+  const art = size >= 100 && !back // grandes cartes : artwork officiel ; petites : sprite pixel de la génération
+  return <MonImg spec={m} back={back} artwork={art} alt={spFr(m.species)} width={size} height={size} draggable={false} style={{ imageRendering: art ? 'auto' : 'pixelated', width: size, height: size, objectFit: 'contain' }} />
 }
 
 function statColor(v: number) {

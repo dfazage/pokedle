@@ -35,6 +35,10 @@ export interface MoveView {
   power: number
   pp: number
   maxpp: number
+  /** Précision en % ; 0 = ne rate jamais. */
+  acc: number
+  priority: number
+  target: string
   disabled: boolean
 }
 export interface BattleView {
@@ -134,6 +138,9 @@ export class BattleSession {
               power: hp?.[2] ? Number(hp[2]) : mv.basePower,
               pp: m.pp ?? 0,
               maxpp: m.maxpp ?? 0,
+              acc: mv.accuracy === true ? 0 : mv.accuracy,
+              priority: mv.priority,
+              target: mv.target,
               disabled: !!m.disabled || (m.pp !== undefined && m.pp <= 0),
             }
           })

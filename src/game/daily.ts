@@ -66,7 +66,7 @@ export interface PreviewMon {
   species: string
   types: string[]
   stats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number }
-  moves: { name: string; type: string; power: number; category: string }[]
+  moves: { name: string; type: string; power: number; category: string; acc: number; pp: number; priority: number; target: string }[]
   item: string
   ability: string
   nature: string
@@ -96,7 +96,7 @@ function previewOf(set: PokemonSet, gen: number): PreviewMon {
     stats: { hp: calc('hp'), atk: calc('atk'), def: calc('def'), spa: calc('spa'), spd: calc('spd'), spe: calc('spe') },
     moves: set.moves.map((m) => {
       const mv = dex.moves.get(m)
-      return { name: mv.name, type: mv.type, power: mv.basePower, category: mv.category }
+      return { name: mv.name, type: mv.type, power: mv.basePower, category: mv.category, acc: mv.accuracy === true ? 0 : mv.accuracy, pp: mv.pp, priority: mv.priority, target: mv.target }
     }),
     item: set.item,
     ability: set.ability,

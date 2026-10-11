@@ -22,14 +22,32 @@ export interface LeaderRow {
   won_today: boolean
 }
 
+/** Pseudo valide (3 à 20 caractères, lettres/chiffres/_ - .) tiré d'une chaîne quelconque ; null si inexploitable. */
+function cleanName(raw: string): string | null {
+  const n = raw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9_.-]+/g, '').slice(0, 20)
+  return n.length >= 3 ? n : null
+}
+
 export async function ensureProfile(user: User): Promise<string | null> {
   if (!supabase) return null
   const { data } = await supabase.from('profiles').select('username').eq('id', user.id).maybeSingle()
   if (data?.username) return data.username
-  const wanted = String(user.user_metadata?.username ?? '').trim()
-  if (wanted.length < 3) return null
-  const { error } = await supabase.from('profiles').insert({ id: user.id, username: wanted })
-  return error ? null : wanted
+  const meta = user.user_metadata ?? {}
+  const wanted = String(meta.username ?? '').trim()
+  if (wanted.length >= 3) {
+    const { error } = await supabase.from('profiles').insert({ id: user.id, username: wanted })
+    return error ? null : wanted
+  }
+  // Connexion Google (ou autre OAuth) : pas de pseudo saisi, on le déduit du nom du compte, puis on désambiguïse si pris.
+  const base = cleanName(String(meta.full_name ?? meta.name ?? '')) ?? cleanName(String(user.email ?? '').split('@')[0]) ?? 'Dresseur'
+  for (let i = 0; i < 6; i++) {
+    const suffix = i === 0 ? '' : String(Math.floor(Math.random() * 9000) + 1000)
+    const name = base.slice(0, 20 - suffix.length) + suffix
+    const { error } = await supabase.from('profiles').insert({ id: user.id, username: name })
+    if (!error) return name
+    if (error.code !== '23505') return null // autre erreur que « pseudo déjà pris »
+  }
+  return null
 }
 
 export async function fetchHistory(): Promise<DayRecord[]> {

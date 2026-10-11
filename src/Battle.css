@@ -9,7 +9,7 @@
 .own-plat { width: calc(var(--u) * 130); height: calc(var(--u) * 30); left: calc(var(--u) * -10); bottom: calc(var(--u) * -6); }
 .sprite { position: absolute; image-rendering: pixelated; object-fit: contain; animation: bob 1.1s steps(2) infinite; }
 @keyframes bob { 0% { transform: translateY(0); } 50% { transform: translateY(calc(var(--u) * -1.5)); } }
-.sprite.front { width: calc(var(--u) * 64); height: calc(var(--u) * 64); right: calc(var(--u) * 28); top: calc(var(--u) * -6); }
+.sprite.front { width: calc(var(--u) * 56); height: calc(var(--u) * 56); right: calc(var(--u) * 32); top: calc(var(--u) * 1); }
 .sprite.back { width: calc(var(--u) * 80); height: calc(var(--u) * 80); left: calc(var(--u) * 16); bottom: calc(var(--u) * -4); }
 .hpbox { position: absolute; background: #f8f0d8; border: calc(var(--u) * 2) solid #484858; border-radius: calc(var(--u) * 3); padding: calc(var(--u) * 3) calc(var(--u) * 5); box-shadow: 0 0 0 calc(var(--u) * 1) #d8a038; width: calc(var(--u) * 100); }
 .hpbox.foe { left: calc(var(--u) * 6); top: calc(var(--u) * 10); }
@@ -38,3 +38,10 @@
 .menu .back-btn::before { content: none !important; }
 
 .menu.list button b { font-size: calc(var(--u) * 6); font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+
+/* Liste d'équipe : une ligne par Pokémon (nom à gauche, PV à droite) pour que 5 entrées tiennent dans la boîte. */
+.menu.team { gap: calc(var(--u) * 1) calc(var(--u) * 4); padding: calc(var(--u) * 2) calc(var(--u) * 3); }
+.menu.team button { flex-direction: row; justify-content: space-between; align-items: center; gap: calc(var(--u) * 2); padding: calc(var(--u) * 1) calc(var(--u) * 1) calc(var(--u) * 1) calc(var(--u) * 6); font-size: calc(var(--u) * 5); }
+.menu.team button b { font-size: calc(var(--u) * 5); min-width: 0; overflow: hidden; }
+.menu.team button small { font-size: calc(var(--u) * 4); white-space: nowrap; color: #606060; }
+.menu.team .back-btn { top: calc(var(--u) * -1); right: calc(var(--u) * 1); }

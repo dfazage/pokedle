@@ -118,7 +118,7 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
             </div>
           )}
           {choosingTeam && (
-            <div className="menu list">
+            <div className="menu list team">
               {alive.map((m) => (
                 <button key={m.idx} onClick={() => onSwitch(m.idx)}>
                   <b>{spFr(m.name).toUpperCase()}</b>

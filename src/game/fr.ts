@@ -5,7 +5,17 @@ const sp = names.species as Record<string, string>
 const mv = names.moves as Record<string, string>
 
 /** Nom français d'une espèce (retombe sur le nom anglais). */
-export const spFr = (name: string) => sp[toId(name)] ?? name
+export const spFr = (name: string) => {
+  const direct = sp[toId(name)]
+  if (direct) return direct
+  // Formes (« Unown-M », « Deoxys-Attack ») : nom français de l'espèce de base + forme.
+  const i = name.indexOf('-')
+  if (i > 0) {
+    const base = sp[toId(name.slice(0, i))]
+    if (base) return `${base}-${name.slice(i + 1)}`
+  }
+  return name
+}
 /** Nom français d'une attaque (retombe sur le nom anglais). */
 export const mvFr = (name: string) => mv[toId(name)] ?? name
 

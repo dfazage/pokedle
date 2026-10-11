@@ -183,14 +183,16 @@ export function winRate(gen: number, player: PokemonSet[], opp: PokemonSet[], n:
 export interface BalanceOptions {
   candidates?: number
   simsPerCandidate?: number
+  /** Sel de re-roll (admin) : 0 = tirage d'origine, n > 0 = n-ième re-tirage du jour. */
+  salt?: number
   min?: number
   max?: number
 }
 
 /** Construit le défi du jour : même résultat pour tout le monde pour une clé de jour donnée. */
 export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): DailyChallenge {
-  const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65 } = opts
-  const baseSeed = hashString(`pokedle:${dayKey}`)
+  const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65, salt = 0 } = opts
+  const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)
   const gen = pick(rand, AVAILABLE_GENS) // génération d'origine du dresseur
   const trainer = pick(rand, TRAINERS_BY_GEN[gen])

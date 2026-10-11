@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, RotateCcw, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
+import { ArrowRight, RotateCcw, Shuffle, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
 import type { Ctx } from './types'
 import { supabase, siteUrl } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
@@ -158,6 +158,10 @@ export function Admin(c: Ctx & { onBack: () => void }) {
       <button className="card row" onClick={c.onAdminReset} style={{ textAlign: 'left' }}>
         <RotateCcw size={22} style={{ color: 'var(--secondary)' }} />
         <div className="grow"><b>Réinitialiser le combat du jour</b><div className="muted small">Efface ton résultat, ta progression et l’ordre de l’équipe pour rejouer</div></div>
+      </button>
+      <button className="card row" onClick={c.onAdminReroll} style={{ textAlign: 'left' }}>
+        <Shuffle size={22} style={{ color: 'var(--violet)' }} />
+        <div className="grow"><b>Re-tirer dresseur + team du jour</b><div className="muted small">Autre dresseur et autre équipe pour tous les joueurs aujourd’hui</div></div>
       </button>
     </>
   )

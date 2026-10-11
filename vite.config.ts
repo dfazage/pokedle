@@ -36,6 +36,10 @@ export default defineConfig({
           handler: 'CacheFirst',
           options: { cacheName: 'sprites', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 1500, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // images PokéAPI : cache à la demande
         }, {
+          urlPattern: ({ url }: { url: URL }) => url.hostname === 'raw.githubusercontent.com' && url.pathname.startsWith('/PokeAPI/cries/'),
+          handler: 'CacheFirst',
+          options: { cacheName: 'cries', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // cris Pokémon : cache à la demande
+        }, {
           urlPattern: ({ url }: { url: URL }) => url.hostname === 'play.pokemonshowdown.com' && url.pathname.startsWith('/sprites/trainers/'),
           handler: 'CacheFirst',
           options: { cacheName: 'trainer-sprites', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 150, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // sprites de dresseurs (Showdown)

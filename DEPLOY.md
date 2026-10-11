@@ -14,3 +14,7 @@
 6. Test : ouvrir l'URL sur mobile → menu du navigateur → « Ajouter à l'écran d'accueil » (PWA).
 
 `public/_redirects` renvoie toute URL vers `index.html` ; `public/_headers` empêche de mettre en cache le service worker (mises à jour immédiates) et cache les `assets/` un an.
+
+**Liens des e-mails (confirmation / mot de passe oublié)** : l'app envoie `redirectTo` = `VITE_SITE_URL` (ou l'origine courante). Cette URL doit figurer dans Supabase → Authentication → URL Configuration → **Redirect URLs**, et **Site URL** ne doit plus être `http://localhost:3000`.
+
+GitHub Pages (`https://dfazage.github.io/pokedle/`) : dans Supabase, **Site URL** = `https://dfazage.github.io/pokedle/` et **Redirect URLs** = `https://dfazage.github.io/pokedle/` + `https://dfazage.github.io/pokedle/**`.

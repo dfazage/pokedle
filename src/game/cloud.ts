@@ -7,6 +7,13 @@ const key = import.meta.env.VITE_SUPABASE_KEY as string | undefined
 /** null si les variables d'environnement manquent : le jeu reste jouable en local. */
 export const supabase = url && key ? createClient(url, key) : null
 
+/** URL publique de l'app (sous-chemin inclus, ex. https://user.github.io/pokedle/), utilisée dans les liens des e-mails
+ *  (confirmation, mot de passe oublié). VITE_SITE_URL force une URL ; sinon origine courante + base de Vite. */
+export const siteUrl = (): string => {
+  const forced = import.meta.env.VITE_SITE_URL as string | undefined
+  return forced || window.location.origin + import.meta.env.BASE_URL
+}
+
 export interface LeaderRow {
   username: string
   wins: number

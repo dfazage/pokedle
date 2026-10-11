@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
+import { Volume2, VolumeX } from 'lucide-react'
 import type { BattleView, MonView } from './game/session'
 import '@fontsource/press-start-2p'
 import { TYPE_FR, mvFr, spFr } from './game/fr'
 import { MonImg } from './game/officialSprites'
+import { cueFor, findMon } from './game/battleCues'
+import { isMuted, playCue, preloadCries, setMuted } from './game/audio'
 import './Battle.css'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -48,6 +51,20 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
   const [typed, setTyped] = useState(0)
   const msg = queue[0] ?? ''
   const timer = useRef<number | undefined>(undefined)
+  const [muted, setMutedState] = useState(isMuted)
+  const lastQueue = useRef<string[] | null>(null)
+
+  // Cris des deux équipes préchargés dès l'ouverture du combat.
+  const nums = [...view.player.team, ...view.opponent.team].map((m) => m.num).join(',')
+  useEffect(() => preloadCries(nums.split(',').map(Number)), [nums])
+
+  // Un son par message affiché (cri à l'entrée en jeu, coup, K.O., jingle de fin…).
+  useEffect(() => {
+    if (lastQueue.current === queue) return
+    lastQueue.current = queue
+    const cue = queue[0] ? cueFor(queue[0]) : null
+    if (cue) playCue(cue, (side, name) => findMon((side === 'player' ? view.player : view.opponent).team, name, spFr)?.num)
+  }, [queue, view])
 
   useEffect(() => {
     setTyped(0)
@@ -93,6 +110,17 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
           <Sprite mon={view.player.active} back />
           <HpBox mon={view.opponent.active} />
           <HpBox mon={view.player.active} own />
+          <button
+            className="mutebtn"
+            aria-label={muted ? 'Activer le son' : 'Couper le son'}
+            onClick={(e) => {
+              e.stopPropagation()
+              setMuted(!muted)
+              setMutedState(!muted)
+            }}
+          >
+            {muted ? <VolumeX /> : <Volume2 />}
+          </button>
         </div>
         <div className="textbox">
           <span>{prompt}</span>

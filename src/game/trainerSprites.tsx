@@ -18,6 +18,7 @@ export function TrainerImg({ id, gen, fallback, ...img }: Props) {
   useEffect(() => setFailed(0), [id, gen])
   const src = trainerSpriteUrls(id, gen)[failed]
   if (!src) return <>{fallback}</>
-  // crossOrigin : réponses « non opaques » → le cache du service worker garde la vraie taille.
-  return <img {...img} alt="" src={src} crossOrigin="anonymous" onError={() => setFailed((n) => n + 1)} />
+  // Pas de crossOrigin : Showdown n'envoie pas d'en-tête CORS, l'image serait rejetée. Réponse « opaque » mais
+  // affichable, et mise en cache telle quelle par le service worker (statuts 0 et 200 acceptés, voir vite.config.ts).
+  return <img {...img} alt="" src={src} onError={() => setFailed((n) => n + 1)} />
 }

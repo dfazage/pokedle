@@ -247,7 +247,7 @@ export default function App() {
   // La musique s'arrête quand on quitte le combat, et en fondu une fois le dernier message lu.
   const battleOver = !!view?.ended && !queue.length && !pending
   // Victoire : le morceau de victoire démarre et continue sur l'écran de résultat ; défaite : fondu simple.
-  useEffect(() => { if (screen !== 'battle' && screen !== 'result') stopMusic(0.6) }, [screen])
+  useEffect(() => { if (screen !== 'intro' && screen !== 'battle' && screen !== 'result') stopMusic(0.6) }, [screen])
   useEffect(() => {
     if (!battleOver || !challenge) return
     if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name)))

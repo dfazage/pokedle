@@ -17,7 +17,7 @@ import BattleScreen from './BattleScreen'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
-import { Admin, Auth, Generations, Onboarding } from './screens/Account'
+import { Admin, Auth, Generations, Onboarding, ResetPassword } from './screens/Account'
 import type { Ctx } from './screens/types'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
@@ -126,7 +126,10 @@ export default function App() {
       await refreshCloud()
     }
     supabase.auth.getSession().then(({ data }) => load(data.session?.user ?? null))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => setTimeout(() => load(sess?.user ?? null), 0))
+    const { data: sub } = supabase.auth.onAuthStateChange((e, sess) => {
+      if (e === 'PASSWORD_RECOVERY') setScreen('reset') // lien « mot de passe oublié » ouvert
+      setTimeout(() => load(sess?.user ?? null), 0)
+    })
     return () => sub.subscription.unsubscribe()
   }, [today, refreshCloud])
 
@@ -316,6 +319,7 @@ export default function App() {
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
       {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version="1.0" />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} />}
+      {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'generations' && <Generations {...ctx} counts={counts} onBack={back} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}

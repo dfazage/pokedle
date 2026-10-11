@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { ArrowRight, RotateCcw, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
 import type { Ctx } from './types'
-import { supabase } from '../game/cloud'
+import { supabase, siteUrl } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
 import { dayNumber } from '../game/info'
 import { MonOrb, TopBar } from '../ui/kit'
 
 export function Auth(c: Ctx & { onBack: () => void }) {
-  const [mode, setMode] = useState<'in' | 'up'>('in')
+  const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in')
   const [mail, setMail] = useState('')
   const [pass, setPass] = useState('')
   const [pseudo, setPseudo] = useState('')
@@ -19,8 +19,11 @@ export function Auth(c: Ctx & { onBack: () => void }) {
     if (!supabase) return
     setBusy(true)
     setMsg('')
-    if (mode === 'up') {
-      const { data, error } = await supabase.auth.signUp({ email: mail, password: pass, options: { data: { username: pseudo.trim() } } })
+    if (mode === 'forgot') {
+      const { error } = await supabase.auth.resetPasswordForEmail(mail, { redirectTo: siteUrl() })
+      setMsg(error ? error.message : 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.')
+    } else if (mode === 'up') {
+      const { data, error } = await supabase.auth.signUp({ email: mail, password: pass, options: { data: { username: pseudo.trim() }, emailRedirectTo: siteUrl() } })
       if (error) setMsg(error.message)
       else if (!data.session) setMsg('Compte créé : confirme ton adresse e-mail, puis connecte-toi.')
       else c.go('home')
@@ -42,19 +45,53 @@ export function Auth(c: Ctx & { onBack: () => void }) {
       <div className="sheet stack">
         {!supabase && <p className="muted">La connexion en ligne n’est pas configurée sur cette version.</p>}
         <div className="tabs">
-          <button className={mode === 'in' ? 'on' : ''} onClick={() => setMode('in')}>Connexion</button>
-          <button className={mode === 'up' ? 'on' : ''} onClick={() => setMode('up')}>Inscription</button>
+          <button className={mode !== 'up' ? 'on' : ''} onClick={() => { setMode('in'); setMsg('') }}>Connexion</button>
+          <button className={mode === 'up' ? 'on' : ''} onClick={() => { setMode('up'); setMsg('') }}>Inscription</button>
         </div>
         <form onSubmit={submit} className="stack">
           {mode === 'up' && (
             <div><div className="lab">Pseudo</div><label className="field"><User size={18} className="muted" /><input placeholder="3 à 20 caractères" minLength={3} maxLength={20} required value={pseudo} onChange={(e) => setPseudo(e.target.value)} /></label></div>
           )}
           <div><div className="lab">Adresse e-mail</div><label className="field"><Mail size={18} className="muted" /><input type="email" placeholder="dresseur@exemple.com" autoComplete="email" required value={mail} onChange={(e) => setMail(e.target.value)} /></label></div>
-          <div><div className="lab">Mot de passe</div><label className="field"><Lock size={18} className="muted" /><input type={show ? 'text' : 'password'} placeholder="6 caractères minimum" minLength={6} autoComplete={mode === 'in' ? 'current-password' : 'new-password'} required value={pass} onChange={(e) => setPass(e.target.value)} /><button type="button" onClick={() => setShow(!show)} aria-label="Afficher le mot de passe">{show ? <EyeOff size={18} className="muted" /> : <Eye size={18} className="muted" />}</button></label></div>
-          <button className="btn violet" disabled={busy || !supabase}><LogIn size={18} /> {mode === 'in' ? 'Se connecter' : 'Créer le compte'}</button>
+          {mode !== 'forgot' && <div><div className="lab">Mot de passe</div><label className="field"><Lock size={18} className="muted" /><input type={show ? 'text' : 'password'} placeholder="6 caractères minimum" minLength={6} autoComplete={mode === 'in' ? 'current-password' : 'new-password'} required value={pass} onChange={(e) => setPass(e.target.value)} /><button type="button" onClick={() => setShow(!show)} aria-label="Afficher le mot de passe">{show ? <EyeOff size={18} className="muted" /> : <Eye size={18} className="muted" />}</button></label></div>}
+          {mode === 'in' && <button type="button" className="link" style={{ alignSelf: 'flex-end' }} onClick={() => { setMode('forgot'); setMsg('') }}>Mot de passe oublié ?</button>}
+          <button className="btn violet" disabled={busy || !supabase}><LogIn size={18} /> {mode === 'in' ? 'Se connecter' : mode === 'up' ? 'Créer le compte' : 'Envoyer le lien'}</button>
+          {mode === 'forgot' && <button type="button" className="link" style={{ alignSelf: 'center' }} onClick={() => { setMode('in'); setMsg('') }}>Retour à la connexion</button>}
           {msg && <p className="small" style={{ color: 'var(--secondary)', textAlign: 'center' }}>{msg}</p>}
         </form>
         <button className="link" style={{ alignSelf: 'center' }} onClick={c.onBack}>Jouer en invité <span className="muted small">(partie non synchronisée)</span></button>
+      </div>
+    </>
+  )
+}
+
+/** Affiché quand le joueur arrive via le lien « mot de passe oublié » : session de récupération active. */
+export function ResetPassword(c: { onDone: () => void }) {
+  const [pass, setPass] = useState('')
+  const [show, setShow] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!supabase) return
+    setBusy(true)
+    const { error } = await supabase.auth.updateUser({ password: pass })
+    setBusy(false)
+    if (error) setMsg(error.message)
+    else c.onDone()
+  }
+  return (
+    <>
+      <div className="purple-head">
+        <h1 className="title" style={{ marginTop: 6 }}>Nouveau mot de passe</h1>
+        <p style={{ opacity: 0.9, marginTop: 8, lineHeight: 1.4 }}>Choisis un nouveau mot de passe pour ton compte.</p>
+      </div>
+      <div className="sheet stack">
+        <form onSubmit={submit} className="stack">
+          <div><div className="lab">Nouveau mot de passe</div><label className="field"><Lock size={18} className="muted" /><input type={show ? 'text' : 'password'} placeholder="6 caractères minimum" minLength={6} autoComplete="new-password" required value={pass} onChange={(e) => setPass(e.target.value)} /><button type="button" onClick={() => setShow(!show)} aria-label="Afficher le mot de passe">{show ? <EyeOff size={18} className="muted" /> : <Eye size={18} className="muted" />}</button></label></div>
+          <button className="btn violet" disabled={busy}><LogIn size={18} /> Enregistrer</button>
+          {msg && <p className="small" style={{ color: 'var(--secondary)', textAlign: 'center' }}>{msg}</p>}
+        </form>
       </div>
     </>
   )

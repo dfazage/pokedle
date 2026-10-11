@@ -17,7 +17,7 @@ import BattleScreen from './BattleScreen'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
-import { Auth, Generations, Onboarding } from './screens/Account'
+import { Admin, Auth, Generations, Onboarding } from './screens/Account'
 import type { Ctx } from './screens/types'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
@@ -316,6 +316,7 @@ export default function App() {
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
       {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version="1.0" />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} />}
+      {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'generations' && <Generations {...ctx} counts={counts} onBack={back} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
       <span hidden>{dayNumber(today)}</span>

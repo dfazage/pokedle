@@ -8,7 +8,7 @@ import { TYPE_FR } from '../game/fr'
 
 export type Screen =
   | 'onboarding' | 'home' | 'opponent' | 'team' | 'battle' | 'result'
-  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'generations'
+  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'generations' | 'admin'
 
 const ICONS: Record<string, typeof Flame> = {
   Normal: Circle, Fire: Flame, Water: Droplet, Grass: Leaf, Electric: Zap, Ice: Snowflake, Fighting: Swords,

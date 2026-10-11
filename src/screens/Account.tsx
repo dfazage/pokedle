@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ArrowRight, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
+import { ArrowRight, RotateCcw, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
 import type { Ctx } from './types'
 import { supabase } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
@@ -108,6 +108,20 @@ export function Generations(c: Ctx & { onBack: () => void; counts: Record<number
           </section>
         )
       })}
+    </>
+  )
+}
+
+export function Admin(c: Ctx & { onBack: () => void }) {
+  return (
+    <>
+      <TopBar title="Options admin" onBack={c.onBack} />
+      <p className="muted">Outils de test réservés aux comptes administrateurs{c.username ? ` (connecté : ${c.username})` : ''}.</p>
+      <div className="lab">Combat du jour · {c.today}</div>
+      <button className="card row" onClick={c.onAdminReset} style={{ textAlign: 'left' }}>
+        <RotateCcw size={22} style={{ color: 'var(--secondary)' }} />
+        <div className="grow"><b>Réinitialiser le combat du jour</b><div className="muted small">Efface ton résultat, ta progression et l’ordre de l’équipe pour rejouer</div></div>
+      </button>
     </>
   )
 }

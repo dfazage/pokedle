@@ -18,7 +18,10 @@ async function one(id) {
       const r = await fetch(url)
       if (!r.ok) throw new Error(String(r.status))
       const j = await r.json()
-      const fr = j.flavor_text_entries.filter((e) => e.language.name === 'fr')
+      // Les jeux récents (Épée/Bouclier…) remplacent le texte des attaques absentes par un message générique : on l'ignore
+      // et on garde le dernier vrai texte.
+      const placeholder = /ne peut pas être utilisée\. Il est recommandé de l/
+      const fr = j.flavor_text_entries.filter((e) => e.language.name === 'fr' && !placeholder.test(e.flavor_text.replace(/\s+/g, ' ')))
       if (!fr.length) return miss.push(`${id} (pas de texte fr)`)
       out[id] = clean(fr[fr.length - 1].flavor_text)
       return

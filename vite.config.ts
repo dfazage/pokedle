@@ -1,12 +1,19 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'node:child_process'
+
+// Identifiant de build (commit court), affiché dans le profil pour savoir quelle version de la PWA tourne.
+const build = (() => {
+  try { return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() } catch { return 'dev' }
+})()
 
 // VITE_BASE : sous-chemin d'hébergement (ex. /pokedle/ pour GitHub Pages), '/' par défaut.
 const base = process.env.VITE_BASE ?? '/'
 
 export default defineConfig({
   base,
+  define: { __BUILD__: JSON.stringify(build) },
   plugins: [
     react(),
     VitePWA({

@@ -50,14 +50,19 @@ export async function ensureProfile(user: User): Promise<string | null> {
   return null
 }
 
+/** La colonne `hp_left` est ajoutée par supabase/results_hp_left.sql ; tant qu'elle n'existe pas, on s'en passe. */
+const missingColumn = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204'
+
 export async function fetchHistory(): Promise<DayRecord[]> {
   if (!supabase) return []
-  const { data, error } = await supabase
-    .from('results')
-    .select('day_key, result, turns, trainer, gen, survivors, kos')
-    .order('day_key', { ascending: true })
+  const q = (cols: string) => supabase!.from('results').select(cols).order('day_key', { ascending: true })
+  let { data, error } = await q('day_key, result, turns, trainer, gen, survivors, kos, hp_left')
+  if (missingColumn(error)) ({ data, error } = await q('day_key, result, turns, trainer, gen, survivors, kos'))
   if (error || !data) return []
-  return data.map((r) => ({ dayKey: r.day_key, result: r.result, turns: r.turns, trainer: r.trainer, gen: r.gen, survivors: r.survivors ?? undefined, kos: r.kos ?? undefined }))
+  return (data as unknown as Record<string, any>[]).map((r) => ({
+    dayKey: r.day_key, result: r.result, turns: r.turns, trainer: r.trainer, gen: r.gen,
+    survivors: r.survivors ?? undefined, kos: r.kos ?? undefined, hpLeft: r.hp_left ?? undefined,
+  }))
 }
 
 /** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour UTC courant et tout doublon. */
@@ -65,7 +70,7 @@ export async function submitResult(rec: DayRecord, choices: string[]): Promise<'
   if (!supabase) return 'error'
   const { data: u } = await supabase.auth.getUser()
   if (!u.user) return 'error'
-  const { error } = await supabase.from('results').insert({
+  const row = {
     user_id: u.user.id,
     day_key: rec.dayKey,
     result: rec.result,
@@ -75,7 +80,9 @@ export async function submitResult(rec: DayRecord, choices: string[]): Promise<'
     survivors: rec.survivors ?? null,
     kos: rec.kos ?? null,
     choices,
-  })
+  }
+  let { error } = await supabase.from('results').insert({ ...row, hp_left: rec.hpLeft ?? null })
+  if (missingColumn(error)) ({ error } = await supabase.from('results').insert(row))
   if (!error) return 'ok'
   return error.code === '23505' ? 'duplicate' : 'error'
 }

@@ -66,6 +66,9 @@ h1, h2, h3, p { margin: 0; }
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; background: var(--surface2); color: var(--text); border: 1px solid var(--line); white-space: nowrap; }
 .pill.yellow { background: rgba(247, 201, 72, 0.2); color: #b68a00; border-color: rgba(247, 201, 72, 0.5); }
 [data-theme='dark'] .pill.yellow { color: var(--yellow); }
+.pill.score { background: rgba(247, 201, 72, 0.2); color: #b68a00; border-color: rgba(247, 201, 72, 0.5); font-size: 13px; }
+[data-theme='dark'] .pill.score { color: var(--yellow); }
+.scorebar { display: flex; justify-content: flex-start; margin-bottom: -4px; }
 .pill.green { background: rgba(78, 201, 160, 0.16); color: #1f9b78; border-color: rgba(78, 201, 160, 0.4); }
 [data-theme='dark'] .pill.green { color: #72d9bb; }
 .pill.red { background: rgba(240, 113, 107, 0.16); color: #d44e47; border-color: rgba(240, 113, 107, 0.4); }

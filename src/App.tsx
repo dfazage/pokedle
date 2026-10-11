@@ -12,10 +12,11 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
+import { scoreHistory } from './game/scoring'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
-import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
+import { BottomNav, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
 import { Admin, Auth, Generations, Onboarding, ResetPassword } from './screens/Account'
@@ -205,6 +206,7 @@ export default function App() {
         turns: v.turn,
         survivors: v.player.team.filter((m) => !m.fainted).length,
         kos: v.opponent.team.filter((m) => m.fainted).length,
+        hpLeft: Math.round((100 * v.player.team.reduce((a, m) => a + Math.max(0, m.hp), 0)) / Math.max(1, v.player.team.reduce((a, m) => a + m.maxhp, 0))),
       }
       if (!getRecord(today)) saveRecord(rec) // copie locale (invité / hors ligne)
       if (signedIn.current) submitResult(rec, choices.current).then(refreshCloud)
@@ -366,6 +368,7 @@ export default function App() {
   }
 
   const stats = computeStats(history, today)
+  const score = useMemo(() => scoreHistory(history), [history])
   const done = history.some((r) => r.dayKey === today)
   const inProgress = !done && loadChoices(today).length > 0
   const onPlay = () => {
@@ -420,7 +423,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, challenge, history, stats, score, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'battle' && view) {
@@ -451,6 +454,7 @@ export default function App() {
   const showNav = NAV_SCREENS.includes(screen)
   return (
     <main className={showNav ? 'app' : 'app nonav'}>
+      {showNav && <div className="scorebar"><ScoreBadge points={score.total} /></div>}
       {screen === 'home' && <Home {...ctx} />}
       {screen === 'opponent' && <Opponent {...ctx} onBack={back} />}
       {screen === 'team' && <Team {...ctx} onBack={() => setScreen('opponent')} onStart={startBattle} />}

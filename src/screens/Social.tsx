@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Sun, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Star, Sun, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
@@ -71,7 +71,7 @@ export function History(c: Ctx) {
             </div>
             <div style={{ textAlign: 'right' }}>
               <b style={{ fontSize: 22, color: r.result === 'win' ? 'var(--tertiary)' : 'var(--secondary)' }}>{r.survivors ?? (r.result === 'win' ? '≥1' : 0)}/6</b>
-              <div className="muted small">{r.turns} tours</div>
+              <div className="muted small">{r.turns} tours · {c.score.byDay.get(r.dayKey)?.points ?? 0} pts</div>
             </div>
           </div>
         </section>
@@ -164,6 +164,10 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
             <b style={{ fontSize: 20 }}>{c.username ?? 'Invité'}</b>
             <div className="muted small">{c.email ?? 'Partie non synchronisée'}</div>
           </div>
+        </div>
+        <div className="row between" style={{ padding: 14, borderRadius: 16, background: 'rgba(247, 201, 72, 0.16)', border: '1px solid rgba(247, 201, 72, 0.4)' }}>
+          <span className="row" style={{ gap: 8 }}><Star size={20} fill="var(--yellow)" style={{ color: 'var(--yellow)' }} /><span className="lab" style={{ margin: 0 }}>Points</span></span>
+          <b style={{ fontSize: 28, color: 'var(--yellow)' }}>{c.score.total.toLocaleString('fr-FR')}</b>
         </div>
         <div className="row">
           <div className="grow row between" style={{ padding: 12, borderRadius: 14, background: 'var(--surface2)' }}><span className="muted small">Victoires</span><b style={{ color: 'var(--tertiary)' }}>{c.stats.totalWins} ({rate}%)</b></div>

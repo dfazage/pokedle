@@ -1,5 +1,6 @@
 import type { DailyChallenge } from '../game/daily'
 import type { DayRecord, Stats } from '../game/history'
+import type { ScoreSummary } from '../game/scoring'
 import type { Screen } from '../ui/kit'
 
 export interface Ctx {
@@ -7,6 +8,7 @@ export interface Ctx {
   challenge: DailyChallenge
   history: DayRecord[]
   stats: Stats
+  score: ScoreSummary
   username: string | null
   email: string | null
   world: { players: number; wins: number } | null

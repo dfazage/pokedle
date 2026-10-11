@@ -176,24 +176,27 @@ h1, h2, h3, p { margin: 0; }
 .squad .orb { width: 26px; height: 26px; }
 .squad .orb.ko { opacity: 0.25; filter: grayscale(1); }
 
-/* ——— Équipe façon écran Pokémon ——— */
-.party { display: grid; gap: 10px; }
-.slot { display: flex; align-items: stretch; gap: 8px; border-radius: 20px; padding: 8px; background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--surface)), color-mix(in srgb, var(--c2) 18%, var(--surface))); border: 2px solid color-mix(in srgb, var(--c1) 45%, transparent); }
+/* ——— Équipe façon écran Pokémon (2 colonnes) ——— */
+.party { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.slot { display: flex; flex-direction: column; gap: 6px; border-radius: 20px; padding: 8px; min-width: 0; background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 30%, var(--surface)), color-mix(in srgb, var(--c2) 18%, var(--surface))); border: 2px solid color-mix(in srgb, var(--c1) 45%, transparent); }
 .slot.lead { border-color: var(--secondary); box-shadow: 0 6px 18px color-mix(in srgb, var(--secondary) 25%, transparent); }
-.slot-main { all: unset; cursor: pointer; flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.slot-main { all: unset; cursor: pointer; display: grid; gap: 6px; min-width: 0; }
 .slot-main:focus-visible { outline: 2px solid var(--primary); border-radius: 14px; }
-.slot-sprite { flex: none; width: 64px; height: 64px; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--c1) 35%, var(--surface2)); }
-.slot-info { flex: 1; min-width: 0; display: grid; gap: 4px; }
-.slot-name { font-family: var(--font); font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.slot-sprite { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--c1) 35%, var(--surface2)); }
+.slot-id { min-width: 0; display: grid; gap: 3px; }
+.slot-name { font-family: var(--font); font-size: 15px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slot-lv { font-size: 11px; font-weight: 800; opacity: .7; }
-.slot-tag { margin-left: auto; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px; background: var(--secondary); color: #fff; white-space: nowrap; }
-.slot-hp { display: flex; align-items: center; gap: 6px; }
+.slot-tag { font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 99px; background: var(--secondary); color: #fff; white-space: nowrap; }
+.slot-hp { display: flex; align-items: center; gap: 5px; }
 .hplbl { font-size: 10px; font-weight: 800; color: #e08030; }
-.hpbar { flex: 1; height: 8px; border-radius: 99px; background: rgba(0,0,0,.22); overflow: hidden; }
+.hpbar { flex: 1; height: 7px; border-radius: 99px; background: rgba(0,0,0,.22); overflow: hidden; }
 .hpbar > span { display: block; height: 100%; width: 100%; background: #48d048; }
-.slot-hpnum { font-size: 11px; font-weight: 700; opacity: .8; }
-.slot-move { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
-.iconbtn.sm { width: 32px; height: 32px; }
+.slot-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0; }
+.slot-hpnum { font-size: 11px; font-weight: 700; opacity: .8; white-space: nowrap; }
+.slot-move { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid color-mix(in srgb, var(--c1) 25%, transparent); padding-top: 6px; }
+.slot-rank { font-size: 12px; font-weight: 800; opacity: .6; }
+.iconbtn.sm { width: 30px; height: 30px; }
 .iconbtn:disabled { opacity: .3; cursor: default; }
 
 .sheet-bg { position: fixed; inset: 0; z-index: 50; background: rgba(8,8,16,.55); display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(2px); }

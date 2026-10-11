@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp, Lock, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react'
 import type { PreviewMon } from '../game/daily'
 import { spriteUrl } from '../game/sprites'
 import { mvFr, spFr, TYPE_FR } from '../game/fr'
@@ -84,24 +84,27 @@ export function PartyList({
         {team.map((m, i) => (
           <div key={m.species + i} className={i === 0 ? 'slot lead' : 'slot'} style={monCardStyle(m.types)}>
             <button className="slot-main" onClick={() => setOpen(i)} aria-label={`Détails de ${spFr(m.species)}`}>
-              <span className="slot-sprite"><MonSprite m={m} size={56} /></span>
-              <span className="slot-info">
-                <span className="row" style={{ gap: 6 }}>
+              <span className="slot-top">
+                <span className="slot-sprite"><MonSprite m={m} size={48} /></span>
+                <span className="slot-id">
                   <b className="slot-name">{spFr(m.species)}</b>
-                  <span className="slot-lv">Nv100</span>
-                  {i === 0 && <span className="slot-tag">En tête</span>}
+                  <span className="row" style={{ gap: 5 }}>
+                    <span className="slot-lv">Nv100</span>
+                    {i === 0 && <span className="slot-tag">En tête</span>}
+                  </span>
                 </span>
-                <span className="slot-hp"><span className="hplbl">PV</span><span className="hpbar"><span /></span></span>
-                <span className="row" style={{ gap: 4, justifyContent: 'space-between' }}>
-                  <span className="row" style={{ gap: 4 }}>{m.types.map((t) => <span key={t} className="badge">{TYPE_FR[t]}</span>)}</span>
-                  <span className="slot-hpnum">{m.stats.hp}/{m.stats.hp}</span>
-                </span>
+              </span>
+              <span className="slot-hp"><span className="hplbl">PV</span><span className="hpbar"><span /></span></span>
+              <span className="slot-foot">
+                <span className="row" style={{ gap: 3, flexWrap: 'wrap' }}>{m.types.map((t) => <span key={t} className="badge">{TYPE_FR[t]}</span>)}</span>
+                <span className="slot-hpnum">{m.stats.hp}/{m.stats.hp}</span>
               </span>
             </button>
             {!locked && (
               <span className="slot-move">
-                <button className="iconbtn sm" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label="Monter"><ChevronUp size={18} /></button>
-                <button className="iconbtn sm" disabled={i === team.length - 1} onClick={() => onMove(i, i + 1)} aria-label="Descendre"><ChevronDown size={18} /></button>
+                <button className="iconbtn sm" disabled={i === 0} onClick={() => onMove(i, i - 1)} aria-label="Avancer dans l'ordre"><ChevronLeft size={16} /></button>
+                <span className="slot-rank">{i + 1}</span>
+                <button className="iconbtn sm" disabled={i === team.length - 1} onClick={() => onMove(i, i + 1)} aria-label="Reculer dans l'ordre"><ChevronRight size={16} /></button>
               </span>
             )}
           </div>

@@ -6,6 +6,7 @@ import { CLASS_FR, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
+import { TrainerImg } from '../game/trainerSprites'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(3 - n)
@@ -42,8 +43,18 @@ export function Home(c: Ctx) {
           <button className="chip" onClick={() => c.go('generations')}>Ligue {gi.region} · Gen {ch.gen}</button>
           <span className="chip y">Difficulté {stars(diff.stars)}</span>
         </div>
-        <h2>{ch.trainer.name}</h2>
-        <p>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
+        <div className="hero-trainer">
+          <div className="hero-trainer-txt">
+            <h2>{ch.trainer.name}</h2>
+            <p>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
+          </div>
+          <TrainerImg
+            id={ch.trainer.id}
+            gen={ch.gen}
+            className="trainer-sprite"
+            fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={72} />}
+          />
+        </div>
         <button className="cta" onClick={c.onPlay}>
           {done ? 'Voir mon résultat' : c.inProgress ? 'Reprendre le combat' : 'Lancer le combat'} <ArrowRight size={18} />
         </button>
@@ -96,7 +107,12 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
           <span className="pill" style={{ color: 'var(--primary)' }}>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class}</span>
           <span className="pill yellow">Difficulté {stars(diff.stars)} {diff.label}</span>
         </div>
-        <MonOrb types={trainerTypes} size={120} />
+        <TrainerImg
+          id={ch.trainer.id}
+          gen={ch.gen}
+          className="trainer-sprite lg"
+          fallback={<MonOrb types={trainerTypes} size={120} />}
+        />
         <h1 className="title">{ch.trainer.name}</h1>
         <p className="muted">Pokémon {gi.game} · Ligue {gi.region} · Gen {ch.gen}</p>
       </section>

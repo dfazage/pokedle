@@ -3,6 +3,7 @@ import { Battle, Teams } from '@pkmn/sim'
 import { aiChoose } from './ai'
 import { mvFr, spFr } from './fr'
 import { BATTLE_GEN, type DailyChallenge } from './daily'
+import type { Cue, Side, SfxId } from './battleCues'
 import { HIT_MARK } from './battleCues'
 
 export interface MonView {
@@ -191,5 +192,185 @@ export function formatLog(lines: string[]): string[] {
       default: break
     }
   }
+  return out
+}
+
+// ───────────────────────── Mise en scène du combat (façon moteur DS) ─────────────────────────
+// Le log d'un tour est découpé en « étapes » jouées une à une : texte, animation, barre de PV qui descend, K.O., etc.
+// Chaque étape porte le changement d'état qu'elle provoque ; l'écran applique ces changements au bon moment
+// au lieu de sauter directement à l'état final du tour.
+
+export type FxKind = 'attack' | 'buff' | 'hit' | 'recall' | 'enter' | 'faint'
+
+export interface Step {
+  /** Message affiché (absent : le message précédent reste à l'écran). */
+  text?: string
+  /** Son à jouer. Absent : déduit du texte ; null : aucun. */
+  cue?: Cue | null
+  /** Animation du sprite. */
+  fx?: { side: Side; kind: FxKind }
+  /** Nouveaux PV du Pokémon actif (la barre descend sur `ms`). */
+  hp?: { side: Side; hp: number; maxhp: number; ms: number }
+  status?: { side: Side; status: string }
+  /** Un Pokémon entre en jeu. `name` = nom d'espèce du simulateur. */
+  enter?: { side: Side; name: string; hp: number; maxhp: number; status: string }
+  /** Appliqué à la fin de l'étape : le Pokémon quitte le terrain / est K.O. */
+  leave?: Side
+  faint?: Side
+  /** Pause (ms) après la fin du texte et de l'animation, avant d'enchaîner automatiquement. */
+  wait: number
+}
+
+const RESIDUAL_FR: Record<string, (who: string) => string> = {
+  brn: (w) => `${w} souffre de sa brûlure !`,
+  psn: (w) => `${w} souffre du poison !`,
+  tox: (w) => `${w} souffre du poison !`,
+  Recoil: (w) => `${w} subit le contrecoup !`,
+  sandstorm: (w) => `${w} est frappé par la tempête de sable !`,
+  hail: (w) => `${w} est frappé par la grêle !`,
+  'Leech Seed': (w) => `${w} voit son énergie drainée !`,
+  'item: Life Orb': (w) => `${w} perd des PV à cause de l'Orbe Vie !`,
+  'item: Rocky Helmet': (w) => `${w} est blessé par le Casque Brutal !`,
+  'Spikes': (w) => `${w} est blessé par les Picots !`,
+  'Stealth Rock': (w) => `${w} est blessé par les Pierres Pointues !`,
+}
+
+const hpMs = (delta: number, max: number) => Math.round(Math.min(1500, Math.max(300, 350 + (delta / Math.max(1, max)) * 1300)))
+
+/** `before` : état d'avant le tour, pour savoir qui est déjà sur le terrain (texte « Reviens, … ! », PV de départ). */
+export function formatSteps(lines: string[], before?: BattleView): Step[] {
+  const out: Step[] = []
+  const nm = (s: string) => spFr(s.replace(/^p\d[a-z]?: /, ''))
+  const sideOf = (s: string): Side => (s.startsWith('p1') ? 'player' : 'opponent')
+  const who = (s: string) => (s.startsWith('p1') ? nm(s) : `${nm(s)} adverse`)
+
+  // Version « privée » après |split| : PV exacts pour les deux camps (seuls ceux du joueur sont affichés en chiffres).
+  const clean: string[] = []
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('|split|')) {
+      clean.push(lines[i + 1] ?? '')
+      i += 2
+    } else clean.push(lines[i])
+  }
+
+  const cur: Record<Side, number> = { player: 0, opponent: 0 }
+  const max: Record<Side, number> = { player: 1, opponent: 1 }
+  const active: Record<Side, string | null> = { player: null, opponent: null }
+  const out0: Record<Side, boolean> = { player: false, opponent: false } // actif déjà K.O. (pas de rappel)
+  for (const side of ['player', 'opponent'] as const) {
+    const a = before?.[side].active
+    if (a) {
+      active[side] = a.name
+      out0[side] = a.fainted
+      cur[side] = a.hp
+      max[side] = a.maxhp
+    }
+  }
+  let pend: { text: string; kind: string }[] = []
+  const flush = () => {
+    for (const t of pend) out.push({ text: t.text, cue: null, wait: 750 })
+    pend = []
+  }
+  const parseHp = (raw: string, side: Side) => {
+    const [frac] = raw.split(' ')
+    if (raw.includes('fnt')) return { hp: 0, maxhp: max[side] }
+    const [c, m] = frac.split('/').map(Number)
+    return { hp: c, maxhp: m || max[side] }
+  }
+  const BREAK = new Set(['move', 'switch', 'drag', 'faint', 'cant', '-miss', '-immune', '-status', 'win', 'turn', 'upkeep'])
+
+  for (let i = 0; i < clean.length; i++) {
+    const p = clean[i].split('|')
+    const kind = p[1]
+    if (BREAK.has(kind)) flush()
+    switch (kind) {
+      case 'switch': case 'drag': {
+        const side = sideOf(p[2])
+        const details = p[3].split(',')[0]
+        const { hp, maxhp } = parseHp(p[4] ?? '1/1', side)
+        const status = (p[4] ?? '').split(' ')[1] ?? ''
+        if (kind === 'switch' && active[side] && !out0[side]) {
+          out.push({
+            text: side === 'player' ? `Reviens, ${spFr(active[side]!)} !` : `L'adversaire rappelle ${spFr(active[side]!)} !`,
+            cue: null,
+            fx: { side, kind: 'recall' },
+            leave: side,
+            wait: 450,
+          })
+        }
+        cur[side] = hp
+        max[side] = maxhp
+        active[side] = details
+        out0[side] = false
+        out.push({
+          text: side === 'player' ? `Vas-y, ${nm(p[2])} !` : `L'adversaire envoie ${nm(details)} !`,
+          enter: { side, name: details, hp, maxhp, status },
+          fx: { side, kind: 'enter' },
+          wait: 800,
+        })
+        break
+      }
+      case 'move': {
+        const side = sideOf(p[2])
+        // Une attaque inflige-t-elle des dégâts à l'adversaire ? (décide entre « coup porté » et simple geste)
+        let dmg = false
+        for (let j = i + 1; j < clean.length; j++) {
+          const q = clean[j].split('|')
+          if (['move', 'turn', 'switch', 'drag', 'cant', 'upkeep'].includes(q[1])) break
+          if (q[1] === '-damage' && sideOf(q[2]) !== side && !(q[4] ?? '').startsWith('[from]')) dmg = true
+        }
+        out.push({ text: `${who(p[2])} utilise ${mvFr(p[3])} !`, cue: null, wait: 250 })
+        out.push({ fx: { side, kind: dmg ? 'attack' : 'buff' }, cue: dmg ? null : { kind: 'sfx', id: 'move' }, wait: dmg ? 380 : 420 })
+        break
+      }
+      case '-supereffective': pend.push({ text: "C'est super efficace !", kind: 'super' }); break
+      case '-resisted': pend.push({ text: "Ce n'est pas très efficace…", kind: 'resist' }); break
+      case '-crit': pend.push({ text: 'Coup critique !', kind: 'crit' }); break
+      case '-damage': {
+        const side = sideOf(p[2])
+        const from = (p[4] ?? '').startsWith('[from]') ? (p[4] ?? '').slice(7).split('|')[0].trim() : ''
+        if (from) flush()
+        const next = parseHp(p[3], side)
+        const delta = Math.max(0, cur[side] - next.hp)
+        cur[side] = next.hp
+        max[side] = next.maxhp
+        const fr = from ? RESIDUAL_FR[from] : undefined
+        if (fr) out.push({ text: fr(who(p[2])), cue: null, wait: 300 })
+        const k = pend.find((t) => t.kind === 'super') ? 'super' : pend.find((t) => t.kind === 'resist') ? 'resist' : pend.find((t) => t.kind === 'crit') ? 'crit' : 'hit'
+        out.push({
+          fx: { side, kind: 'hit' },
+          hp: { side, hp: next.hp, maxhp: next.maxhp, ms: hpMs(delta, next.maxhp) },
+          cue: from ? null : { kind: 'sfx', id: k as SfxId },
+          wait: hpMs(delta, next.maxhp) + 350,
+        })
+        break
+      }
+      case '-heal': {
+        const side = sideOf(p[2])
+        const next = parseHp(p[3], side)
+        const delta = Math.max(0, next.hp - cur[side])
+        cur[side] = next.hp
+        max[side] = next.maxhp
+        out.push({ hp: { side, hp: next.hp, maxhp: next.maxhp, ms: hpMs(delta, next.maxhp) }, cue: null, wait: hpMs(delta, next.maxhp) + 250 })
+        break
+      }
+      case 'cant': out.push({ text: `${who(p[2])} ne peut pas attaquer.`, wait: 800 }); break
+      case '-immune': out.push({ text: `Ça n'affecte pas ${who(p[2])}…`, wait: 800 }); break
+      case '-miss': out.push({ text: "L'attaque échoue !", wait: 800 }); break
+      case '-status':
+        out.push({ text: `${who(p[2])} est ${STATUS_FR[p[3]] ?? p[3]} !`, status: { side: sideOf(p[2]), status: p[3] }, wait: 800 })
+        break
+      case '-curestatus': out.push({ status: { side: sideOf(p[2]), status: '' }, cue: null, wait: 150 }); break
+      case 'faint': {
+        const side = sideOf(p[2])
+        out0[side] = true
+        out.push({ text: `${who(p[2])} est K.O. !`, fx: { side, kind: 'faint' }, faint: side, wait: 900 })
+        break
+      }
+      case 'win': out.push({ text: p[2] === 'Toi' ? 'Victoire !' : 'Défaite…', wait: 900 }); break
+      default: break
+    }
+  }
+  flush()
   return out
 }

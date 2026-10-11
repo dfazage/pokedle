@@ -1,0 +1,327 @@
+[
+ {
+  "id": "cyrus-distortion",
+  "name": "Cyrus",
+  "class": "Team Boss",
+  "order": 20,
+  "gen": 4,
+  "game": "platinum",
+  "stage": "Monde Distorsion",
+  "sprite": "cyrus",
+  "team": [
+   {
+    "species": "houndoom",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "darkpulse",
+     "willowisp",
+     "thunderfang"
+    ]
+   },
+   {
+    "species": "honchkrow",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "drillpeck",
+     "nightslash",
+     "heatwave",
+     "psychic"
+    ]
+   },
+   {
+    "species": "crobat",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "crosspoison",
+     "airslash",
+     "toxic",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "gyarados",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "gigaimpact",
+     "waterfall",
+     "icefang",
+     "earthquake"
+    ]
+   },
+   {
+    "species": "weavile",
+    "origLevel": 48,
+    "item": "sitrusberry",
+    "moves": [
+     "nightslash",
+     "icepunch",
+     "fakeout",
+     "xscissor"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cyrus-hq",
+  "name": "Cyrus",
+  "class": "Team Boss",
+  "order": 21,
+  "gen": 4,
+  "game": "platinum",
+  "stage": "QG Galaxie",
+  "sprite": "cyrus",
+  "team": [
+   {
+    "species": "sneasel",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "slash",
+     "icepunch",
+     "quickattack",
+     "screech"
+    ]
+   },
+   {
+    "species": "crobat",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "poisonfang",
+     "aircutter",
+     "bite",
+     "supersonic"
+    ]
+   },
+   {
+    "species": "honchkrow",
+    "origLevel": 46,
+    "item": "sitrusberry",
+    "moves": [
+     "drillpeck",
+     "nightshade",
+     "astonish",
+     "faintattack"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "mars-spearpillar",
+  "name": "Mars",
+  "class": "Team Executive",
+  "order": 22,
+  "gen": 4,
+  "game": "platinum",
+  "stage": null,
+  "sprite": "mars",
+  "team": [
+   {
+    "species": "bronzor",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "gyroball",
+     "extrasensory",
+     "lightscreen",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "golbat",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "aircutter",
+     "bite",
+     "poisonfang",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "purugly",
+    "origLevel": 46,
+    "item": "sitrusberry",
+    "moves": [
+     "slash",
+     "shadowclaw",
+     "aerialace",
+     "hypnosis"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "jupiter-spearpillar",
+  "name": "Jupiter",
+  "class": "Team Executive",
+  "order": 23,
+  "gen": 4,
+  "game": "platinum",
+  "stage": null,
+  "sprite": "jupiter",
+  "team": [
+   {
+    "species": "bronzor",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "gyroball",
+     "extrasensory",
+     "rockslide",
+     "reflect"
+    ]
+   },
+   {
+    "species": "golbat",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "sludgebomb",
+     "aircutter",
+     "gigadrain",
+     "meanlook"
+    ]
+   },
+   {
+    "species": "skuntank",
+    "origLevel": 46,
+    "item": "sitrusberry",
+    "moves": [
+     "nightslash",
+     "poisonjab",
+     "flamethrower",
+     "smokescreen"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "saturn-hq",
+  "name": "Saturn",
+  "class": "Team Executive",
+  "order": 24,
+  "gen": 4,
+  "game": "platinum",
+  "stage": null,
+  "sprite": "saturn",
+  "team": [
+   {
+    "species": "golbat",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "aircutter",
+     "bite",
+     "poisonfang",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "bronzor",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "gyroball",
+     "extrasensory",
+     "shadowball",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "toxicroak",
+    "origLevel": 44,
+    "item": "sitrusberry",
+    "moves": [
+     "poisonjab",
+     "brickbreak",
+     "xscissor",
+     "faintattack"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "barry-league",
+  "name": "Barry",
+  "class": "Rival",
+  "order": 25,
+  "gen": 4,
+  "game": "platinum",
+  "stage": null,
+  "sprite": "barry",
+  "team": [
+   {
+    "species": "staraptor",
+    "origLevel": 48,
+    "item": null,
+    "moves": [
+     "closecombat",
+     "aerialace",
+     "steelwing",
+     "uturn"
+    ]
+   },
+   {
+    "species": "floatzel",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "aquajet",
+     "crunch",
+     "icefang",
+     "brickbreak"
+    ]
+   },
+   {
+    "species": "heracross",
+    "origLevel": 48,
+    "item": null,
+    "moves": [
+     "closecombat",
+     "rockslide",
+     "nightslash",
+     "aerialace"
+    ]
+   },
+   {
+    "species": "roserade",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "poisonjab",
+     "gigadrain",
+     "shadowball",
+     "grasswhistle"
+    ]
+   },
+   {
+    "species": "snorlax",
+    "origLevel": 49,
+    "item": null,
+    "moves": [
+     "bodyslam",
+     "crunch",
+     "earthquake",
+     "rest"
+    ]
+   },
+   {
+    "species": "infernape",
+    "origLevel": 51,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "focusblast",
+     "shadowclaw",
+     "aerialace"
+    ]
+   }
+  ]
+ }
+]

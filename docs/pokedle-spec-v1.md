@@ -4,7 +4,7 @@ Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + T
 
 ## Règles
 - Clé du jour en UTC (changement à minuit UTC = 8h à Kuala Lumpur) → seed déterministe.
-- Dresseur canon tiré au sort parmi les 4 générations (Rouge, Cristal, Émeraude, Platine : arènes, Conseil des 4, champions) ; sa génération d'origine sert de « ligue » (affichage, historique, classement). Le combat, lui, est **toujours en génération 4** (moteur `@pkmn/sim` gen 4, 493 espèces, `BATTLE_GEN` dans `src/game/daily.ts`) : l'équipe d'origine du dresseur (gens 1-4) est convertie en gen 4, montée niveau 100 et complétée à 6 avec des Pokémon du thème du dresseur ; le joueur tire dans tout le pool gen 4. Combats inter-générations assumés.
+- Dresseur canon tiré au sort parmi les 4 générations (Rouge, Cristal, Émeraude, Platine : arènes, Conseil des 4, champions ; à partir du 2026-10-13 aussi boss et admins des équipes Rocket/Aqua/Magma/Galaxie, rivaux et Pierre Rochard, voir `EXTRA_FROM` dans `daily.ts`) ; sa génération d'origine sert de « ligue » (affichage, historique, classement). Le combat, lui, est **toujours en génération 4** (moteur `@pkmn/sim` gen 4, 493 espèces, `BATTLE_GEN` dans `src/game/daily.ts`) : l'équipe d'origine du dresseur (gens 1-4) est convertie en gen 4, montée niveau 100 et complétée à 6 avec des Pokémon du thème du dresseur ; le joueur tire dans tout le pool gen 4. Combats inter-générations assumés.
 - Gen 1 : le jeu d'origine n'a pas d'attaques dans ses données de dresseurs, elles sont générées (`scripts/fill_moves.mjs`) à partir des attaques réellement apprenables dans la génération.
 - Équipe imposée au joueur (6 Pokémon niveau 100) tirée via `@pkmn/randoms`, filtrée par simulations IA vs IA (cible 35–65 % de victoires) ; en pratique ~2/3 des jours tombent dans la cible avec les trainers des gens 1-2 plus durs à équilibrer.
 - 1 tentative par jour, abandon = défaite, reprise après rechargement (les choix sont rejoués, le combat est déterministe).
@@ -17,6 +17,7 @@ Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + T
 
 ## Commandes
 - `npm run dev` / `npm run build` / `npm run preview`
+- `python3 -I scripts/extract_extra.py <dossier des dépôts pret> src/data` : régénère `trainers.extra.gen*.json` (boss d'équipe, admins, rivaux, Pierre Rochard) ; champ `sprite` = id Showdown, `stage` = lieu quand la même personne apparaît plusieurs fois
 - `node scripts/validate_gen3.mjs` : vérifie que les données de dresseurs existent bien en gen 3
 - `python3 -I scripts/extract_gen3.py <pokeemerald> src/data/trainers.gen3.json` et `python3 -I scripts/extract_gen124.py <dossier des dépôts pret> src/data` : régénèrent les données (puis `node scripts/fill_moves.mjs` pour valider et compléter)
 - `npx tsx scripts/test_daily.ts`, `test_session.ts`, `test_history.ts` : tests rapides

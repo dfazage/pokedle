@@ -6,6 +6,10 @@ import trainersGen1 from '../data/trainers.gen1.json'
 import trainersGen2 from '../data/trainers.gen2.json'
 import trainersGen3 from '../data/trainers.gen3.json'
 import trainersGen4 from '../data/trainers.gen4.json'
+import extraGen1 from '../data/trainers.extra.gen1.json'
+import extraGen2 from '../data/trainers.extra.gen2.json'
+import extraGen3 from '../data/trainers.extra.gen3.json'
+import extraGen4 from '../data/trainers.extra.gen4.json'
 import { aiChoose } from './ai'
 import { dayKeyUTC, hashString, mulberry32, pick, seedArray } from './rng'
 
@@ -17,6 +21,10 @@ export interface TrainerData {
   class: string
   gen: number
   game: string
+  /** Id du sprite Showdown si différent de `id` (ex. `giovanni` pour `giovanni-rocket`). */
+  sprite?: string
+  /** Lieu du combat, quand le même dresseur apparaît plusieurs fois (ex. Giovanni : Repaire Rocket / Sylphe SARL). */
+  stage?: string | null
   team: { species: string; item: string | null; moves: string[] }[]
 }
 
@@ -35,8 +43,21 @@ const TRAINERS_BY_GEN: Record<number, TrainerData[]> = {
   3: trainersGen3 as TrainerData[],
   4: trainersGen4 as TrainerData[],
 }
+/**
+ * Dresseurs « hors ligue » (boss et admins d'équipe, rivaux, Pierre Rochard…), voir scripts/extract_extra.py.
+ * Ils n'entrent dans le tirage qu'à partir de EXTRA_FROM : les jours déjà passés (et celui en cours au moment du
+ * déploiement) gardent exactement le même dresseur, puisque le tirage dépend de la taille du pool.
+ */
+export const EXTRA_FROM = '2026-10-13'
+const EXTRA_BY_GEN: Record<number, TrainerData[]> = {
+  1: extraGen1 as TrainerData[],
+  2: extraGen2 as TrainerData[],
+  3: extraGen3 as TrainerData[],
+  4: extraGen4 as TrainerData[],
+}
+const poolFor = (gen: number, dayKey: string) => (dayKey >= EXTRA_FROM ? [...TRAINERS_BY_GEN[gen], ...EXTRA_BY_GEN[gen]] : TRAINERS_BY_GEN[gen])
 export { GAME_NAMES } from './names'
-export const TRAINER_COUNTS: Record<number, number> = Object.fromEntries(Object.entries(TRAINERS_BY_GEN).map(([g, t]) => [g, t.length]))
+export const TRAINER_COUNTS: Record<number, number> = Object.fromEntries(Object.entries(TRAINERS_BY_GEN).map(([g, t]) => [g, t.length + EXTRA_BY_GEN[Number(g)].length]))
 export const AVAILABLE_GENS = Object.keys(TRAINERS_BY_GEN).map(Number)
 
 export interface PreviewMon {
@@ -195,7 +216,7 @@ export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): Dai
   const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)
   const gen = pick(rand, AVAILABLE_GENS) // génération d'origine du dresseur
-  const trainer = pick(rand, TRAINERS_BY_GEN[gen])
+  const trainer = pick(rand, poolFor(gen, dayKey))
   const opponentTeam = buildOpponent(trainer, BATTLE_GEN, seedArray(baseSeed ^ 0xa5a5))
 
   const taken = new Set(opponentTeam.map((s) => Dex.forGen(BATTLE_GEN).species.get(s.species).baseSpecies))

@@ -10,7 +10,7 @@ import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { dayKeyUTC } from './game/rng'
-import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
+import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
@@ -324,7 +324,7 @@ export default function App() {
       <div className="arena" data-theme="dark">
         <main className="app nonav">
           <TopBar
-            title={<>{challenge.trainer.name}<div className="muted small">{CLASS_FR[challenge.trainer.class] ?? challenge.trainer.class} · {gi.game}</div></>}
+            title={<>{challenge.trainer.name}<div className="muted small">{classLabel(challenge.trainer)} · {gi.game}</div></>}
             right={<span className="pill">Tour {view.turn}</span>}
           />
           <BattleScreen view={view} queue={queue} onAdvance={advance} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />

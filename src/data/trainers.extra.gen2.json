@@ -1,0 +1,248 @@
+[
+ {
+  "id": "archer-radiotower",
+  "name": "Archer",
+  "class": "Team Executive",
+  "order": 20,
+  "gen": 2,
+  "game": "crystal",
+  "stage": null,
+  "sprite": "archer",
+  "team": [
+   {
+    "species": "houndour",
+    "origLevel": 33,
+    "item": null,
+    "moves": [
+     "ember",
+     "roar",
+     "bite",
+     "faintattack"
+    ]
+   },
+   {
+    "species": "koffing",
+    "origLevel": 33,
+    "item": null,
+    "moves": [
+     "tackle",
+     "sludge",
+     "smokescreen",
+     "haze"
+    ]
+   },
+   {
+    "species": "houndoom",
+    "origLevel": 35,
+    "item": null,
+    "moves": [
+     "ember",
+     "smog",
+     "bite",
+     "faintattack"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ariana-radiotower",
+  "name": "Ariana",
+  "class": "Team Executive",
+  "order": 21,
+  "gen": 2,
+  "game": "crystal",
+  "stage": null,
+  "sprite": "ariana",
+  "team": [
+   {
+    "species": "arbok",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "wrap",
+     "poisonsting",
+     "bite",
+     "glare"
+    ]
+   },
+   {
+    "species": "vileplume",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "absorb",
+     "sweetscent",
+     "sleeppowder",
+     "acid"
+    ]
+   },
+   {
+    "species": "murkrow",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "peck",
+     "pursuit",
+     "haze",
+     "nightshade"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "silver-victoryroad",
+  "name": "Silver",
+  "class": "Rival",
+  "order": 22,
+  "gen": 2,
+  "game": "crystal",
+  "stage": "Route Victoire",
+  "sprite": "silver",
+  "team": [
+   {
+    "species": "sneasel",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "screech",
+     "faintattack",
+     "furycutter"
+    ]
+   },
+   {
+    "species": "golbat",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "leechlife",
+     "bite",
+     "confuseray",
+     "wingattack"
+    ]
+   },
+   {
+    "species": "magneton",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "thundershock",
+     "sonicboom",
+     "thunderwave",
+     "swift"
+    ]
+   },
+   {
+    "species": "gengar",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "meanlook",
+     "curse",
+     "shadowball",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "disable",
+     "recover",
+     "futuresight",
+     "psychic"
+    ]
+   },
+   {
+    "species": "feraligatr",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "rage",
+     "watergun",
+     "scaryface",
+     "slash"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "silver-mtsilver",
+  "name": "Silver",
+  "class": "Rival",
+  "order": 23,
+  "gen": 2,
+  "game": "crystal",
+  "stage": "Mont Argenté",
+  "sprite": "silver",
+  "team": [
+   {
+    "species": "sneasel",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "screech",
+     "faintattack",
+     "furycutter"
+    ]
+   },
+   {
+    "species": "crobat",
+    "origLevel": 48,
+    "item": null,
+    "moves": [
+     "toxic",
+     "bite",
+     "confuseray",
+     "wingattack"
+    ]
+   },
+   {
+    "species": "magneton",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "thunder",
+     "sonicboom",
+     "thunderwave",
+     "swift"
+    ]
+   },
+   {
+    "species": "gengar",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "meanlook",
+     "curse",
+     "shadowball",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "recover",
+     "futuresight",
+     "psychic",
+     "reflect"
+    ]
+   },
+   {
+    "species": "feraligatr",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "surf",
+     "raindance",
+     "slash",
+     "screech"
+    ]
+   }
+  ]
+ }
+]

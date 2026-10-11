@@ -29,7 +29,13 @@ export const CLASS_FR: Record<string, string> = {
   'Kanto Gym Leader': "Champion d'arène de Kanto",
   'Elite Four': 'Conseil des 4',
   Champion: 'Maître de la Ligue',
+  'Former Champion': 'Ancien Maître de la Ligue',
+  'Team Boss': "Chef d'équipe",
+  'Team Executive': "Admin d'équipe",
+  Rival: 'Rival',
 }
+/** Classe du dresseur en français, suivie du lieu du combat quand il y en a un (« Chef d'équipe (Repaire Rocket) »). */
+export const classLabel = (t: { class: string; stage?: string | null }) => (CLASS_FR[t.class] ?? t.class) + (t.stage ? ` (${t.stage})` : '')
 export const GEN_INFO: Record<number, { roman: string; region: string; game: string; species: string }> = {
   1: { roman: 'I', region: 'Kanto', game: 'Rouge', species: '#001 → #151' },
   2: { roman: 'II', region: 'Johto', game: 'Cristal', species: '#001 → #251' },

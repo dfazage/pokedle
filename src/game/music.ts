@@ -236,9 +236,8 @@ export function renderLoop(c: Ctx, out: AudioNode, choice: MusicChoice, t0 = 0) 
 let timer = 0
 let stopCur: ((fade: number) => void) | null = null
 
-/** Lance (ou relance) la musique du combat. À appeler depuis un geste utilisateur. */
-export function startMusic(choice: MusicChoice) {
-  stopMusic(0.05)
+/** Repli : thème chiptune synthétisé, quand les morceaux de src/assets/bgm sont absents ou illisibles. */
+function startChip(choice: MusicChoice) {
   const a = musicOutput()
   if (!a) return
   const { ctx: c, out } = a
@@ -291,4 +290,56 @@ export function stopMusic(fade = 0.8) {
   const s = stopCur
   stopCur = null
   s?.(fade)
+}
+
+// ——— Morceaux fournis (src/assets/bgm/*.mp3) ———
+// Lus en flux (élément <audio> branché sur le bus musique) : pas de décodage complet en mémoire, et le bouton son /
+// la suspension en arrière-plan s'appliquent comme pour le reste. Les fichiers sont repérés par leur numéro de piste.
+const FILES = import.meta.glob('../assets/bgm/*.mp3', { query: '?url', import: 'default', eager: true }) as Record<string, string>
+const TRACKS = { team: { battle: '025', win: '026' }, other: { battle: '094', win: '097' } } as const
+const trackUrl = (kind: ThemeKind, part: 'battle' | 'win') => {
+  const n = TRACKS[kind === 'team' ? 'team' : 'other'][part]
+  return Object.entries(FILES).find(([path]) => (path.split('/').pop() ?? '').startsWith(n))?.[1]
+}
+
+function startTrack(url: string, o: { loop: boolean; gain: number; onError?: () => void }): boolean {
+  const a = musicOutput()
+  if (!a) return false
+  const { ctx: c, out } = a
+  const el = new Audio(url)
+  el.loop = o.loop
+  el.preload = 'auto'
+  const src = c.createMediaElementSource(el)
+  const g = c.createGain()
+  g.gain.setValueAtTime(0.0001, c.currentTime)
+  g.gain.linearRampToValueAtTime(o.gain, c.currentTime + 0.5)
+  src.connect(g).connect(out)
+  let dead = false
+  const failed = () => { if (!dead && o.onError) { dead = true; o.onError() } }
+  el.addEventListener('error', failed)
+  void el.play().catch(failed)
+  stopCur = (fade) => {
+    dead = true
+    const now = c.currentTime
+    g.gain.cancelScheduledValues(now)
+    g.gain.setValueAtTime(g.gain.value, now)
+    g.gain.linearRampToValueAtTime(0.0001, now + Math.max(0.02, fade))
+    window.setTimeout(() => { el.pause(); el.removeAttribute('src'); el.load(); src.disconnect(); g.disconnect() }, fade * 1000 + 150)
+  }
+  return true
+}
+
+/** Lance la musique du combat : morceau fourni si présent (Team Magma/Aqua pour les méchants, Conseil des 4 pour le reste), sinon chiptune. À appeler depuis un geste utilisateur. */
+export function startMusic(choice: MusicChoice) {
+  stopMusic(0.05)
+  const url = trackUrl(choice.kind, 'battle')
+  if (url && startTrack(url, { loop: true, gain: 0.5, onError: () => { stopMusic(0.05); startChip(choice) } })) return
+  startChip(choice)
+}
+
+/** Musique de victoire (une fois) ; sans morceau fourni, on se contente du jingle de victoire des effets. */
+export function playVictory(choice: MusicChoice) {
+  stopMusic(0.6)
+  const url = trackUrl(choice.kind, 'win')
+  if (url) startTrack(url, { loop: false, gain: 0.6 })
 }

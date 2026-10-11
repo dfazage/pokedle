@@ -14,6 +14,7 @@ import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
+import { musicFor, startMusic, stopMusic } from './game/music'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
@@ -197,8 +198,14 @@ export default function App() {
       setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
     }
     setScreen('battle')
+    startMusic(musicFor(challenge.trainer.class, challenge.gen)) // lancé par le clic sur « Lancer le combat »
     finish(s)
   }, [challenge, today, finish])
+
+  // La musique s'arrête quand on quitte le combat, et en fondu une fois le dernier message lu.
+  const battleOver = !!view?.ended && !queue.length && !pending
+  useEffect(() => { if (screen !== 'battle') stopMusic(0.6) }, [screen])
+  useEffect(() => { if (battleOver) stopMusic(1.5) }, [battleOver])
 
   const act = (choice: string) => {
     const s = session.current

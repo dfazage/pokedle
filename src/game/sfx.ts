@@ -9,7 +9,7 @@ type Noise = { at?: number; dur: number; vol?: number; filter?: BiquadFilterType
 
 const noiseBufs = new WeakMap<Ctx, AudioBuffer>()
 
-function tone(c: Ctx, out: AudioNode, t: number, o: Tone) {
+export function tone(c: Ctx, out: AudioNode, t: number, o: Tone) {
   const t0 = t + (o.at ?? 0)
   const osc = c.createOscillator()
   osc.type = o.type ?? 'square'
@@ -23,7 +23,7 @@ function tone(c: Ctx, out: AudioNode, t: number, o: Tone) {
   osc.stop(t0 + o.dur + 0.02)
 }
 
-function noise(c: Ctx, out: AudioNode, t: number, o: Noise) {
+export function noise(c: Ctx, out: AudioNode, t: number, o: Noise) {
   let buf = noiseBufs.get(c)
   if (!buf) {
     buf = c.createBuffer(1, c.sampleRate, c.sampleRate)

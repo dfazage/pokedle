@@ -13,6 +13,7 @@ const CRIES = (((import.meta.env?.VITE_CRIES_URL as string | undefined) ?? 'http
 let ctx: AudioContext | null = null
 let master: GainNode | null = null
 let sfxBus: AudioNode | null = null
+let musicBus: GainNode | null = null
 let muted = readMuted()
 
 function readMuted(): boolean {
@@ -43,6 +44,9 @@ function ensure(): AudioContext | null {
     limiter.release.value = 0.1
     master.connect(limiter).connect(ctx.destination)
     sfxBus = makeBus(ctx, master)
+    musicBus = ctx.createGain()
+    musicBus.gain.value = 0.55 // la musique reste sous les cris et les effets
+    musicBus.connect(master)
   }
   if (ctx.state !== 'running') void ctx.resume().catch(() => {})
   return ctx
@@ -57,6 +61,12 @@ if (typeof document !== 'undefined') {
     if (document.hidden) void ctx.suspend().catch(() => {})
     else void ctx.resume().catch(() => {})
   })
+}
+
+/** Sortie de la musique (créée dans un geste utilisateur) ; coupée avec le reste quand le son est en sourdine. */
+export function musicOutput(): { ctx: AudioContext; out: AudioNode } | null {
+  const c = ensure()
+  return c && musicBus ? { ctx: c, out: musicBus } : null
 }
 
 // ——— Cris ———

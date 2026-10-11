@@ -20,6 +20,14 @@ export interface TrainerData {
   team: { species: string; item: string | null; moves: string[] }[]
 }
 
+/**
+ * Génération du moteur de combat : toujours la 4 (493 espèces, mécaniques Diamant/Perle/Platine), quel que soit le
+ * dresseur tiré. Les dresseurs des gens 1 à 4 s'affrontent donc avec leurs équipes d'origine converties en gen 4
+ * (niveau 100, talents/natures par défaut), contre une équipe de joueur tirée dans tout le pool gen 4.
+ * `DailyChallenge.gen` reste la génération d'origine du dresseur (ligue, jeu, historique, classement).
+ */
+export const BATTLE_GEN = 4
+
 /** Générations pour lesquelles les données de dresseurs sont disponibles. */
 const TRAINERS_BY_GEN: Record<number, TrainerData[]> = {
   1: trainersGen1 as TrainerData[],
@@ -184,17 +192,17 @@ export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): Dai
   const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65 } = opts
   const baseSeed = hashString(`pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)
-  const gen = pick(rand, AVAILABLE_GENS)
+  const gen = pick(rand, AVAILABLE_GENS) // génération d'origine du dresseur
   const trainer = pick(rand, TRAINERS_BY_GEN[gen])
-  const opponentTeam = buildOpponent(trainer, gen, seedArray(baseSeed ^ 0xa5a5))
+  const opponentTeam = buildOpponent(trainer, BATTLE_GEN, seedArray(baseSeed ^ 0xa5a5))
 
-  const taken = new Set(opponentTeam.map((s) => Dex.forGen(gen).species.get(s.species).baseSpecies))
+  const taken = new Set(opponentTeam.map((s) => Dex.forGen(BATTLE_GEN).species.get(s.species).baseSpecies))
   let best: { team: PokemonSet[]; rate: number } | null = null
   for (let c = 0; c < candidates; c++) {
-    const team = randomTeam(gen, seedArray(baseSeed + 1000 * (c + 1)), new Set(), 6)
+    const team = randomTeam(BATTLE_GEN, seedArray(baseSeed + 1000 * (c + 1)), new Set(), 6)
     // une équipe candidate peut partager des espèces avec l'adversaire, c'est autorisé
     void taken
-    const rate = winRate(gen, team, opponentTeam, simsPerCandidate, baseSeed + c)
+    const rate = winRate(BATTLE_GEN, team, opponentTeam, simsPerCandidate, baseSeed + c)
     if (rate >= min && rate <= max) {
       best = { team, rate }
       break
@@ -209,7 +217,7 @@ export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): Dai
     opponentTeam,
     battleSeed: seedArray(baseSeed ^ 0x5eed),
     estimatedWinRate: best!.rate,
-    playerPreview: best!.team.map((m) => previewOf(m, gen)),
-    opponentPreview: opponentTeam.map((m) => previewOf(m, gen)),
+    playerPreview: best!.team.map((m) => previewOf(m, BATTLE_GEN)),
+    opponentPreview: opponentTeam.map((m) => previewOf(m, BATTLE_GEN)),
   }
 }

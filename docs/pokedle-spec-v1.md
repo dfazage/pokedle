@@ -4,9 +4,9 @@ Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + T
 
 ## Règles
 - Clé du jour en UTC (changement à minuit UTC = 8h à Kuala Lumpur) → seed déterministe.
-- Génération tirée au sort (1 à 4, une version par génération : Rouge, Cristal, Émeraude, Platine), puis dresseur canon (arènes, Conseil des 4, champions). Équipe d'origine montée niveau 100 et complétée à 6 avec des Pokémon du thème du dresseur.
+- Dresseur canon tiré au sort parmi les 4 générations (Rouge, Cristal, Émeraude, Platine : arènes, Conseil des 4, champions) ; sa génération d'origine sert de « ligue » (affichage, historique, classement). Le combat, lui, est **toujours en génération 4** (moteur `@pkmn/sim` gen 4, 493 espèces, `BATTLE_GEN` dans `src/game/daily.ts`) : l'équipe d'origine du dresseur (gens 1-4) est convertie en gen 4, montée niveau 100 et complétée à 6 avec des Pokémon du thème du dresseur ; le joueur tire dans tout le pool gen 4. Combats inter-générations assumés.
 - Gen 1 : le jeu d'origine n'a pas d'attaques dans ses données de dresseurs, elles sont générées (`scripts/fill_moves.mjs`) à partir des attaques réellement apprenables dans la génération.
-- Équipe imposée au joueur (6 Pokémon niveau 100) tirée via `@pkmn/randoms`, filtrée par simulations IA vs IA (cible 35–65 % de victoires).
+- Équipe imposée au joueur (6 Pokémon niveau 100) tirée via `@pkmn/randoms`, filtrée par simulations IA vs IA (cible 35–65 % de victoires) ; en pratique ~2/3 des jours tombent dans la cible avec les trainers des gens 1-2 plus durs à équilibrer.
 - 1 tentative par jour, abandon = défaite, reprise après rechargement (les choix sont rejoués, le combat est déterministe).
 - Historique : victoires totales, série en cours, meilleure série. En ligne via Supabase (projet `pokedle`, tables `profiles` et `results` avec RLS, fonctions `leaderboard_v2` et `daily_stats`) quand le joueur est connecté ; stockage local pour les invités.
 

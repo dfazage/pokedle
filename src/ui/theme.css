@@ -96,6 +96,11 @@ h1, h2, h3, p { margin: 0; }
 .hero .chip.y { background: var(--yellow); color: #3b2c00; }
 .hero h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin: 14px 0 8px; position: relative; z-index: 1; }
 .hero p { opacity: 0.92; font-size: 14px; line-height: 1.4; max-width: 85%; position: relative; z-index: 1; }
+.hero-trainer { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; position: relative; z-index: 1; }
+.hero-trainer-txt { min-width: 0; flex: 1; }
+.hero-trainer-txt p { max-width: none; }
+.hero-trainer > .orb { margin-bottom: 4px; background: rgba(255, 255, 255, 0.22); }
+.trainer-sprite { flex: none; width: 96px; height: 96px; object-fit: contain; object-position: bottom; image-rendering: pixelated; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.3)); }
 .hero .cta { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; margin-top: 18px; padding: 14px 18px; border-radius: 999px; background: #fff; color: #d44e47; font-weight: 800; width: 100%; justify-content: center; }
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .tile { border-radius: 20px; padding: 14px; color: #fff; display: flex; flex-direction: column; gap: 2px; min-height: 116px; }

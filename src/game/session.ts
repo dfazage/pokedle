@@ -14,6 +14,8 @@ export interface MonView {
   fainted: boolean
   active: boolean
   status: string
+  /** Statuts temporaires actifs (confusion, vampigraine…), ids du simulateur. */
+  vol: string[]
   types: string[]
   // Données pour les sprites originaux générés (voir sprites.ts)
   num: number
@@ -102,6 +104,7 @@ export class BattleSession {
         fainted: p.fainted,
         active: p.isActive,
         status: p.status || '',
+        vol: p.isActive ? Object.keys(p.volatiles ?? {}).filter((k) => k in VOL_FR) : [],
         types: [...p.species.types],
         ...lineInfo(b.dex, p.species),
       }))
@@ -140,6 +143,18 @@ export class BattleSession {
     }
   }
 }
+
+/** Statuts temporaires affichés : id du simulateur → texte d'apparition. */
+export const VOL_FR: Record<string, string> = {
+  confusion: 'est confus',
+  leechseed: 'est infecté par Vampigraine',
+  attract: 'est amoureux',
+  taunt: 'est provoqué',
+  encore: 'est obligé de répéter son attaque',
+  yawn: 'a sommeil',
+}
+const VOL_ALIAS: Record<string, string> = { 'move: Attract': 'attract', 'move: Taunt': 'taunt', 'move: Encore': 'encore', 'move: Leech Seed': 'leechseed', 'move: Yawn': 'yawn' }
+const volId = (raw: string) => VOL_ALIAS[raw] ?? raw.toLowerCase().replace(/^move: /, '').replace(/[^a-z]/g, '')
 
 const STATUS_FR: Record<string, string> = {
   brn: 'brûlé', par: 'paralysé', psn: 'empoisonné', tox: 'gravement empoisonné', slp: 'endormi', frz: 'gelé',
@@ -212,6 +227,8 @@ export interface Step {
   /** Nouveaux PV du Pokémon actif (la barre descend sur `ms`). */
   hp?: { side: Side; hp: number; maxhp: number; ms: number }
   status?: { side: Side; status: string }
+  /** Statut temporaire qui apparaît (`on`) ou disparaît. */
+  vol?: { side: Side; id: string; on: boolean }
   /** Un Pokémon entre en jeu. `name` = nom d'espèce du simulateur. */
   enter?: { side: Side; name: string; hp: number; maxhp: number; status: string }
   /** Appliqué à la fin de l'étape : le Pokémon quitte le terrain / est K.O. */
@@ -277,7 +294,7 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
     const [c, m] = frac.split('/').map(Number)
     return { hp: c, maxhp: m || max[side] }
   }
-  const BREAK = new Set(['move', 'switch', 'drag', 'faint', 'cant', '-miss', '-immune', '-status', 'win', 'turn', 'upkeep'])
+  const BREAK = new Set(['move', 'switch', 'drag', 'faint', 'cant', '-miss', '-immune', '-status', '-start', '-end', '-curestatus', 'win', 'turn', 'upkeep'])
 
   for (let i = 0; i < clean.length; i++) {
     const p = clean[i].split('|')
@@ -354,13 +371,35 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         out.push({ hp: { side, hp: next.hp, maxhp: next.maxhp, ms: hpMs(delta, next.maxhp) }, cue: null, wait: hpMs(delta, next.maxhp) + 250 })
         break
       }
-      case 'cant': out.push({ text: `${who(p[2])} ne peut pas attaquer.`, wait: 800 }); break
+      case 'cant': {
+        const why = p[3]
+        const text = why === 'slp' ? `${who(p[2])} dort profondément.` : why === 'frz' ? `${who(p[2])} est gelé !` : why === 'par' ? `${who(p[2])} est paralysé ! Il ne peut pas attaquer !` : why === 'flinch' ? `${who(p[2])} est apeuré !` : why === 'recharge' ? `${who(p[2])} doit se reposer.` : `${who(p[2])} ne peut pas attaquer.`
+        out.push({ text, wait: 800 })
+        break
+      }
       case '-immune': out.push({ text: `Ça n'affecte pas ${who(p[2])}…`, wait: 800 }); break
       case '-miss': out.push({ text: "L'attaque échoue !", wait: 800 }); break
       case '-status':
         out.push({ text: `${who(p[2])} est ${STATUS_FR[p[3]] ?? p[3]} !`, status: { side: sideOf(p[2]), status: p[3] }, wait: 800 })
         break
-      case '-curestatus': out.push({ status: { side: sideOf(p[2]), status: '' }, cue: null, wait: 150 }); break
+      case '-curestatus': {
+        const side = sideOf(p[2])
+        out.push({ text: p[3] === 'slp' ? `${who(p[2])} se réveille !` : p[3] === 'frz' ? `${who(p[2])} n'est plus gelé !` : undefined, status: { side, status: '' }, cue: null, wait: p[3] === 'slp' || p[3] === 'frz' ? 800 : 150 })
+        break
+      }
+      case '-start': {
+        const id = volId(p[3] ?? '')
+        if (id in VOL_FR) out.push({ text: `${who(p[2])} ${VOL_FR[id]} !`, vol: { side: sideOf(p[2]), id, on: true }, cue: { kind: 'sfx', id: 'status' }, wait: 800 })
+        break
+      }
+      case '-end': {
+        const id = volId(p[3] ?? '')
+        if (id in VOL_FR) {
+          const text = id === 'confusion' ? `${who(p[2])} n'est plus confus !` : id === 'attract' ? `${who(p[2])} n'est plus amoureux.` : id === 'taunt' ? `${who(p[2])} n'est plus provoqué.` : undefined
+          out.push({ text, vol: { side: sideOf(p[2]), id, on: false }, cue: null, wait: text ? 700 : 100 })
+        }
+        break
+      }
       case 'faint': {
         const side = sideOf(p[2])
         out0[side] = true

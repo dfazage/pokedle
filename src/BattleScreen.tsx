@@ -50,6 +50,14 @@ const STATUS_BADGE: Record<string, { label: string; title: string }> = {
   tox: { label: 'PSN', title: 'Gravement empoisonné' },
   frz: { label: 'GEL', title: 'Gelé' },
 }
+const VOL_BADGE: Record<string, { label: string; title: string }> = {
+  confusion: { label: 'CNF', title: 'Confus' },
+  leechseed: { label: 'VAM', title: 'Vampigraine' },
+  attract: { label: 'AMO', title: 'Amoureux' },
+  taunt: { label: 'PRV', title: 'Provoqué' },
+  encore: { label: 'ENC', title: 'Encore' },
+  yawn: { label: 'SOM?', title: 'Somnolent' },
+}
 export function StatusBadge({ status }: { status: string }) {
   const b = STATUS_BADGE[status]
   if (!b) return null
@@ -64,7 +72,12 @@ function HpBox({ mon, ms, own }: { mon: MonView | null; ms: number; own?: boolea
   return (
     <div className={`hpbox ${own ? 'own' : 'foe'}`}>
       <div className="hrow"><span className="nm">{spFr(mon.name).toUpperCase()}</span><span className="lv">Nv100</span></div>
-      {mon.status && <div className="hrow strow"><StatusBadge status={mon.status} /></div>}
+      {(mon.status || mon.vol.length > 0) && (
+        <div className="hrow strow">
+          {mon.status && <StatusBadge status={mon.status} />}
+          {mon.vol.map((v) => VOL_BADGE[v] && <span key={v} className={`st st-v st-${v}`} title={VOL_BADGE[v].title}>{VOL_BADGE[v].label}</span>)}
+        </div>
+      )}
       <div className="hrow bar">
         <span className="hplabel">PV</span>
         <div className="track"><div className={`fill ${tone}`} style={{ width: `${pct}%` }} /></div>
@@ -79,7 +92,7 @@ const Sprite = ({ mon, back, wrap }: { mon: MonView | null; back?: boolean; wrap
   if (!mon) return null
   // Sprite de la génération en cours (public/sprites), repli sur le sprite généré par code (game/sprites.ts).
   return (
-    <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${mon.status ? ` is-${mon.status}` : ''}`} style={mon.fainted ? { visibility: 'hidden' } : undefined}>
+    <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${mon.status ? ` is-${mon.status}` : ''}${mon.vol.includes('confusion') ? ' is-cnf' : ''}`} style={mon.fainted ? { visibility: 'hidden' } : undefined}>
       <MonImg spec={mon} back={back} className="sprite" alt={spFr(mon.name)} draggable={false} />
     </div>
   )
@@ -96,7 +109,7 @@ function applyPre(d: Disp, st: Step, team: (side: Side, name: string) => MonView
   const n: Disp = { ...d, ms: { ...d.ms } }
   if (st.enter) {
     const base = team(st.enter.side, st.enter.name)
-    if (base) n[st.enter.side] = { ...base, hp: st.enter.hp, maxhp: st.enter.maxhp, status: st.enter.status, fainted: false, active: true }
+    if (base) n[st.enter.side] = { ...base, hp: st.enter.hp, maxhp: st.enter.maxhp, status: st.enter.status, vol: [], fainted: false, active: true }
     n.ms[st.enter.side] = 0
   }
   if (st.hp) {
@@ -107,6 +120,13 @@ function applyPre(d: Disp, st: Step, team: (side: Side, name: string) => MonView
   if (st.status) {
     const m = n[st.status.side]
     if (m) n[st.status.side] = { ...m, status: st.status.status }
+  }
+  if (st.vol) {
+    const m = n[st.vol.side]
+    if (m) {
+      const rest = (m.vol ?? []).filter((v) => v !== st.vol!.id)
+      n[st.vol.side] = { ...m, vol: st.vol.on ? [...rest, st.vol.id] : rest }
+    }
   }
   return n
 }

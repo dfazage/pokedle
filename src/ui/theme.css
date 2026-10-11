@@ -285,3 +285,58 @@ h1, h2, h3, p { margin: 0; }
 @keyframes glow-pulse { 0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1); } 50% { opacity: 1; transform: translateX(-50%) scale(1.06); } }
 @keyframes embers { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-110px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .aura .fl, .aura .glow, .aura::after { animation: none; } }
+
+/* Intro du combat : transition façon DS, dresseurs face à face, VS, texte (écran toujours sombre) */
+.bi { position: fixed; inset: 0; z-index: 60; background: #000; color: #e4e1e7; cursor: pointer; }
+.bi-stage { position: relative; max-width: 480px; height: 100dvh; margin: 0 auto; overflow: hidden; isolation: isolate; background: #0b0b0f; }
+.bi-layer { position: absolute; inset: 0; }
+.bi-bars { z-index: 9; display: flex; flex-direction: column; pointer-events: none; }
+.bi-bars i { flex: 1; background: #000; transform: translateX(var(--from)); animation: bi-bar 0.9s cubic-bezier(0.7, 0, 0.3, 1) both; animation-delay: calc(var(--n) * 28ms); }
+@keyframes bi-bar { 0% { transform: translateX(var(--from)); } 45%, 60% { transform: translateX(0); } 100% { transform: translateX(calc(var(--from) * -1)); } }
+.bi-flash { z-index: 10; background: #fff; opacity: 0; pointer-events: none; animation: bi-flash 0.55s ease-out 0.22s both; }
+@keyframes bi-flash { 0% { opacity: 0; } 18% { opacity: 0.95; } 100% { opacity: 0; } }
+.bi-back { z-index: 1; background: radial-gradient(120% 80% at 50% 0%, #1d2140 0%, #0b0b0f 70%); }
+.bi-back::before, .bi-back::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; filter: blur(60px); opacity: 0; animation: bi-halo 2.9s ease-out 0.95s both; }
+.bi-back::before { left: -90px; top: 20%; background: var(--primary); }
+.bi-back::after { right: -90px; bottom: 10%; background: var(--secondary); }
+.boost .bi-back::before { background: #ff7a1a; }
+.boost .bi-back::after { background: #ffcf3a; }
+@keyframes bi-halo { 0% { opacity: 0; } 30% { opacity: 0.5; } 100% { opacity: 0.35; } }
+.bi-rays { z-index: 2; opacity: 0; background: repeating-conic-gradient(from 0deg at 50% 52%, rgba(255, 255, 255, 0.07) 0 6deg, transparent 6deg 18deg); -webkit-mask: radial-gradient(circle at 50% 52%, #000 0, transparent 70%); mask: radial-gradient(circle at 50% 52%, #000 0, transparent 70%); animation: bi-rays 2.9s linear 0.95s both; }
+@keyframes bi-rays { 0% { opacity: 0; transform: rotate(0); } 20% { opacity: 1; } 100% { opacity: 0.8; transform: rotate(25deg); } }
+.bi-side { position: absolute; z-index: 4; display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0; }
+.bi-foe { right: 6%; top: 9%; width: 58%; animation: bi-inR 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) 1.25s both; }
+.bi-me { left: 6%; bottom: 11%; width: 46%; animation: bi-inL 0.55s cubic-bezier(0.2, 0.9, 0.2, 1) 1.45s both; }
+@keyframes bi-inR { from { opacity: 0; transform: translateX(140%) skewX(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes bi-inL { from { opacity: 0; transform: translateX(-140%) skewX(8deg); } to { opacity: 1; transform: none; } }
+.bi-sprite { position: relative; display: grid; place-items: center; width: 100%; }
+.bi-sprite img { width: 100%; image-rendering: pixelated; filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5)); position: relative; z-index: 2; }
+.bi-sprite img.flip { transform: scaleX(-1); }
+.boost .bi-foe .bi-sprite img { filter: drop-shadow(0 0 10px rgba(255, 190, 70, 0.9)) drop-shadow(0 6px 8px rgba(0, 0, 0, 0.4)); }
+.bi-tag { font-weight: 800; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(8px); }
+.bi-name { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; text-align: center; }
+.bi-cls { font-size: 12px; color: #c4cbe0; font-weight: 600; text-align: center; }
+.bi-balls { display: flex; gap: 6px; }
+.bi-balls i { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(145deg, #f0716b 0 48%, #1b1b22 48% 54%, #fff 54%); box-shadow: inset 0 0 0 1.5px rgba(0, 0, 0, 0.6); transform: scale(0); animation: bi-pop 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) both; animation-delay: calc(1.9s + var(--k) * 70ms); }
+@keyframes bi-pop { from { transform: scale(0); } to { transform: scale(1); } }
+.bi-vs { position: absolute; z-index: 6; left: 24%; top: 31%; font-family: 'Press Start 2P', var(--font); font-size: 38px; color: #fff; letter-spacing: -2px; text-shadow: 4px 4px 0 var(--secondary), -3px -3px 0 var(--primary), 0 0 28px rgba(255, 255, 255, 0.6); transform: translate(-50%, -50%) scale(0) rotate(-12deg); opacity: 0; animation: bi-vs 0.6s cubic-bezier(0.2, 1.7, 0.4, 1) 1.75s both; }
+.boost .bi-vs { text-shadow: 4px 4px 0 #ff5a1a, -3px -3px 0 #ffcf3a, 0 0 30px rgba(255, 170, 40, 0.9); }
+@keyframes bi-vs { 0% { opacity: 0; transform: translate(-50%, -50%) scale(3) rotate(-12deg); } 70% { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(-6deg); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-6deg); } }
+.bi-slash { position: absolute; z-index: 5; left: -10%; right: -10%; top: 42%; height: 3px; background: linear-gradient(90deg, transparent, #fff, transparent); transform: rotate(-18deg) scaleX(0); box-shadow: 0 0 18px #fff; opacity: 0.9; animation: bi-slash 0.5s ease-out 1.7s both; }
+@keyframes bi-slash { to { transform: rotate(-18deg) scaleX(1); opacity: 0; } }
+.bi-cta { position: absolute; z-index: 7; left: 0; right: 0; bottom: 4.5%; text-align: center; font-family: 'Press Start 2P', var(--font); font-size: 12px; letter-spacing: 0.04em; line-height: 1.7; text-shadow: 2px 2px 0 #000; }
+.bi-cta span { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; width: 0; animation: bi-type 1s steps(var(--n), end) 2.5s both; }
+@keyframes bi-type { to { width: 100%; } }
+.bi-fade { z-index: 11; background: #000; opacity: 0; pointer-events: none; animation: bi-fade 0.45s ease-in 3.45s both; }
+@keyframes bi-fade { to { opacity: 1; } }
+.bi-aura { position: absolute; inset: -8% -10% -4% -10%; z-index: 1; pointer-events: none; }
+.bi-aura .glow { position: absolute; left: 50%; bottom: -2%; width: 120%; height: 100%; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(ellipse at 50% 70%, rgba(255, 244, 170, 0.95) 0%, rgba(255, 170, 40, 0.75) 32%, rgba(255, 80, 20, 0.4) 58%, transparent 74%); filter: blur(10px); animation: glow-pulse 1.8s ease-in-out infinite; }
+.bi-aura .fl { position: absolute; bottom: 4%; left: var(--x); width: var(--w); height: var(--h); margin-left: calc(var(--w) / -2); border-radius: 52% 48% 50% 50% / 72% 72% 28% 28%; transform-origin: 50% 100%; background: linear-gradient(to top, #fff6b0 0%, #ffd23a 24%, #ff8a1f 55%, rgba(255, 60, 20, 0.85) 80%, rgba(255, 40, 20, 0) 100%); filter: blur(1.2px); box-shadow: 0 0 16px rgba(255, 150, 40, 0.65); animation: flicker var(--d) ease-in-out infinite; animation-delay: var(--s); }
+.bi-aura .f1 { --x: 8%; --w: 11%; --h: 48%; --d: 1.3s; --s: -0.2s; }
+.bi-aura .f2 { --x: 22%; --w: 14%; --h: 66%; --d: 1.1s; --s: -0.7s; }
+.bi-aura .f3 { --x: 37%; --w: 15%; --h: 82%; --d: 1.5s; --s: -0.4s; }
+.bi-aura .f4 { --x: 50%; --w: 17%; --h: 92%; --d: 1.2s; --s: -0.9s; }
+.bi-aura .f5 { --x: 63%; --w: 15%; --h: 80%; --d: 1.4s; --s: -0.1s; }
+.bi-aura .f6 { --x: 78%; --w: 14%; --h: 64%; --d: 1.15s; --s: -0.6s; }
+.bi-aura .f7 { --x: 92%; --w: 11%; --h: 46%; --d: 1.35s; --s: -0.5s; }
+@media (prefers-reduced-motion: reduce) { .bi-aura .fl, .bi-aura .glow { animation: none; } }

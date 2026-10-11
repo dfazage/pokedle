@@ -21,6 +21,7 @@ import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
 import { Admin, Auth, Onboarding, ResetPassword } from './screens/Account'
 import { Guide } from './screens/Guide'
+import { BattleIntro } from './screens/BattleIntro'
 import type { Ctx } from './screens/types'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
@@ -238,7 +239,7 @@ export default function App() {
       setPending(v)
       setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
     }
-    setScreen('battle')
+    setScreen(saved.length ? 'battle' : 'intro') // nouveau combat : petite intro avant l'arène
     startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name))) // lancé par le clic sur « Lancer le combat »
     finish(s)
   }, [challenge, today, finish])
@@ -424,6 +425,9 @@ export default function App() {
   }
   const ctx: Ctx = { today, challenge, history, stats, score, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
+
+  if (screen === 'intro')
+    return <BattleIntro challenge={challenge} boosted={isFormidable(challenge.gen, challenge.trainer.name)} onDone={() => setScreen('battle')} />
 
   if (screen === 'battle' && view) {
     const over = view.ended && !queue.length && !pending

@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   ArrowLeft, BarChart3, Bug, CalendarDays, Circle, Droplet, Flame, Gem, Ghost, House, Leaf, Moon, Mountain,
-  Shield, Skull, Snowflake, Sparkles, Swords, User, Wind, Zap, Brain, ChevronsRight,
+  Shield, Skull, Snowflake, Sparkles, Star, Swords, User, Wind, Zap, Brain, ChevronsRight,
 } from 'lucide-react'
 import { TYPE_COLORS, fmtCountdown, msToNextDay } from '../game/info'
 import { TYPE_FR } from '../game/fr'
 
 export type Screen =
   | 'onboarding' | 'home' | 'opponent' | 'team' | 'battle' | 'result'
-  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'reset' | 'generations' | 'admin'
+  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'reset' | 'guide' | 'admin'
 
 const ICONS: Record<string, typeof Flame> = {
   Normal: Circle, Fire: Flame, Water: Droplet, Grass: Leaf, Electric: Zap, Ice: Snowflake, Fighting: Swords,
@@ -57,6 +57,15 @@ export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: ()
       <div className="t">{title}</div>
       {right ?? <span style={{ width: 40 }} />}
     </div>
+  )
+}
+
+/** Pastille des points totaux, affichée en haut à gauche des écrans principaux. */
+export function ScoreBadge({ points }: { points: number }) {
+  return (
+    <span className="pill score" aria-label={`${points} points`}>
+      <Star size={14} fill="currentColor" /> {points.toLocaleString('fr-FR')} pts
+    </span>
   )
 }
 

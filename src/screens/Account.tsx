@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { ArrowRight, RotateCcw, Shuffle, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
 import type { Ctx } from './types'
 import { supabase, siteUrl } from '../game/cloud'
-import { GEN_INFO } from '../game/fr'
 import { dayNumber } from '../game/info'
 import { MonOrb, TopBar } from '../ui/kit'
 
@@ -137,29 +136,6 @@ export function Onboarding(c: { done: () => void; login: () => void }) {
       <div className="dots">{SLIDES.map((_, k) => <i key={k} className={k === i ? 'on' : ''} style={k === i ? { background: 'var(--violet)' } : undefined} />)}</div>
       <button className="btn violet" onClick={() => (i < SLIDES.length - 1 ? setI(i + 1) : c.done())}>{i < SLIDES.length - 1 ? 'Continuer' : 'Commencer'} <ArrowRight size={18} /></button>
       <button className="link" style={{ alignSelf: 'center' }} onClick={c.login}>J’ai déjà un compte</button>
-    </>
-  )
-}
-
-export function Generations(c: Ctx & { onBack: () => void; counts: Record<number, number> }) {
-  return (
-    <>
-      <TopBar title="Générations" onBack={c.onBack} />
-      <p className="muted">Chaque jour, une génération est tirée au sort parmi les jeux ci-dessous.</p>
-      {[1, 2, 3, 4].map((g) => {
-        const gi = GEN_INFO[g]
-        const active = c.challenge.gen === g
-        return (
-          <section key={g} className="card stack" style={active ? { borderColor: 'var(--tertiary)' } : undefined}>
-            <div className="row between">
-              <span className="eyebrow" style={{ color: 'var(--tertiary)' }}>Gen {gi.roman} · {gi.region}</span>
-              <span className={active ? 'pill green' : 'pill'}>{active ? 'Actif aujourd’hui' : 'Dans la rotation'}</span>
-            </div>
-            <h2 className="h2">Pokémon {gi.game}</h2>
-            <p className="muted small">{c.counts[g] ?? 0} dresseurs · espèces {gi.species}</p>
-          </section>
-        )
-      })}
     </>
   )
 }

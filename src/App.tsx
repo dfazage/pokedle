@@ -12,13 +12,15 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
+import { scoreHistory } from './game/scoring'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
-import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
+import { BottomNav, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
-import { Admin, Auth, Generations, Onboarding, ResetPassword } from './screens/Account'
+import { Admin, Auth, Onboarding, ResetPassword } from './screens/Account'
+import { Guide } from './screens/Guide'
 import type { Ctx } from './screens/types'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
@@ -49,7 +51,7 @@ function loadOrder(day: string): number[] | null {
 }
 
 type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog; formatSteps: typeof import('./game/session').formatSteps }
-const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result', 'generations']
+const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result']
 
 export default function App() {
   const today = useMemo(() => dayKeyUTC(), [])
@@ -62,7 +64,6 @@ export default function App() {
   const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
   const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
-  const [counts, setCounts] = useState<Record<number, number>>({})
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
   const [email, setEmail] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
@@ -183,7 +184,6 @@ export default function App() {
       engine.current = { BattleSession: sess.BattleSession, formatLog: sess.formatLog, formatSteps: sess.formatSteps }
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
-        setCounts(daily.TRAINER_COUNTS)
         const salt = await fetchDailySalt(today)
         if (!cancelled) setChallenge(daily.buildDaily(today, { salt }))
       }
@@ -205,6 +205,7 @@ export default function App() {
         turns: v.turn,
         survivors: v.player.team.filter((m) => !m.fainted).length,
         kos: v.opponent.team.filter((m) => m.fainted).length,
+        hpLeft: Math.round((100 * v.player.team.reduce((a, m) => a + Math.max(0, m.hp), 0)) / Math.max(1, v.player.team.reduce((a, m) => a + m.maxhp, 0))),
       }
       if (!getRecord(today)) saveRecord(rec) // copie locale (invité / hors ligne)
       if (signedIn.current) submitResult(rec, choices.current).then(refreshCloud)
@@ -366,6 +367,7 @@ export default function App() {
   }
 
   const stats = computeStats(history, today)
+  const score = useMemo(() => scoreHistory(history), [history])
   const done = history.some((r) => r.dayKey === today)
   const inProgress = !done && loadChoices(today).length > 0
   const onPlay = () => {
@@ -420,7 +422,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, challenge, history, stats, score, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'battle' && view) {
@@ -448,9 +450,12 @@ export default function App() {
     )
   }
 
+  if (screen === 'guide') return <Guide {...ctx} onBack={() => setScreen('settings')} />
+
   const showNav = NAV_SCREENS.includes(screen)
   return (
     <main className={showNav ? 'app' : 'app nonav'}>
+      {showNav && <div className="scorebar"><ScoreBadge points={score.total} /></div>}
       {screen === 'home' && <Home {...ctx} />}
       {screen === 'opponent' && <Opponent {...ctx} onBack={back} />}
       {screen === 'team' && <Team {...ctx} onBack={() => setScreen('opponent')} onStart={startBattle} />}
@@ -461,7 +466,6 @@ export default function App() {
       {screen === 'auth' && <Auth {...ctx} onBack={back} onGuest={playAsGuest} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
-      {screen === 'generations' && <Generations {...ctx} counts={counts} onBack={back} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
       <span hidden>{dayNumber(today)}</span>
     </main>

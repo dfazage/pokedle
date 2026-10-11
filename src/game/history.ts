@@ -7,6 +7,8 @@ export interface DayRecord {
   turns: number
   survivors?: number
   kos?: number
+  /** PV restants de l'équipe du joueur en fin de combat, en % (0-100). */
+  hpLeft?: number
 }
 export interface Stats {
   totalWins: number
@@ -52,7 +54,7 @@ export function getRecord(dayKey: string): DayRecord | undefined {
   return loadHistory().find((r) => r.dayKey === dayKey)
 }
 
-function prevDay(key: string): string {
+export function prevDay(key: string): string {
   const d = new Date(key + 'T00:00:00Z')
   d.setUTCDate(d.getUTCDate() - 1)
   return d.toISOString().slice(0, 10)

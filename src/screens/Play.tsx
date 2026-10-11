@@ -1,6 +1,6 @@
 import { PartyList, MonSprite } from './Party'
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight, Star } from 'lucide-react'
 import type { Ctx } from './types'
 import { classLabel, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
@@ -41,7 +41,7 @@ export function Home(c: Ctx) {
 
       <section className="hero">
         <div className="row" style={{ flexWrap: 'wrap' }}>
-          <button className="chip" onClick={() => c.go('generations')}>Ligue {gi.region} · Gen {ch.gen}</button>
+          <button className="chip" onClick={() => c.go('guide')}>Ligue {gi.region} · Gen {ch.gen}</button>
           <span className="chip y">Difficulté {stars(diff.stars)}</span>
         </div>
         <div className="hero-trainer">
@@ -208,6 +208,7 @@ export function Result(c: Ctx) {
   const [copied, setCopied] = useState(false)
   if (!rec) return null
   const win = rec.result === 'win'
+  const sc = c.score.byDay.get(rec.dayKey)
   const alive = rec.survivors ?? (win ? 1 : 0)
   const kos = rec.kos ?? (win ? 6 : 0)
   const prev = computeStats(c.history.filter((r) => r.dayKey !== c.today), c.today).currentStreak
@@ -249,6 +250,31 @@ export function Result(c: Ctx) {
         <div className="card"><div className="lab">Survivants</div><b style={{ fontSize: 30 }}>{alive}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < alive ? 'on' : ''} />)}</div></div>
         <div className="card"><div className="lab">K.O. infligés</div><b style={{ fontSize: 30 }}>{kos}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < kos ? 'on blue' : ''} />)}</div></div>
       </div>
+      {sc && (
+        <section className="card stack">
+          <div className="row between">
+            <span className="lab" style={{ margin: 0 }}><Star size={13} style={{ verticalAlign: -2 }} /> Points du jour</span>
+            <b style={{ fontSize: 28, color: 'var(--yellow)' }}>+{sc.points}</b>
+          </div>
+          {win ? (
+            <div className="stack small" style={{ gap: 6 }}>
+              {([
+                ['Base du dresseur', `${sc.base}`],
+                ['Rapidité', `${Math.round(sc.speed * 100)} %`],
+                ['PV restants', `${Math.round(sc.hp * 100)} %`],
+                ['Survivants', `${Math.round(sc.survivors * 100)} %`],
+                [`Série (${sc.streak} j)`, `×${sc.streakMult.toFixed(2)}`],
+                ...(sc.flawless ? [['Sans K.O.', '+10']] : []),
+              ] as [string, string][]).map(([k, v]) => (
+                <div key={k} className="row between"><span className="muted">{k}</span><b>{v}</b></div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted small">Pas de points sur une défaite. Reviens demain pour relancer ta série !</p>
+          )}
+          <div className="row between small"><span className="muted">Total</span><b>{c.score.total.toLocaleString('fr-FR')} pts</b></div>
+        </section>
+      )}
       <section className="card stack">
         <div className="lab" style={{ marginBottom: 0 }}>Aperçu du partage</div>
         <div className="share-grid" style={{ whiteSpace: 'pre-line', fontSize: 18 }}>{text}</div>

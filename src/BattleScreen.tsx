@@ -96,9 +96,13 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
   }
   if (!msg && view.ended) prompt = view.result === 'win' ? 'Tu as gagné le combat !' : 'Tu as perdu le combat…'
 
+  const locked = !!msg || view.ended
+  const teamAll = view.player.team
+
   return (
-    <div className="gba" onClick={msg ? tap : undefined}>
-      <div className="gba-in">
+    <div className="nds" onClick={msg ? tap : undefined}>
+      {/* Écran du haut : terrain, boîtes de PV et texte */}
+      <div className="nds-screen">
         <div className="bfield">
           <div className="sky" /><div className="grass" />
           <div className="plat foe-plat" /><div className="plat own-plat" />
@@ -118,44 +122,49 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
             {muted ? <VolumeX /> : <Volume2 />}
           </button>
         </div>
-        <div className="bottom">
-          {!(showMenu && (menu === 'moves' || choosingTeam)) && (
-            <div className="textbox">
-              <span>{prompt}</span>
-              {msg && !typing && <i className="more">▼</i>}
-            </div>
-          )}
-          {showMenu && !choosingTeam && menu === 'main' && (
-            <div className="menu grid">
-              <button onClick={() => setMenu('moves')}>COMBAT</button>
-              <button disabled>SAC</button>
-              <button disabled={view.player.trapped} onClick={() => setMenu('team')}>POKéMON</button>
-              <button onClick={onForfeit}>FUITE</button>
-            </div>
-          )}
-          {showMenu && !choosingTeam && menu === 'moves' && (
-            <div className="menu list">
-              {view.player.moves.map((m) => (
-                <button key={m.slot} disabled={m.disabled} onClick={() => onMove(m.slot)}>
-                  <b>{mvFr(m.name.replace(/^(Hidden Power) .*/, '$1')).toUpperCase()}</b>
-                  <small style={{ color: TYPE_COLORS[m.type] }}>{(TYPE_FR[m.type] ?? m.type).toUpperCase()} {m.pp}/{m.maxpp}</small>
-                </button>
-              ))}
-              <button className="back-btn" aria-label="Retour" onClick={() => setMenu('main')}>✕</button>
-            </div>
-          )}
-          {choosingTeam && (
-            <div className="menu list team">
-              {alive.map((m) => (
-                <button key={m.idx} onClick={() => onSwitch(m.idx)}>
-                  <b>{spFr(m.name).toUpperCase()}</b>
-                  <small>{m.hp}/{m.maxhp}</small>
-                </button>
-              ))}
-              {!forced && <button className="back-btn" aria-label="Retour" onClick={() => setMenu('main')}>✕</button>}
-            </div>
-          )}
+        <div className="textbox">
+          <span>{prompt}</span>
+          {msg && !typing && <i className="more">▼</i>}
         </div>
+      </div>
+
+      {/* Écran du bas (tactile) : menus */}
+      <div className={`nds-screen touch${locked ? ' locked' : ''}`}>
+        <div className="balls" aria-hidden>
+          {teamAll.map((m) => <span key={m.idx} className={`ball${m.fainted ? ' ko' : ''}`} />)}
+        </div>
+        {!choosingTeam && menu === 'main' && (
+          <div className="tmenu main">
+            <button className="tbtn fight" disabled={!showMenu} onClick={() => setMenu('moves')}>COMBAT</button>
+            <button className="tbtn bag" disabled>SAC</button>
+            <button className="tbtn run" disabled={!showMenu} onClick={onForfeit}>FUITE</button>
+            <button className="tbtn mons" disabled={!showMenu || view.player.trapped} onClick={() => setMenu('team')}>POKéMON</button>
+          </div>
+        )}
+        {!choosingTeam && menu === 'moves' && (
+          <div className="tmenu moves">
+            {view.player.moves.map((m) => (
+              <button key={m.slot} className="tbtn move" style={{ ['--tc' as string]: TYPE_COLORS[m.type] ?? '#888' }} disabled={m.disabled || !showMenu} onClick={() => onMove(m.slot)}>
+                <b>{mvFr(m.name.replace(/^(Hidden Power) .*/, '$1')).toUpperCase()}</b>
+                <span className="mrow"><span className="tchip">{(TYPE_FR[m.type] ?? m.type).toUpperCase()}</span><span>PP {m.pp}/{m.maxpp}</span></span>
+              </button>
+            ))}
+            <button className="tbtn cancel" onClick={() => setMenu('main')}>ANNULER</button>
+          </div>
+        )}
+        {choosingTeam && (
+          <>
+            <div className={`tmenu team${!forced ? ' has-cancel' : ''}`}>
+              {alive.map((m) => (
+                <button key={m.idx} className="tbtn mon" onClick={() => onSwitch(m.idx)}>
+                  <b>{spFr(m.name).toUpperCase()}</b>
+                  <small>PV {m.hp}/{m.maxhp}</small>
+                </button>
+              ))}
+            </div>
+            {!forced && <button className="tbtn cancel tcancel" onClick={() => setMenu('main')}>ANNULER</button>}
+          </>
+        )}
       </div>
     </div>
   )

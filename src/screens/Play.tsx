@@ -7,6 +7,7 @@ import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
 import { TrainerImg } from '../game/trainerSprites'
+import { MonImg } from '../game/officialSprites'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(3 - n)
@@ -124,7 +125,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {ch.opponentPreview.map((m, i) => (
             <div key={m.species + i} className="stack" style={{ alignItems: 'center', gap: 6, padding: 10, borderRadius: 18, background: 'var(--surface2)' }}>
-              <MonOrb types={m.types} size={48} />
+              <MonImg spec={m} alt={spFr(m.species)} width={64} height={64} draggable={false} style={{ width: 64, height: 64, objectFit: 'contain', imageRendering: 'pixelated' }} />
               <b style={{ fontSize: 13, textAlign: 'center' }}>{spFr(m.species)}</b>
               <div className="row" style={{ gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {m.types.map((t) => <TypeBadge key={t} type={t} soft />)}

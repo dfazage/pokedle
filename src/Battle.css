@@ -113,3 +113,4 @@
 .cat-Physical .cb { stroke: #e0781c; } .cat-Physical .cg { fill: #f08c28; }
 .cat-Special .cb { stroke: #4a78d8; } .cat-Special .cg2 { fill: none; stroke: #4a78d8; stroke-width: 1.3; }
 .cat-Status .cb { stroke: #8890a0; } .cat-Status .cg2 { fill: none; stroke: #8890a0; stroke-width: 1.3; }
+.tbtn.move.sel { outline: calc(var(--u) * 3) solid #e04030; outline-offset: calc(var(--u) * 1); transform: translateY(calc(var(--u) * -1)); background: linear-gradient(#fffbe0, #f0ecc0); }

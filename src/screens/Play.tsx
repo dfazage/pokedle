@@ -6,9 +6,12 @@ import { classLabel, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
+import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
+import { MoveSheet } from '../ui/MoveInfo'
+import type { MoveFacts } from '../game/moves'
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(3 - n)
 const today$ = (c: Ctx) => c.history.find((r) => r.dayKey === c.today)
@@ -19,6 +22,7 @@ export function Home(c: Ctx) {
   const diff = difficulty(ch.estimatedWinRate)
   const left = useCountdown()
   const done = today$(c)
+  const fire = isFormidable(ch.gen, ch.trainer.name)
   const rate = stats.played ? Math.round((stats.totalWins / stats.played) * 100) : 0
   const worldRate = c.world && c.world.players ? ((c.world.wins / c.world.players) * 100).toFixed(1) : null
   return (
@@ -45,16 +49,24 @@ export function Home(c: Ctx) {
           <span className="chip y">Difficulté {stars(diff.stars)}</span>
         </div>
         <div className="hero-trainer">
+          <div className={fire ? 'trainer-stage fire' : 'trainer-stage'}>
+            {fire && (
+              <span className="aura" aria-hidden>
+                <i className="glow" />
+                {[1, 2, 3, 4, 5, 6, 7].map((k) => <i key={k} className={`fl f${k}`} />)}
+              </span>
+            )}
+            <TrainerImg
+              id={ch.trainer.sprite ?? ch.trainer.id}
+              gen={ch.gen}
+              className="trainer-sprite xl"
+              fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={120} />}
+            />
+          </div>
           <div className="hero-trainer-txt">
             <h2>{ch.trainer.name}</h2>
             <p>{classLabel(ch.trainer)} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
           </div>
-          <TrainerImg
-            id={ch.trainer.sprite ?? ch.trainer.id}
-            gen={ch.gen}
-            className="trainer-sprite"
-            fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={72} />}
-          />
         </div>
         <button className="cta" onClick={c.onPlay}>
           {done ? 'Voir mon résultat' : c.inProgress ? 'Reprendre le combat' : 'Lancer le combat'} <ArrowRight size={18} />
@@ -150,6 +162,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
 export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
   const team = c.challenge.playerPreview
   const [i, setI] = useState(0)
+  const [info, setInfo] = useState<MoveFacts | null>(null) // attaque dont la fiche est ouverte
   const m = team[i]
   const next = (d: number) => setI((i + d + team.length) % team.length)
   const attack = m.stats.spa > m.stats.atk ? ['Attaque spé.', m.stats.spa] : ['Attaque', m.stats.atk]
@@ -178,19 +191,21 @@ export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
         </div>
         <div className="stack" style={{ marginTop: 12, gap: 8 }}>
           {m.moves.map((mv) => (
-            <div key={mv.name} className="row between" style={{ padding: '8px 12px', borderRadius: 14, background: 'var(--surface2)' }}>
+            <button key={mv.name} className="row between mv-row" onClick={() => setInfo(mv)} aria-label={`Fiche de ${mvFr(mv.name.replace(/^(Hidden Power) .*/, '$1'))}`}>
               <b>{mvFr(mv.name.replace(/^(Hidden Power) .*/, '$1'))}</b>
               <span className="row" style={{ gap: 8 }}>
                 <span className="muted small">{mv.power ? `Puiss. ${mv.power}` : mv.category === 'Status' ? 'Statut' : '—'}</span>
                 <TypeBadge type={mv.type} soft />
+                <span className="mv-i" aria-hidden>i</span>
               </span>
-            </div>
+            </button>
           ))}
         </div>
       </section>
       <div className="dots">{team.map((_, k) => <i key={k} className={k === i ? 'on' : ''} />)}</div>
       <SlideToConfirm label="Glisser pour confirmer" onConfirm={c.onStart} />
       <p className="muted small" style={{ textAlign: 'center' }}>Équipe imposée aujourd’hui · duels 6v6, niveau 100</p>
+      {info && <MoveSheet m={info} onClose={() => setInfo(null)} />}
     </>
   )
 }

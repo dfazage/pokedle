@@ -7,7 +7,7 @@ import { TYPE_COLORS, fmtCountdown, msToNextDay } from '../game/info'
 import { TYPE_FR } from '../game/fr'
 
 export type Screen =
-  | 'onboarding' | 'home' | 'opponent' | 'team' | 'battle' | 'result'
+  | 'onboarding' | 'home' | 'opponent' | 'team' | 'intro' | 'battle' | 'result'
   | 'history' | 'leaderboard' | 'settings' | 'auth' | 'reset' | 'guide' | 'admin'
 
 const ICONS: Record<string, typeof Flame> = {

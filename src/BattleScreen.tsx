@@ -6,6 +6,7 @@ import { TYPE_FR, mvFr, spFr } from './game/fr'
 import { MonImg } from './game/officialSprites'
 import { matchups } from './game/typechart'
 import { TypeIcon } from './ui/kit'
+import { MoveBody } from './ui/MoveInfo'
 import { cueFor, findMon, type Side } from './game/battleCues'
 import { isMuted, playCue, preloadCries, setMuted } from './game/audio'
 import './Battle.css'
@@ -290,6 +291,7 @@ interface Props {
 
 export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch, onForfeit }: Props) {
   const [menu, setMenu] = useState<'main' | 'moves' | 'team'>('main')
+  const [pick, setPick] = useState<number | null>(null) // attaque sélectionnée (fiche affichée) ; un second appui la lance
   const [typed, setTyped] = useState(0)
   const [shownMsg, setShownMsg] = useState('') // dernier message affiché (reste à l'écran pendant les étapes sans texte)
   const [textId, setTextId] = useState(0)
@@ -394,7 +396,10 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
   const teamAll = view.player.team
   const shown: Disp = disp ?? { player: view.player.active, opponent: view.opponent.active, ms: { player: 0, opponent: 0 } }
 
+  const picked = menu === 'moves' && !choosingTeam ? view.player.moves.find((m) => m.slot === pick) : undefined
+  const foe = view.opponent.active
   return (
+    <>
     <div className="nds" onClick={busy ? tap : undefined}>
       {/* Écran du haut : terrain, boîtes de PV et texte */}
       <div className="nds-screen">
@@ -429,7 +434,7 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
         </div>
         {!choosingTeam && menu === 'main' && (
           <div className="tmenu main">
-            <button className="tbtn fight" disabled={!showMenu} onClick={() => setMenu('moves')}>COMBAT</button>
+            <button className="tbtn fight" disabled={!showMenu} onClick={() => { setPick(null); setMenu('moves') }}>COMBAT</button>
             <button className="tbtn bag" disabled>SAC</button>
             <button className="tbtn run" disabled={!showMenu} onClick={onForfeit}>FUITE</button>
             <button className="tbtn mons" disabled={!showMenu || view.player.trapped} onClick={() => setMenu('team')}>POKéMON</button>
@@ -438,7 +443,7 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
         {!choosingTeam && menu === 'moves' && (
           <div className="tmenu moves">
             {view.player.moves.map((m) => (
-              <button key={m.slot} className="tbtn move" style={{ ['--tc' as string]: TYPE_COLORS[m.type] ?? '#888' }} disabled={m.disabled || !showMenu} onClick={() => onMove(m.slot)}>
+              <button key={m.slot} className={`tbtn move${pick === m.slot ? ' sel' : ''}`} style={{ ['--tc' as string]: TYPE_COLORS[m.type] ?? '#888' }} disabled={m.disabled || !showMenu} onClick={() => (pick === m.slot ? onMove(m.slot) : setPick(m.slot))}>
                 <b>{mvFr(m.name.replace(/^(Hidden Power) .*/, '$1')).toUpperCase()}</b>
                 <span className="mrow">
                   <span className="tchip"><span className="ti"><TypeIcon type={m.type} size={10} /></span>{(TYPE_FR[m.type] ?? m.type).toUpperCase()}</span>
@@ -466,5 +471,22 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
         )}
       </div>
     </div>
+    {/* Section 3 : fiche de l'attaque sélectionnée (description et chiffres) */}
+    {menu === 'moves' && !choosingTeam && (
+      <section className="mi-card glass" style={{ ['--tc' as string]: picked ? TYPE_COLORS[picked.type] ?? '#888' : 'var(--primary)' }}>
+        {picked ? (
+          <>
+            <MoveBody
+              m={{ name: picked.name, type: picked.type, category: picked.category, power: picked.power, acc: picked.acc, pp: picked.maxpp, ppLeft: picked.pp, priority: picked.priority, target: picked.target }}
+              foe={foe ? { name: foe.name, types: foe.types } : null}
+            />
+            <button className="mi-use" disabled={picked.disabled || !showMenu} onClick={() => onMove(picked.slot)}>Utiliser {mvFr(picked.name.replace(/^(Hidden Power) .*/, '$1'))}</button>
+          </>
+        ) : (
+          <p className="mi-hint">Touche une attaque pour lire sa fiche, touche-la de nouveau pour la lancer.</p>
+        )}
+      </section>
+    )}
+    </>
   )
 }

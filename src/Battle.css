@@ -45,3 +45,8 @@
 .menu.team button b { font-size: calc(var(--u) * 5); min-width: 0; overflow: hidden; }
 .menu.team button small { font-size: calc(var(--u) * 4); white-space: nowrap; color: #606060; }
 .menu.team .back-btn { top: calc(var(--u) * -1); right: calc(var(--u) * 1); }
+
+/* Bouton son (coin haut-droit du terrain) */
+.mutebtn { all: unset; cursor: pointer; position: absolute; z-index: 3; right: calc(var(--u) * 3); top: calc(var(--u) * 3); width: calc(var(--u) * 13); height: calc(var(--u) * 13); display: grid; place-items: center; border-radius: calc(var(--u) * 3); background: rgba(40, 40, 56, 0.55); color: #fff; }
+.mutebtn:focus-visible { outline: 2px solid #fff; }
+.mutebtn svg { width: 62%; height: 62%; }

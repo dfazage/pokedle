@@ -1,7 +1,10 @@
 // Sprites 100 % originaux, générés par code (aucun asset officiel).
 // Chaque espèce → une grille 64×64 déterministe : la graine vient de la ligne évolutive (même famille =
 // même silhouette), la couleur des types, la taille de la taille réelle, les détails du stade d'évolution.
+// Si l'espèce a des traits dans data/sprite-traits.json (descriptions produites par analyze_sprites.py puis
+// build_sprite_traits.mjs), silhouette, couleurs, queue, oreilles, têtes et détails viennent de ces traits.
 import { mulberry32 } from './rng'
+import traitsData from '../data/sprite-traits.json'
 
 const N = 64
 const GROUND = 59
@@ -26,6 +29,19 @@ export interface SpriteSpec {
   bst: number
   types: string[]
 }
+
+type Arch = 'biped' | 'quad' | 'blob' | 'serpent' | 'bird' | 'fish' | 'insect' | 'floater'
+type Feat = 'wings' | 'shell' | 'spikes' | 'flame' | 'leaf' | 'antennae' | 'fins' | 'spots' | 'stripes' | 'pincers' | 'horns' | 'crest'
+export interface SpriteTraits {
+  arch?: Arch
+  colors?: string[] // corps, accent, déco
+  tail?: 'none' | 'long' | 'tuft' | 'fan' | 'multi' | 'flame'
+  ears?: 'pointed' | 'round' | 'horn' | 'none'
+  heads?: number
+  eyes?: number
+  feats?: Feat[]
+}
+const TRAITS = traitsData as Record<string, SpriteTraits>
 
 type RGB = [number, number, number]
 const hex = (h: string): RGB => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)) as RGB
@@ -97,8 +113,6 @@ class Canvas64 {
   }
 }
 
-type Arch = 'biped' | 'quad' | 'blob' | 'serpent' | 'bird' | 'fish' | 'insect' | 'floater'
-
 function pickArch(types: string[], bst: number, r: () => number): Arch {
   const t = types.join(' ')
   const w: Partial<Record<Arch, number>> = { biped: 2, quad: 2, blob: 1 }
@@ -126,19 +140,33 @@ function pickArch(types: string[], bst: number, r: () => number): Arch {
 export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array; pal: Record<number, RGB> } {
   const r = mulberry32(spec.root * 7919 + 13) // même ligne → mêmes choix de forme
   const g = new Canvas64()
+  const tr = TRAITS[String(spec.num)]
+  const feats = new Set(tr?.feats ?? [])
   const t1 = spec.types[0], t2 = spec.types[1]
-  const arch = pickArch(spec.types, spec.bst, r)
+  const arch = tr?.arch ?? pickArch(spec.types, spec.bst, r)
   const hs = (r() - 0.5) * 26
-  const bodyC = hueShift(hex(TYPE_HEX[t1] ?? '#999999'), hs)
-  const accC = t2 ? hueShift(hex(TYPE_HEX[t2]), hs * 0.5) : mix(bodyC, [248, 236, 205], 0.62)
-  const decoC = hex(DECO_HEX[t2 && r() > 0.5 ? t2 : t1] ?? '#ffffff')
+  let bodyC = hueShift(hex(TYPE_HEX[t1] ?? '#999999'), hs)
+  let accC = t2 ? hueShift(hex(TYPE_HEX[t2]), hs * 0.5) : mix(bodyC, [248, 236, 205], 0.62)
+  let decoC = hex(DECO_HEX[t2 && r() > 0.5 ? t2 : t1] ?? '#ffffff')
+  if (tr?.colors?.length) {
+    const [c0, c1, c2] = tr.colors
+    bodyC = hex(c0)
+    accC = c1 ? hex(c1) : mix(bodyC, [248, 236, 205], 0.62)
+    if (c2) decoC = hex(c2)
+  }
+  const nHeads = Math.min(3, Math.max(1, tr?.heads ?? 1))
 
   const sNorm = Math.min(1, Math.max(0, (0.5 + 0.25 * Math.log2(1 + spec.heightm) - 0.5) / 0.5))
   const S = 13 + 15 * sNorm + Math.min(3, spec.stage * 1.2)
   const st = spec.stage
   const spiky = r() < 0.5
-  const earKind = Math.floor(r() * 3) // 0 triangle pointues 1 rondes 2 cornes
-  const tailKind = Math.floor(r() * 3)
+  let earKind = Math.floor(r() * 3) // 0 triangle pointues 1 rondes 2 cornes
+  let tailKind = Math.floor(r() * 3)
+  if (tr?.ears === 'pointed') earKind = 0
+  else if (tr?.ears === 'round') earKind = 1
+  else if (tr?.ears === 'horn') earKind = 2
+  if (tr?.tail === 'long') tailKind = 0
+  else if (tr?.tail === 'tuft') tailKind = 1
   const eyeKind = Math.floor(r() * 3)
   const decoSide = r()
   const face = !back
@@ -149,6 +177,7 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
   type Pt = { x: number; y: number }
   const decorate = (head: Pt, hr: number, tail: Pt, backPt: Pt) => {
     const types = spec.types
+    if (tr) return decorateTraits(head, hr, backPt)
     for (const t of types) {
       if (t === 'Fire') {
         g.tri(tail.x - 3, tail.y, tail.x + 3, tail.y, tail.x, tail.y - 9 - st * 2, 2, 0)
@@ -203,8 +232,71 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
     }
   }
 
-  const eyes = (hx: number, hy: number, hr: number, spread = 0.45) => {
+  // Détails tirés de la description du sprite (remplacent les décors par type).
+  const decorateTraits = (head: Pt, hr: number, backPt: Pt) => {
+    const top = head.y - hr
+    if (feats.has('horns')) {
+      for (const sx of [-1, 1]) {
+        g.tri(head.x + sx * hr * 0.15, top + 2, head.x + sx * hr * 0.75, top + 2, head.x + sx * hr * 0.9, top - 8 - st * 2, 2, 0)
+        g.tri(head.x + sx * hr * 0.9, top - 8 - st * 2, head.x + sx * hr * 0.55, top - 4, head.x + sx * hr * 0.15, top - 9 - st * 2, 2, 2)
+      }
+    }
+    if (feats.has('crest')) g.tri(head.x - 2, top + 1, head.x + 2, top + 1, head.x + 1, top - 5 - st, 1, 2)
+    if (feats.has('antennae')) {
+      g.line(head.x - 3, top + 1, head.x - 8, top - 8, 1, 2)
+      g.line(head.x + 3, top + 1, head.x + 8, top - 8, 1, 2)
+    }
+    if (feats.has('leaf')) {
+      g.ellipse(backPt.x - 4, backPt.y - 2, 4, 2.4, 2)
+      g.ellipse(backPt.x + 4, backPt.y - 3, 4, 2.4, 2)
+    }
+    if (feats.has('fins') && arch !== 'fish') g.tri(backPt.x - 4, backPt.y + 2, backPt.x + 4, backPt.y + 2, backPt.x + 2, backPt.y - 7, 1, 0)
+    if (feats.has('spikes')) {
+      const n = 3 + Math.min(st, 2)
+      for (let i = 0; i < n; i++) {
+        const x = backPt.x - 8 + (i * 16) / (n - 1)
+        g.tri(x - 2, backPt.y + 2, x + 2, backPt.y + 2, x, backPt.y - 4 - st, 2, 0)
+      }
+    }
+    if (feats.has('shell') && (arch === 'quad' || arch === 'biped')) g.ellipse(backPt.x + (arch === 'quad' ? 2 : 0), backPt.y + 3, 0.5 * S, 0.32 * S, 1)
+    if (feats.has('flame') && tr?.tail !== 'flame') g.tri(head.x - 3, top + 2, head.x + 3, top + 2, head.x, top - 8 - st * 2, 2, 0)
+    if (feats.has('spots') && face)
+      for (const [dx, dy] of [[-4, 2], [3, 0], [0, 5]]) for (const [ox, oy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) g.set(backPt.x + dx + ox, backPt.y + 6 + dy + oy, 2)
+    if (feats.has('stripes')) for (const dx of [-3, 3]) g.line(backPt.x + dx, backPt.y + 3, backPt.x + dx, backPt.y + 9, 1, 0, 1)
+    // Oreilles : seulement si la description en montre.
+    if (tr?.ears && tr.ears !== 'none') {
+      if (earKind === 0) {
+        g.tri(head.x - hr, head.y - hr * 0.3, head.x - hr * 0.3, head.y - hr * 0.9, head.x - hr * 0.9, top - 7 - st, 0)
+        g.tri(head.x + hr, head.y - hr * 0.3, head.x + hr * 0.3, head.y - hr * 0.9, head.x + hr * 0.9, top - 7 - st, 0)
+      } else if (earKind === 1) {
+        g.ellipse(head.x - hr * 0.8, head.y - hr * 0.8, 3.5, 3.5, 1)
+        g.ellipse(head.x + hr * 0.8, head.y - hr * 0.8, 3.5, 3.5, 1)
+      } else if (tr?.ears === 'horn') {
+        g.tri(head.x - 2, top + 1, head.x + 2, top + 1, head.x - 1, top - 6 - st, 1, 2)
+      }
+    }
+  }
+
+  // Pinces de part et d'autre du corps (encoche en V découpée dans une ellipse).
+  const pincers = (y: number, half: number) => {
+    for (const sx of [-1, 1]) {
+      const px = cx + sx * (half + 0.18 * S), big = sx === 1 ? 1.25 : 1
+      g.line(cx + sx * half * 0.7, y + 0.2 * S, px, y, 2, 0)
+      g.ellipse(px, y - 0.12 * S, 0.24 * S * big, 0.2 * S * big, 0)
+      for (let k = 0; k < 0.2 * S * big; k++) for (let w = -k * 0.35; w <= k * 0.35; w++) g.set(px + w, y - 0.32 * S * big + k, 0)
+    }
+  }
+
+  const eyes = (hx: number, hy: number, hr: number, spread = 0.45, mouth = true) => {
     if (!face) return
+    if (tr?.eyes === 1) {
+      const er = Math.max(2.2, hr * 0.38)
+      for (let y = -er; y <= er; y++) for (let x = -er; x <= er; x++) {
+        const d = Math.hypot(x, y)
+        if (d <= er) g.set(hx + x, hy + y, d <= er * 0.45 ? 12 : 11)
+      }
+      return
+    }
     for (const sx of [-1, 1]) {
       const ex = hx + sx * hr * spread, ey = hy - hr * 0.05
       if (eyeKind === 0) {
@@ -215,11 +307,34 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
         g.set(ex, ey, 12); g.set(ex + 1, ey, 12); g.set(ex, ey + 1, 12); g.set(ex + 1, ey + 1, 11)
       }
     }
+    if (!mouth) return
     for (let i = -1; i <= 1; i++) g.set(hx + i, hy + hr * 0.5, 12)
     if (spec.bst > 450) { g.set(hx - 1, hy + hr * 0.5 + 1, 11); g.set(hx + 1, hy + hr * 0.5 + 1, 11) }
   }
 
   const tailDraw = (x: number, y: number, dir: number, len: number) => {
+    if (tr?.tail === 'none') return
+    if (tr?.tail === 'multi') {
+      for (let i = 0; i < 5; i++) {
+        const a = ((-15 + i * 24) * Math.PI) / 180, ex = x + dir * len * 1.1 * Math.cos(a), ey = y - len * 1.1 * Math.sin(a)
+        g.line(x, y, ex, ey, 3, 0)
+        g.ellipse(ex, ey, 3.2, 2.6, 0)
+        g.set(ex + dir * 2, ey, 7)
+      }
+      return
+    }
+    if (tr?.tail === 'fan') {
+      g.tri(x, y, x + dir * len, y - len * 0.7, x + dir * len * 0.75, y, 1)
+      g.tri(x, y, x + dir * len, y + len * 0.5, x + dir * len * 0.75, y, 1)
+      return
+    }
+    if (tr?.tail === 'flame') {
+      g.line(x, y, x + dir * len * 0.7, y - len * 0.4, 3, 0)
+      const fx = x + dir * len * 0.8, fy = y - len * 0.5
+      g.tri(fx - 3, fy + 2, fx + 3, fy + 2, fx, fy - 8 - st * 2, 2, 0)
+      g.tri(fx - 1.5, fy + 2, fx + 1.5, fy + 2, fx, fy - 4 - st, 1, 2)
+      return
+    }
     if (tailKind === 0) g.line(x, y, x + dir * len, y - len * 0.6, 3, 0)
     else if (tailKind === 1) {
       g.line(x, y, x + dir * len * 0.7, y + 1, 3, 0)
@@ -228,6 +343,11 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
   }
 
   let head: Pt = { x: cx, y: gy - 40 }, hr = 8, tail: Pt = { x: cx + 14, y: gy - 20 }, backPt: Pt = { x: cx, y: gy - 30 }
+  const extraHeads: { x: number; y: number; r: number }[] = []
+
+  // Ailes derrière le corps pour les silhouettes qui n'en dessinent pas déjà.
+  if (feats.has('wings') && arch !== 'bird' && arch !== 'insect')
+    for (const sx of [-1, 1]) g.ellipse(cx + sx * 0.8 * S, gy - 1.25 * S, 0.36 * S, 0.55 * S, 2)
 
   if (arch === 'biped') {
     const legY = gy - 0.28 * S
@@ -256,6 +376,20 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
     g.ellipse(head.x, head.y, hr * 1.05, hr, 0)
     if (face) g.ellipse(head.x - hr * 0.3, head.y + hr * 0.45, hr * 0.55, hr * 0.4, 1)
     backPt = { x: cx + 0.05 * S, y: by - 0.45 * S }
+  } else if (arch === 'blob' && nHeads > 1) {
+    // Plusieurs petits corps côte à côte (celui du fond d'abord), chacun avec son visage.
+    const subs = nHeads === 3 ? [[0, 1.0, 0.95], [-0.62, 0.78, 0.8], [0.62, 0.8, 0.8]] : [[-0.42, 0.85, 0.85], [0.42, 0.8, 0.85]]
+    if (feats.has('spikes') || /Ground|Rock/.test(spec.types.join())) g.ellipse(cx, gy - 1, 1.15 * S, 0.22 * S, 2)
+    for (const [ox, h, w] of subs) {
+      const bx = cx + ox * S, rx = 0.36 * S * w, ry = 0.62 * S * h, by = gy - 0.12 * S - ry
+      g.ellipse(bx, by, rx, ry, 0)
+      const hy = by - ry * 0.35
+      extraHeads.push({ x: bx, y: hy, r: rx })
+    }
+    hr = 0.36 * S
+    head = { x: cx, y: gy - 1.5 * S }
+    tail = { x: cx + 0.9 * S, y: gy - 0.4 * S }
+    backPt = { x: cx, y: gy - 1.4 * S }
   } else if (arch === 'blob') {
     const ry = 0.72 * S
     g.ellipse(cx - 0.4 * S, gy - 0.12 * S, 0.22 * S, 0.14 * S, 1)
@@ -342,9 +476,20 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
     backPt = { x: cx, y: gy - 1.9 * S }
   }
 
+  if (feats.has('pincers')) pincers(arch === 'blob' ? gy - 1.0 * S : backPt.y + 0.1 * S, arch === 'blob' ? 0.88 * S : 0.6 * S)
+
   // Les décors passent derrière/au-dessus selon le type ; ordre simple : par-dessus.
-  decorate(head, hr, tail, backPt)
-  eyes(head.x, head.y, hr, arch === 'bird' ? 0.5 : 0.45)
+  if (extraHeads.length) {
+    // Plusieurs têtes : petit nez (couleur accent) + yeux sur chacune, pas de décor de tête commun.
+    for (const h of extraHeads) {
+      if (face) g.ellipse(h.x, h.y + h.r * 0.5, h.r * 0.32, h.r * 0.22, 1)
+      eyes(h.x, h.y, h.r, 0.4, false)
+    }
+    if (tr) decorateTraits({ x: -99, y: -99 }, 0, backPt) // hors cadre : seuls les détails du corps s'affichent
+  } else {
+    decorate(head, hr, tail, backPt)
+    eyes(head.x, head.y, hr, arch === 'bird' ? 0.5 : 0.45)
+  }
   if (spiky && decoSide > 0.6 && arch !== 'floater') for (let i = 0; i < 3; i++) g.tri(cx - 6 + i * 6, backPt.y + 2, cx - 3 + i * 6, backPt.y + 2, cx - 4.5 + i * 6, backPt.y - 5 - st, 2)
 
   g.outline()

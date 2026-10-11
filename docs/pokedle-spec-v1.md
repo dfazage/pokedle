@@ -22,10 +22,11 @@ Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + T
 - `npx tsx scripts/test_daily.ts`, `test_session.ts`, `test_history.ts` : tests rapides
 - `node scripts/e2e2.mjs <dossier>` : parcours complet dans Chromium (nécessite `npm run preview`)
 - `python3 -I scripts/analyze_sprites.py --archives generation-{1,2,3,4}.tar.gz --out-dir out` (nécessite `ANTHROPIC_API_KEY`, `pip install aiohttp pillow`) : envoie les sprites des archives PokéAPI à une API Vision (async, backoff 429/5xx, reprise via `sprite_results.jsonl`) et produit `master_sprite_dataset.json` (`{ "<n° dex>": { "<version>": { primary_colors, anatomy, distinct_features, pose } } }`) ; échecs dans `failed_images.log`. Par défaut : red-blue, crystal, emerald, platinum, sprites de face uniquement (`--versions all` / `--all-variants` pour le reste).
+- `node scripts/build_sprite_traits.mjs out/master_sprite_dataset.json` : convertit ces descriptions en traits compacts (`src/data/sprite-traits.json` : silhouette, 3 couleurs, queue, oreilles, nombre de têtes/yeux, détails comme cornes, pinces, ailes…) que `sprites.ts` applique ; les espèces sans traits gardent le rendu généré par type. `scripts/fixtures/master_sprite_sample.json` (6 Pokémon décrits à la main) sert de test en attendant le vrai lancement.
 
 ## Reste à faire
 - Habillage rétro propre à chaque génération ; affiner les sprites générés (ou brancher un pack sous licence ouverte)
-- Lancer `analyze_sprites.py` sur les vraies archives (testé seulement contre une API simulée) et exploiter `master_sprite_dataset.json` pour affiner les sprites générés
+- Lancer `analyze_sprites.py` sur les vraies archives (testé seulement contre une API simulée), puis `build_sprite_traits.mjs` pour remplacer les 6 traits de test par les ~490 espèces
 - Autres versions par génération (Bleu/Jaune, Or/Argent, Rubis/Saphir/Rouge Feu, Diamant/Perle/HGSS)
 - Vérification serveur du combat complet (aujourd'hui seul le résultat est contrôlé : jour, doublon, propriétaire)
 - Déplacer le filtre d'équilibrage côté serveur (précalcul) 

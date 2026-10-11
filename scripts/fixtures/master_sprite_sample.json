@@ -1,0 +1,86 @@
+{
+  "38": {
+    "platinum": {
+      "primary_colors": ["pale yellow", "golden yellow", "orange"],
+      "anatomy": {
+        "body_shape": "slender quadruped, fox-like",
+        "head": "narrow fox head with pointed ears and a tuft of fur on top, red eyes",
+        "limbs": "four thin legs",
+        "tail": "nine long fluffy tails fanned out behind, orange tips",
+        "other_parts": ["fluffy mane on the neck"]
+      },
+      "distinct_features": ["nine fluffy tails", "pointed ears", "head crest tuft", "red eyes", "orange tail tips"],
+      "pose": { "facing": "right", "stance": "standing", "description": "Stands on four legs looking over its shoulder, tails fanned behind." }
+    }
+  },
+  "51": {
+    "platinum": {
+      "primary_colors": ["brown", "red", "beige"],
+      "anatomy": {
+        "body_shape": "three round cylindrical bodies emerging from the ground",
+        "head": "three rounded heads with small eyes and large red noses",
+        "limbs": "none",
+        "tail": "none",
+        "other_parts": ["mound of rocks and dirt at the base"]
+      },
+      "distinct_features": ["three heads", "big red noses", "rocky mound", "no limbs"],
+      "pose": { "facing": "front", "stance": "emerging from the ground", "description": "Three heads poke up together from a pile of dirt." }
+    }
+  },
+  "99": {
+    "platinum": {
+      "primary_colors": ["orange-red", "beige", "cream"],
+      "anatomy": {
+        "body_shape": "round crab body, wide and flat",
+        "head": "head fused with the round body, white eyes on top, row of short spikes like a crown",
+        "limbs": "six thin legs and two pincers, one claw much larger than the other",
+        "tail": "none",
+        "other_parts": ["one huge pincer", "one small pincer"]
+      },
+      "distinct_features": ["huge claw", "pincers", "shell", "crown of spikes"],
+      "pose": { "facing": "front", "stance": "crouching", "description": "Crab braced low on its legs, raising its enormous claw." }
+    }
+  },
+  "119": {
+    "platinum": {
+      "primary_colors": ["orange", "white", "black"],
+      "anatomy": {
+        "body_shape": "round fish",
+        "head": "head is the round body, big lips, single white horn on the forehead",
+        "limbs": "large flowing white fins",
+        "tail": "wide frilly white tail fin with dark spots",
+        "other_parts": ["dorsal fin", "pectoral fins"]
+      },
+      "distinct_features": ["horn on forehead", "large white fins", "black stripes", "pink lips", "spotted fins"],
+      "pose": { "facing": "left", "stance": "swimming", "description": "Round fish swimming with fins spread wide." }
+    }
+  },
+  "127": {
+    "platinum": {
+      "primary_colors": ["tan", "brown", "white"],
+      "anatomy": {
+        "body_shape": "bipedal beetle, stocky and oval",
+        "head": "no distinct head, two huge horn pincers on top, toothy mouth in the middle of the body",
+        "limbs": "two short legs and two thin arms with claws",
+        "tail": "none",
+        "other_parts": ["two large pincers on top of the head"]
+      },
+      "distinct_features": ["two huge horns", "pincers", "jagged mouth", "segmented belly"],
+      "pose": { "facing": "front", "stance": "standing", "description": "Stocky beetle standing upright with arms spread." }
+    }
+  },
+  "201": {
+    "platinum": {
+      "primary_colors": ["black", "gray", "white"],
+      "anatomy": {
+        "body_shape": "thin letter-shaped body, floating",
+        "head": "round body holding one big central eye",
+        "limbs": "two thin stalk-like legs",
+        "tail": "none",
+        "other_parts": ["small stalk on top"]
+      },
+      "distinct_features": ["single large eye", "letter shape", "thin stalks"],
+      "pose": { "facing": "front", "stance": "floating", "description": "Floats upright like a letter, eye staring forward." }
+    }
+  }
+}

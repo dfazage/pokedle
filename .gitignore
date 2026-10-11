@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .env
+
+# Sorties de analyze_sprites.py
+out

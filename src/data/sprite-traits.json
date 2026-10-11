@@ -1,0 +1,6 @@
+{"38":{"arch":"quad","colors":["#f5e086","#e8c03c","#f08838"],"tail":"multi","ears":"pointed","feats":["crest"]},
+"51":{"arch":"blob","colors":["#a06838","#e04040","#e0cca0"],"tail":"none","heads":3},
+"99":{"arch":"blob","colors":["#e8643c","#e0cca0","#f4e8c8"],"tail":"none","feats":["shell","spikes","pincers"]},
+"119":{"arch":"fish","colors":["#f08838","#f4f4f0","#403c48"],"tail":"fan","ears":"horn","feats":["fins","spots","stripes"]},
+"127":{"arch":"biped","colors":["#d0b080","#a06838","#f4f4f0"],"tail":"none","ears":"none","feats":["pincers","horns"]},
+"201":{"arch":"floater","colors":["#403c48","#9898a0","#f4f4f0"],"tail":"none","eyes":1}}

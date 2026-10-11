@@ -18,3 +18,10 @@
 **Liens des e-mails (confirmation / mot de passe oublié)** : l'app envoie `redirectTo` = `VITE_SITE_URL` (ou l'origine courante). Cette URL doit figurer dans Supabase → Authentication → URL Configuration → **Redirect URLs**, et **Site URL** ne doit plus être `http://localhost:3000`.
 
 GitHub Pages (`https://dfazage.github.io/pokedle/`) : dans Supabase, **Site URL** = `https://dfazage.github.io/pokedle/` et **Redirect URLs** = `https://dfazage.github.io/pokedle/` + `https://dfazage.github.io/pokedle/**`.
+
+## Connexion Google
+
+1. Google Cloud Console → APIs & Services → Credentials → Create OAuth client ID (type *Web application*).
+   - Authorized redirect URI : `https://gcjsqxogywmgslkqoojq.supabase.co/auth/v1/callback`
+2. Supabase → Authentication → Providers → Google : activer, coller *Client ID* et *Client secret*.
+3. Supabase → Authentication → URL Configuration : **Site URL** = URL de production (jamais `localhost`), et l'URL de production + `http://localhost:5173/**` dans **Redirect URLs**.

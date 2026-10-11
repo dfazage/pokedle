@@ -378,3 +378,8 @@ h1, h2, h3, p { margin: 0; }
 .mi-use:disabled { opacity: 0.45; box-shadow: none; }
 @keyframes mi-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes mi-up { from { transform: translate(-50%, 105%); } to { transform: translate(-50%, 0); } }
+
+/* Fiches d'attaque : fond quasi opaque pour que le contenu derrière ne transparaisse pas dans le texte */
+.mi-in.glass { background: color-mix(in srgb, var(--surface) 95%, transparent); }
+.mi-card.glass { background: color-mix(in srgb, var(--surface) 92%, transparent); }
+.mi-scrim { background: rgba(0, 0, 0, 0.62); }

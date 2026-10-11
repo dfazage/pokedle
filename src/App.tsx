@@ -466,7 +466,7 @@ export default function App() {
       {screen === 'result' && <Result {...ctx} />}
       {screen === 'history' && <History {...ctx} />}
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
-      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version="1.0" />}
+      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.0 · ${__BUILD__}`} />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} onGuest={playAsGuest} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}

@@ -3,6 +3,7 @@ import { Battle, Teams } from '@pkmn/sim'
 import { aiChoose } from './ai'
 import { mvFr, spFr } from './fr'
 import { BATTLE_GEN, type DailyChallenge } from './daily'
+import { HIT_MARK } from './battleCues'
 
 export interface MonView {
   idx: number
@@ -143,6 +144,21 @@ const STATUS_FR: Record<string, string> = {
   brn: 'brûlé', par: 'paralysé', psn: 'empoisonné', tox: 'gravement empoisonné', slp: 'endormi', frz: 'gelé',
 }
 
+const STOP = new Set(['move', 'switch', 'drag', 'turn', 'cant', 'upkeep', 'win'])
+const NOT_PLAIN = new Set(['-supereffective', '-resisted', '-crit', '-miss', '-immune', '-fail'])
+/** Vrai si l'attaque de la ligne i inflige des dégâts d'efficacité normale (ni super/peu efficace, ni critique, ni ratée). */
+function plainHit(lines: string[], i: number): boolean {
+  const user = lines[i].split('|')[2] // les PV payés par le lanceur lui-même (Clonage…) ne sont pas un coup
+  let damaged = false
+  for (let j = i + 1; j < lines.length; j++) {
+    const p = lines[j].split('|')
+    if (STOP.has(p[1])) break
+    if (NOT_PLAIN.has(p[1])) return false
+    if (p[1] === '-damage' && p[2] !== user && !p.slice(4).some((x) => x.startsWith('[from]'))) damaged = true
+  }
+  return damaged
+}
+
 /** Traduit le protocole Showdown en lignes lisibles (noms de Pokémon/attaques en anglais pour la V1). */
 export function formatLog(lines: string[]): string[] {
   const out: string[] = []
@@ -156,13 +172,13 @@ export function formatLog(lines: string[]): string[] {
       i += 2
     } else clean.push(lines[i])
   }
-  for (const line of clean) {
-    const p = line.split('|')
+  for (let i = 0; i < clean.length; i++) {
+    const p = clean[i].split('|')
     switch (p[1]) {
       case 'turn': out.push(`— Tour ${p[2]} —`); break
       case 'switch': case 'drag':
         out.push(p[2].startsWith('p1') ? `Vas-y, ${nm(p[2])} !` : `L'adversaire envoie ${nm(p[2].split(',')[0])} !`); break
-      case 'move': out.push(`${who(p[2])} utilise ${mvFr(p[3])} !`); break
+      case 'move': out.push(`${who(p[2])} utilise ${mvFr(p[3])} !${plainHit(clean, i) ? HIT_MARK : ''}`); break
       case 'cant': out.push(`${who(p[2])} ne peut pas attaquer.`); break
       case '-supereffective': out.push("C'est super efficace !"); break
       case '-resisted': out.push("Ce n'est pas très efficace…"); break

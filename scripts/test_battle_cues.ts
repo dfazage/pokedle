@@ -1,10 +1,12 @@
 // Vérifie que les messages de formatLog produisent les bons sons et que chaque nom se résout en n° de Pokédex.
 import { buildDaily } from '../src/game/daily'
 import { BattleSession, formatLog } from '../src/game/session'
-import { cueFor, findMon } from '../src/game/battleCues'
+import { HIT_MARK, cueFor, findMon, stripMarks } from '../src/game/battleCues'
 import { spFr } from '../src/game/fr'
 
 const counts: Record<string, number> = {}
+const hitMoves = new Set<string>(), plainMoves = new Set<string>()
+let badMark = 0, leak = 0
 let unresolved = 0, unknown = new Set<string>(), total = 0
 for (const day of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-17']) {
   const s = new BattleSession(buildDaily(day, { candidates: 1, simsPerCandidate: 1 }))
@@ -17,7 +19,18 @@ for (const day of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026
     else break
   }
   const v = s.view()
-  for (const msg of lines.filter((l) => !l.startsWith('—'))) {
+  const shown = lines.filter((l) => !l.startsWith('—'))
+  shown.forEach((msg, k) => {
+    if (stripMarks(msg).includes(HIT_MARK)) leak++
+    if (!/ utilise .+ !/.test(stripMarks(msg))) return
+    const name = stripMarks(msg).replace(/^.* utilise /, '').replace(/ !$/, '')
+    if (msg.endsWith(HIT_MARK)) {
+      hitMoves.add(name)
+      const next = shown[k + 1] ?? ''
+      if (/super efficace|pas très efficace|Coup critique|échoue|n'affecte pas/.test(next)) { badMark++; console.log('MARQUE INCORRECTE:', msg, '→', next) }
+    } else plainMoves.add(name)
+  })
+  for (const msg of shown) {
     total++
     const cue = cueFor(msg)
     if (!cue) { unknown.add(msg.replace(/^.* (utilise|est) /, '… $1 ').slice(0, 50)); continue }
@@ -32,6 +45,9 @@ for (const day of ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026
 console.log('messages:', total, counts)
 console.log('sans son:', [...unknown])
 console.log('noms non résolus:', unresolved)
+console.log('attaques avec impact normal (marquées):', [...hitMoves].sort().join(', '))
+console.log('attaques sans impact normal (non marquées):', [...plainMoves].sort().join(', '))
+console.log('marques incorrectes:', badMark, '| marqueurs visibles après strip:', leak)
 // Cas de bord fixés à la main
 const cases: [string, string][] = [
   ['Pikachu adverse est K.O. !', 'faint'], ['Pikachu est K.O. !', 'faint'], ['Vas-y, Pikachu !', 'cry'],

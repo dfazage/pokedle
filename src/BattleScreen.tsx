@@ -4,7 +4,7 @@ import type { BattleView, MonView } from './game/session'
 import '@fontsource/press-start-2p'
 import { TYPE_FR, mvFr, spFr } from './game/fr'
 import { MonImg } from './game/officialSprites'
-import { cueFor, findMon } from './game/battleCues'
+import { cueFor, findMon, stripMarks } from './game/battleCues'
 import { isMuted, playCue, preloadCries, setMuted } from './game/audio'
 import './Battle.css'
 
@@ -49,7 +49,7 @@ interface Props {
 export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch, onForfeit }: Props) {
   const [menu, setMenu] = useState<'main' | 'moves' | 'team'>('main')
   const [typed, setTyped] = useState(0)
-  const msg = queue[0] ?? ''
+  const msg = stripMarks(queue[0] ?? '')
   const timer = useRef<number | undefined>(undefined)
   const [muted, setMutedState] = useState(isMuted)
   const lastQueue = useRef<string[] | null>(null)

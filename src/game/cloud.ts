@@ -53,6 +53,20 @@ export async function ensureProfile(user: User): Promise<string | null> {
 /** La colonne `hp_left` est ajoutée par supabase/results_hp_left.sql ; tant qu'elle n'existe pas, on s'en passe. */
 const missingColumn = (e: { code?: string } | null) => e?.code === '42703' || e?.code === 'PGRST204'
 
+export type RenameResult = 'ok' | 'taken' | 'invalid' | 'error'
+
+/** Change (ou crée, si le profil n'existe pas encore) le pseudo du compte connecté. 3 à 20 caractères, unique. */
+export async function updateUsername(raw: string): Promise<RenameResult> {
+  if (!supabase) return 'error'
+  const name = raw.trim()
+  if (name.length < 3 || name.length > 20) return 'invalid'
+  const { data: u } = await supabase.auth.getUser()
+  if (!u.user) return 'error'
+  const { error } = await supabase.from('profiles').upsert({ id: u.user.id, username: name }, { onConflict: 'id' })
+  if (!error) return 'ok'
+  return error.code === '23505' ? 'taken' : 'error'
+}
+
 export async function fetchHistory(): Promise<DayRecord[]> {
   if (!supabase) return []
   const q = (cols: string) => supabase!.from('results').select(cols).order('day_key', { ascending: true })

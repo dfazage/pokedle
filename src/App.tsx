@@ -13,7 +13,7 @@ import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
@@ -276,6 +276,15 @@ export default function App() {
     finish(s)
   }
 
+  const rename = async (name: string) => {
+    const r = await updateUsername(name)
+    if (r === 'ok') {
+      setUsername(name.trim())
+      setRows(await fetchLeaderboard()) // le classement affiche le nouveau pseudo
+    }
+    return r
+  }
+
   const adminReroll = async () => {
     if (!isAdmin) return
     if (!window.confirm('Re-tirer le dresseur et la team du jour pour TOUT LE MONDE ? Les résultats déjà enregistrés resteront liés à l’ancien dresseur.')) return
@@ -423,7 +432,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, score, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, challenge, history, stats, score, username, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'intro')

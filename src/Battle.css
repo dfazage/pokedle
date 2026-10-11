@@ -78,3 +78,8 @@
 .mutebtn { all: unset; cursor: pointer; position: absolute; z-index: 3; right: calc(var(--u) * 3); top: calc(var(--u) * 3); width: calc(var(--u) * 13); height: calc(var(--u) * 13); display: grid; place-items: center; border-radius: calc(var(--u) * 3); background: rgba(40, 40, 56, 0.55); color: #fff; }
 .mutebtn:focus-visible { outline: 2px solid #fff; }
 .mutebtn svg { width: 62%; height: 62%; }
+
+.hpbox .strow { flex-wrap: wrap; gap: calc(var(--u) * 2); }
+.st-v { background: #7a6ac8; } .st-leechseed { background: #58a838; } .st-attract { background: #e8689a; } .st-taunt { background: #c04848; } .st-encore { background: #3888b8; } .st-yawn { background: #98a0b0; }
+.spw.is-cnf .sprite { animation: wobble .6s steps(4) infinite; }
+@keyframes wobble { 25% { transform: translateX(calc(var(--u) * -2)) rotate(-4deg); } 75% { transform: translateX(calc(var(--u) * 2)) rotate(4deg); } }

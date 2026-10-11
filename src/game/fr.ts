@@ -1,8 +1,10 @@
 import names from '../data/names.fr.json'
+import abilityNames from '../data/abilities.fr.json'
 
 const toId = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 const sp = names.species as Record<string, string>
 const mv = names.moves as Record<string, string>
+const ab = abilityNames as Record<string, { n: string; d: string }>
 
 /** Nom français d'une espèce (retombe sur le nom anglais). */
 export const spFr = (name: string) => {
@@ -18,6 +20,14 @@ export const spFr = (name: string) => {
 }
 /** Nom français d'une attaque (retombe sur le nom anglais). */
 export const mvFr = (name: string) => mv[toId(name)] ?? name
+/** Nom français d'un talent (gens 3-4 ; retombe sur le nom anglais). */
+export const abFr = (name: string) => ab[toId(name)]?.n ?? name
+/** Description courte d'un talent, en français (chaîne vide si inconnue). */
+export const abDesc = (name: string) => ab[toId(name)]?.d ?? ''
+
+export const STAT_FR: Record<string, string> = {
+  atk: "L'Attaque", def: 'La Défense', spa: "L'Atq. Spé.", spd: 'La Déf. Spé.', spe: 'La Vitesse', accuracy: 'La Précision', evasion: "L'Esquive",
+}
 
 export const TYPE_FR: Record<string, string> = {
   Normal: 'Normal', Fire: 'Feu', Water: 'Eau', Electric: 'Électrik', Grass: 'Plante', Ice: 'Glace', Fighting: 'Combat',

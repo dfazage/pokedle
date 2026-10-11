@@ -8,6 +8,7 @@ import '@fontsource/plus-jakarta-sans/700.css'
 import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView } from './game/session'
+import { applyPatch, type MonPatch, type Step } from './game/patch'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { dayKeyUTC } from './game/rng'
 import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
@@ -64,7 +65,7 @@ export default function App() {
   const [rows, setRows] = useState<LeaderRow[]>([])
   const [world, setWorld] = useState<{ players: number; wins: number } | null>(null)
   const [view, setView] = useState<BattleView | null>(null)
-  const [queue, setQueue] = useState<string[]>([])
+  const [queue, setQueue] = useState<Step[]>([])
   const [pending, setPending] = useState<BattleView | null>(null)
   const [, bump] = useState(0)
   const signedIn = useRef(false)
@@ -180,7 +181,7 @@ export default function App() {
       s.choose(c)
     }
     s.drainLog()
-    setQueue(saved.length ? [] : intro.filter((l) => !l.startsWith('—')))
+    setQueue(saved.length ? [] : intro)
     setPending(null)
     setView(s.view())
     setScreen('battle')
@@ -192,19 +193,23 @@ export default function App() {
     if (!s) return
     choices.current.push(choice)
     saveChoices(today, choices.current)
-    const lines = engine.current!.formatLog(s.choose(choice)).filter((l) => !l.startsWith('—'))
-    setQueue(lines)
-    setPending(s.view()) // l'écran se met à jour une fois le texte lu
+    const steps = engine.current!.formatLog(s.choose(choice))
+    setQueue(steps)
+    if (steps.length) setPending(s.view()) // l'écran rattrape l'état final une fois le texte lu
+    else setView(s.view()) // rien à lire : on n'attend pas un clic qui ne viendra pas
     finish(s)
     bump((n) => n + 1)
   }
+
+  // PV, statuts, K.O. appliqués message par message pendant la lecture du tour.
+  const onPatch = useCallback((patch: MonPatch[]) => setView((v) => (v ? applyPatch(v, patch) : v)), [])
 
   const forfeit = () => {
     const s = session.current
     if (!s || s.view().ended) return
     if (!window.confirm('Fuir compte comme une défaite pour aujourd’hui. Continuer ?')) return
     s.forfeit()
-    setQueue(['Tu as pris la fuite… (défaite)'])
+    setQueue([{ text: 'Tu as pris la fuite… (défaite)' }])
     setPending(s.view())
     finish(s)
   }
@@ -290,7 +295,7 @@ export default function App() {
             title={<>{challenge.trainer.name}<div className="muted small">{CLASS_FR[challenge.trainer.class] ?? challenge.trainer.class} · {gi.game}</div></>}
             right={<span className="pill">Tour {view.turn}</span>}
           />
-          <BattleScreen view={view} queue={queue} onAdvance={advance} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />
+          <BattleScreen view={view} queue={queue} onAdvance={advance} onPatch={onPatch} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />
           <div className="stack" style={{ gap: 8 }}>
             {([['Toi', view.player.team], [challenge.trainer.name, view.opponent.team]] as const).map(([who, team]) => (
               <div key={who} className="squad">

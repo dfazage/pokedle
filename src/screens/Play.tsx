@@ -1,9 +1,9 @@
-import { PartyList, MonSprite } from './Party'
+import { PartyList, MonSprite, AbilityNote } from './Party'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight } from 'lucide-react'
 import type { Ctx } from './types'
-import { CLASS_FR, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
+import { CLASS_FR, GEN_INFO, abFr, mvFr, spFr } from '../game/fr'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
@@ -113,6 +113,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
               <div className="row" style={{ gap: 4, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {m.types.map((t) => <TypeBadge key={t} type={t} soft />)}
               </div>
+              {m.ability && <span className="muted" style={{ fontSize: 11, textAlign: 'center' }}>{abFr(m.ability)}</span>}
             </div>
           ))}
         </div>
@@ -159,6 +160,7 @@ export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
           <div><div className="l">{String(attack[0]).toUpperCase()}</div><div className="v">{attack[1]}</div></div>
           <div><div className="l">VITESSE</div><div className="v" style={{ color: 'var(--yellow)' }}>{m.stats.spe}</div></div>
         </div>
+        {m.ability && <div style={{ marginTop: 12 }}><AbilityNote ability={m.ability} /></div>}
         <div className="stack" style={{ marginTop: 12, gap: 8 }}>
           {m.moves.map((mv) => (
             <div key={mv.name} className="row between" style={{ padding: '8px 12px', borderRadius: 14, background: 'var(--surface2)' }}>

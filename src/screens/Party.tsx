@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react'
 import type { PreviewMon } from '../game/daily'
 import { MonImg } from '../game/officialSprites'
-import { mvFr, spFr, TYPE_FR } from '../game/fr'
+import { abDesc, abFr, mvFr, spFr, TYPE_FR } from '../game/fr'
 import { TypeBadge, monCardStyle } from '../ui/kit'
 import { GEN_INFO } from '../game/fr'
 
@@ -14,6 +14,19 @@ const STAT_LABELS: [keyof PreviewMon['stats'], string][] = [
 export function MonSprite({ m, back = false, size = 64 }: { m: PreviewMon; back?: boolean; size?: number }) {
   const art = size >= 100 && !back // grandes cartes : artwork officiel ; petites : sprite pixel de la génération
   return <MonImg spec={m} back={back} artwork={art} alt={spFr(m.species)} width={size} height={size} draggable={false} style={{ imageRendering: art ? 'auto' : 'pixelated', width: size, height: size, objectFit: 'contain' }} />
+}
+
+/** Talent d'un Pokémon (gens 3-4) : nom français + description courte. Rien en gens 1-2, où les talents n'existent pas. */
+export function AbilityNote({ ability }: { ability: string }) {
+  if (!ability) return null
+  const d = abDesc(ability)
+  return (
+    <div style={{ padding: '8px 12px', borderRadius: 14, background: 'var(--surface2)', textAlign: 'left' }}>
+      <div className="lab" style={{ marginBottom: 2 }}>Talent</div>
+      <b>{abFr(ability)}</b>
+      {d && <div className="muted small">{d}</div>}
+    </div>
+  )
 }
 
 function statColor(v: number) {
@@ -40,10 +53,10 @@ export function MonSheet({ m, gen, onClose }: { m: PreviewMon; gen: number; onCl
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '8px 0' }}>
           {m.types.map((t) => <TypeBadge key={t} type={t} />)}
-          {m.ability && <span className="pill">Talent : {m.ability}</span>}
           {m.item && <span className="pill">Objet : {m.item}</span>}
           {m.nature && <span className="pill">{m.nature}</span>}
         </div>
+        <AbilityNote ability={m.ability} />
 
         <div className="lab" style={{ margin: '14px 0 6px' }}>Statistiques</div>
         <div className="stack" style={{ gap: 6 }}>

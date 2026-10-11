@@ -15,5 +15,5 @@ for (const day of ['2026-10-12','2026-10-13','2026-10-14','2026-10-15','2026-10-
   console.log(day, s.challenge.trainer.name, 'résultat:', v.result, 'tours:', v.turn, 'étapes:', steps)
 }
 const s2 = new BattleSession(buildDaily('2026-10-12', { candidates: 1, simsPerCandidate: 1 }))
-s2.choose('move 1'); console.log(formatLog(s2.battle.log).slice(0, 10).join('\n'))
+s2.choose('move 1'); console.log(formatLog(s2.battle.log).slice(0, 10).map((x) => x.text).join('\n'))
 console.log('stalls:', stalls)

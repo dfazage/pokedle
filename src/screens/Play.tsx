@@ -6,6 +6,7 @@ import { classLabel, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
+import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
@@ -19,6 +20,7 @@ export function Home(c: Ctx) {
   const diff = difficulty(ch.estimatedWinRate)
   const left = useCountdown()
   const done = today$(c)
+  const fire = isFormidable(ch.gen, ch.trainer.name)
   const rate = stats.played ? Math.round((stats.totalWins / stats.played) * 100) : 0
   const worldRate = c.world && c.world.players ? ((c.world.wins / c.world.players) * 100).toFixed(1) : null
   return (
@@ -45,16 +47,24 @@ export function Home(c: Ctx) {
           <span className="chip y">Difficulté {stars(diff.stars)}</span>
         </div>
         <div className="hero-trainer">
+          <div className={fire ? 'trainer-stage fire' : 'trainer-stage'}>
+            {fire && (
+              <span className="aura" aria-hidden>
+                <i className="glow" />
+                {[1, 2, 3, 4, 5, 6, 7].map((k) => <i key={k} className={`fl f${k}`} />)}
+              </span>
+            )}
+            <TrainerImg
+              id={ch.trainer.sprite ?? ch.trainer.id}
+              gen={ch.gen}
+              className="trainer-sprite xl"
+              fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={120} />}
+            />
+          </div>
           <div className="hero-trainer-txt">
             <h2>{ch.trainer.name}</h2>
             <p>{classLabel(ch.trainer)} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
           </div>
-          <TrainerImg
-            id={ch.trainer.sprite ?? ch.trainer.id}
-            gen={ch.gen}
-            className="trainer-sprite"
-            fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={72} />}
-          />
         </div>
         <button className="cta" onClick={c.onPlay}>
           {done ? 'Voir mon résultat' : c.inProgress ? 'Reprendre le combat' : 'Lancer le combat'} <ArrowRight size={18} />

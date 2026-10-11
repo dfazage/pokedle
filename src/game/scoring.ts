@@ -59,6 +59,9 @@ export function baseFor(gen: number, trainer: string): number {
   return (cls && SCORING.baseByClass[cls]) || SCORING.defaultBase
 }
 
+/** Adversaire redoutable : une victoire contre lui rapporte nettement plus (affiché par une aura enflammée). */
+export const isFormidable = (gen: number, trainer: string): boolean => baseFor(gen, trainer) >= 100
+
 export function scoreRecord(r: DayRecord, streak: number): ScoreBreakdown {
   const S = SCORING
   const base = baseFor(r.gen, r.trainer)

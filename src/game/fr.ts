@@ -3,6 +3,9 @@ import names from '../data/names.fr.json'
 const toId = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 const sp = names.species as Record<string, string>
 const mv = names.moves as Record<string, string>
+const ab = names.abilities as Record<string, string>
+const it = names.items as Record<string, string>
+const nt = names.natures as Record<string, string>
 
 /** Nom français d'une espèce (retombe sur le nom anglais). */
 export const spFr = (name: string) => {
@@ -18,6 +21,10 @@ export const spFr = (name: string) => {
 }
 /** Nom français d'une attaque (retombe sur le nom anglais). */
 export const mvFr = (name: string) => mv[toId(name)] ?? name
+/** Talent, objet et nature en français (retombent sur le nom anglais). */
+export const abFr = (name: string) => ab[toId(name)] ?? name
+export const itemFr = (name: string) => it[toId(name)] ?? name
+export const natureFr = (name: string) => nt[toId(name)] ?? name
 
 export const TYPE_FR: Record<string, string> = {
   Normal: 'Normal', Fire: 'Feu', Water: 'Eau', Electric: 'Électrik', Grass: 'Plante', Ice: 'Glace', Fighting: 'Combat',

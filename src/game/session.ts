@@ -17,6 +17,8 @@ export interface MonView {
   /** Statuts temporaires actifs (confusion, vampigraine…), ids du simulateur. */
   vol: string[]
   types: string[]
+  /** Modificateurs de stats en cours (atk, def, spa, spd, spe, accuracy, evasion), non nuls uniquement ; vide hors du terrain. */
+  boosts: Record<string, number>
   // Données pour les sprites originaux générés (voir sprites.ts)
   num: number
   root: number
@@ -28,6 +30,9 @@ export interface MoveView {
   slot: number
   name: string
   type: string
+  /** Physical / Special / Status. */
+  category: string
+  power: number
   pp: number
   maxpp: number
   disabled: boolean
@@ -106,6 +111,7 @@ export class BattleSession {
         status: p.status || '',
         vol: p.isActive ? Object.keys(p.volatiles ?? {}).filter((k) => k in VOL_FR) : [],
         types: [...p.species.types],
+        boosts: p.isActive ? Object.fromEntries(Object.entries(p.boosts ?? {}).filter(([, v]) => v)) : {},
         ...lineInfo(b.dex, p.species),
       }))
     const pTeam = toView(0)
@@ -118,10 +124,14 @@ export class BattleSession {
       request === 'move' && activeMoves
         ? activeMoves.moves.map((m: any, i: number) => {
             const mv = b.dex.moves.get(m.id)
+            // Puissance Cachée : le type et la puissance viennent des IV, ils sont dans le nom (« Hidden Power Flying 70 »).
+            const hp = /^Hidden Power (\w+)(?: (\d+))?/.exec(m.move)
             return {
               slot: i + 1,
               name: m.move,
-              type: mv.type,
+              type: hp ? hp[1] : mv.type,
+              category: mv.category,
+              power: hp?.[2] ? Number(hp[2]) : mv.basePower,
               pp: m.pp ?? 0,
               maxpp: m.maxpp ?? 0,
               disabled: !!m.disabled || (m.pp !== undefined && m.pp <= 0),
@@ -227,6 +237,8 @@ export interface Step {
   /** Nouveaux PV du Pokémon actif (la barre descend sur `ms`). */
   hp?: { side: Side; hp: number; maxhp: number; ms: number }
   status?: { side: Side; status: string }
+  /** Modificateurs de stats du Pokémon actif (valeurs absolues après l'étape). */
+  boost?: { side: Side; boosts: Record<string, number> }
   /** Statut temporaire qui apparaît (`on`) ou disparaît. */
   vol?: { side: Side; id: string; on: boolean }
   /** Un Pokémon entre en jeu. `name` = nom d'espèce du simulateur. */
@@ -236,6 +248,12 @@ export interface Step {
   faint?: Side
   /** Pause (ms) après la fin du texte et de l'animation, avant d'enchaîner automatiquement. */
   wait: number
+}
+
+/** Stats modifiables, avec l'article contracté pour les messages (« L'Attaque de … augmente ! »). */
+const STAT_FR: Record<string, { art: string }> = {
+  atk: { art: "l'Attaque" }, def: { art: 'la Défense' }, spa: { art: "l'Attaque Spéciale" }, spd: { art: 'la Défense Spéciale' },
+  spe: { art: 'la Vitesse' }, accuracy: { art: 'la Précision' }, evasion: { art: "l'Esquive" },
 }
 
 const RESIDUAL_FR: Record<string, (who: string) => string> = {
@@ -283,6 +301,11 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
       max[side] = a.maxhp
     }
   }
+  const bst: Record<Side, Record<string, number>> = { player: { ...(before?.player.active?.boosts ?? {}) }, opponent: { ...(before?.opponent.active?.boosts ?? {}) } }
+  const boostStep = (side: Side, nb: Record<string, number>, text?: string): Step => {
+    bst[side] = nb
+    return { text, boost: { side, boosts: nb }, cue: text ? { kind: 'sfx', id: 'status' } : null, wait: text ? 800 : 100 }
+  }
   let pend: { text: string; kind: string }[] = []
   const flush = () => {
     for (const t of pend) out.push({ text: t.text, cue: null, wait: 750 })
@@ -294,7 +317,7 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
     const [c, m] = frac.split('/').map(Number)
     return { hp: c, maxhp: m || max[side] }
   }
-  const BREAK = new Set(['move', 'switch', 'drag', 'faint', 'cant', '-miss', '-immune', '-status', '-start', '-end', '-curestatus', 'win', 'turn', 'upkeep'])
+  const BREAK = new Set(['move', 'switch', 'drag', 'faint', 'cant', '-miss', '-immune', '-status', '-boost', '-unboost', '-setboost', '-clearboost', '-clearallboost', '-clearnegativeboost', '-start', '-end', '-curestatus', 'win', 'turn', 'upkeep'])
 
   for (let i = 0; i < clean.length; i++) {
     const p = clean[i].split('|')
@@ -317,6 +340,7 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         }
         cur[side] = hp
         max[side] = maxhp
+        bst[side] = {} // les modificateurs de stats disparaissent au changement
         active[side] = details
         out0[side] = false
         out.push({
@@ -400,6 +424,30 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         }
         break
       }
+      case '-boost': case '-unboost': case '-setboost': {
+        const side = sideOf(p[2])
+        const stat = p[3]
+        const n = Math.abs(Number(p[4])) || 1
+        const nb = { ...bst[side] }
+        const v = kind === '-setboost' ? Number(p[4]) : (nb[stat] ?? 0) + (kind === '-boost' ? n : -n)
+        nb[stat] = Math.max(-6, Math.min(6, v))
+        if (!nb[stat]) delete nb[stat]
+        const up = kind === '-boost' || (kind === '-setboost' && Number(p[4]) > 0)
+        const size = kind === '-setboost' ? 3 : n
+        const verb = `${up ? 'augmente' : 'diminue'}${size >= 3 ? ' énormément' : size === 2 ? ' beaucoup' : ''}`
+        const label = STAT_FR[stat]
+        out.push(boostStep(side, nb, label ? `${label.art} de ${who(p[2])} ${verb} !`.replace(/^./, (c) => c.toUpperCase()) : undefined))
+        break
+      }
+      case '-clearboost': case '-clearnegativeboost': {
+        const side = sideOf(p[2])
+        const nb = kind === '-clearboost' ? {} : Object.fromEntries(Object.entries(bst[side]).filter(([, x]) => x > 0))
+        out.push(boostStep(side, nb, kind === '-clearboost' ? `Les stats de ${who(p[2])} sont réinitialisées !` : undefined))
+        break
+      }
+      case '-clearallboost':
+        out.push(boostStep('player', {}, 'Tous les changements de stats sont annulés !'), boostStep('opponent', {}))
+        break
       case 'faint': {
         const side = sideOf(p[2])
         out0[side] = true

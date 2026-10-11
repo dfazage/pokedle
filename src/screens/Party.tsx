@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Lock, X } from 'lucide-react'
 import type { PreviewMon } from '../game/daily'
 import { MonImg } from '../game/officialSprites'
-import { mvFr, spFr, TYPE_FR } from '../game/fr'
+import { abFr, itemFr, mvFr, natureFr, spFr, TYPE_FR } from '../game/fr'
 import { TypeBadge, monCardStyle } from '../ui/kit'
 import { GEN_INFO } from '../game/fr'
 
@@ -40,9 +40,9 @@ export function MonSheet({ m, gen, onClose }: { m: PreviewMon; gen: number; onCl
         </div>
         <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '8px 0' }}>
           {m.types.map((t) => <TypeBadge key={t} type={t} />)}
-          {m.ability && <span className="pill">Talent : {m.ability}</span>}
-          {m.item && <span className="pill">Objet : {m.item}</span>}
-          {m.nature && <span className="pill">{m.nature}</span>}
+          {m.ability && <span className="pill">Talent : {abFr(m.ability)}</span>}
+          {m.item && <span className="pill">Objet : {itemFr(m.item)}</span>}
+          {m.nature && <span className="pill">Nature : {natureFr(m.nature)}</span>}
         </div>
 
         <div className="lab" style={{ margin: '14px 0 6px' }}>Statistiques</div>

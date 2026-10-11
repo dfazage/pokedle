@@ -30,3 +30,6 @@ out
 
 # Archives PokéAPI extraites en local (25 000 fichiers, 113 Mo) : inutiles, les images sont lues depuis PokéAPI/sprites
 src/assets/sprites/
+
+# Musiques fournies (protégées) : à garder en local, jamais dans le dépôt
+src/assets/bgm/*.mp3

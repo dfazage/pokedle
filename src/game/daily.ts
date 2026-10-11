@@ -11,6 +11,7 @@ import extraGen2 from '../data/trainers.extra.gen2.json'
 import extraGen3 from '../data/trainers.extra.gen3.json'
 import extraGen4 from '../data/trainers.extra.gen4.json'
 import { aiChoose } from './ai'
+import { applyProfile } from './profiles'
 import { dayKeyUTC, hashString, mulberry32, pick, seedArray } from './rng'
 
 Teams.setGeneratorFactory(TeamGenerators)
@@ -31,7 +32,8 @@ export interface TrainerData {
 /**
  * Génération du moteur de combat : toujours la 4 (493 espèces, mécaniques Diamant/Perle/Platine), quel que soit le
  * dresseur tiré. Les dresseurs des gens 1 à 4 s'affrontent donc avec leurs équipes d'origine converties en gen 4
- * (niveau 100, talents/natures par défaut), contre une équipe de joueur tirée dans tout le pool gen 4.
+ * (niveau 100, nature/EV/talent/objet d'après les profils Pokémon Showdown les plus joués, voir profiles.ts), contre une
+ * équipe de joueur tirée dans tout le pool gen 4.
  * `DailyChallenge.gen` reste la génération d'origine du dresseur (ligue, jeu, historique, classement).
  */
 export const BATTLE_GEN = 4
@@ -115,12 +117,12 @@ export interface DailyChallenge {
   opponentPreview: PreviewMon[]
 }
 
-function normalize(set: Partial<PokemonSet> & { species: string }, gen: number): PokemonSet {
+function normalize(set: Partial<PokemonSet> & { species: string }, gen: number, profile?: { ability?: boolean; item?: boolean }): PokemonSet {
   const sp = Dex.forGen(gen).species.get(set.species)
   // Gens 1-2 : points d'effort maximaux (255) et DV 15 (= IV 30) ; gen 3+ : 85 PE répartis, IV 31.
   const old = gen <= 2
   const stat = (v: number) => ({ hp: v, atk: v, def: v, spa: v, spd: v, spe: v })
-  return {
+  const base = {
     name: sp.baseSpecies,
     species: sp.name,
     item: gen >= 2 ? set.item ?? '' : '',
@@ -132,6 +134,8 @@ function normalize(set: Partial<PokemonSet> & { species: string }, gen: number):
     ivs: set.ivs ?? stat(old ? 30 : 31),
     level: 100,
   } as PokemonSet
+  // Gen 4 : nature / EV (et talent / objet des dresseurs) d'après les profils les plus joués sur Pokémon Showdown, IV à 31.
+  return gen === 4 && profile ? applyProfile(base, Dex.forGen(gen), profile) : base
 }
 
 function randomTeam(
@@ -153,7 +157,7 @@ function randomTeam(
         if (exclude.has(sp.baseSpecies)) continue
         if (strict && !sp.types.some((t) => themeTypes!.has(t))) continue
         exclude.add(sp.baseSpecies)
-        out.push(normalize({ ...s, level: 100 }, gen))
+        out.push(normalize({ ...s, level: 100 }, gen, {}))
         if (out.length === count) break
       }
     }
@@ -166,7 +170,7 @@ function buildOpponent(trainer: TrainerData, gen: number, seed: [number, number,
   const team: PokemonSet[] = trainer.team.map((m) => {
     const sp = Dex.forGen(gen).species.get(m.species)
     used.add(sp.baseSpecies)
-    return normalize({ species: sp.name, item: m.item ?? '', moves: m.moves }, gen)
+    return normalize({ species: sp.name, item: m.item ?? '', moves: m.moves }, gen, { ability: true, item: true })
   })
   if (team.length < 6) {
     // Thème : les types les plus fréquents de l'équipe d'origine du dresseur.

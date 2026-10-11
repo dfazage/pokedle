@@ -54,8 +54,11 @@ const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 're
 export default function App() {
   const today = useMemo(() => dayKeyUTC(), [])
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
-  const [onboarded, setOnboarded] = useLocalState<'0' | '1'>('pokedle:onboarded', '0')
-  const [screen, setScreen] = useState<Screen>(onboarded === '1' ? 'home' : 'onboarding')
+  // Accès à l'app : il faut être connecté OU avoir explicitement choisi de jouer en invité.
+  const [guest, setGuest] = useLocalState<'0' | '1'>('pokedle:guest', '0')
+  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [authReady, setAuthReady] = useState(!supabase) // session Supabase restaurée ?
+  const [screen, setScreen] = useState<Screen>('onboarding')
   const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
   const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
@@ -128,8 +131,14 @@ export default function App() {
       if (local && !cloud.some((r) => r.dayKey === today)) await submitResult(local, loadChoices(today))
       await refreshCloud()
     }
-    supabase.auth.getSession().then(({ data }) => load(data.session?.user ?? null))
+    supabase.auth.getSession().then(({ data }) => {
+      setIsSignedIn(!!data.session)
+      setAuthReady(true)
+      load(data.session?.user ?? null)
+    })
     const { data: sub } = supabase.auth.onAuthStateChange((e, sess) => {
+      setIsSignedIn(!!sess) // synchrone : la garde d'accès s'ouvre dès la connexion
+      setAuthReady(true)
       if (e === 'PASSWORD_RECOVERY') setScreen('reset') // lien « mot de passe oublié » ouvert
       setTimeout(() => load(sess?.user ?? null), 0)
     })
@@ -365,10 +374,30 @@ export default function App() {
     else setScreen('opponent')
   }
 
+  // Garde d'accès : ni connecté ni invité → on reste sur l'accueil/onboarding (ou la connexion).
+  const entered = isSignedIn || guest === '1'
+  const PUBLIC_SCREENS: Screen[] = ['onboarding', 'auth', 'reset']
+  if (!authReady && !entered)
+    return (
+      <main className="app center">
+        <div className="splash-orb" />
+      </main>
+    )
+  if (!entered && !PUBLIC_SCREENS.includes(screen)) {
+    setScreen('onboarding')
+    return null
+  }
+  // Une fois connecté (ou invité), on quitte l'accueil/onboarding.
+  const playAsGuest = () => { setGuest('1'); setScreen('home') }
+  if (entered && screen === 'onboarding') {
+    setScreen('home')
+    return null
+  }
+
   if (screen === 'onboarding')
     return (
       <main className="app">
-        <Onboarding done={() => { setOnboarded('1'); setScreen('home') }} login={() => { setOnboarded('1'); setScreen('auth') }} />
+        <Onboarding done={playAsGuest} login={() => setScreen('auth')} />
       </main>
     )
 
@@ -392,7 +421,7 @@ export default function App() {
     }
   }
   const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
-  const back = () => setScreen('home')
+  const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'battle' && view) {
     const over = view.ended && !queue.length && !pending
@@ -429,7 +458,7 @@ export default function App() {
       {screen === 'history' && <History {...ctx} />}
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
       {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version="1.0" />}
-      {screen === 'auth' && <Auth {...ctx} onBack={back} />}
+      {screen === 'auth' && <Auth {...ctx} onBack={back} onGuest={playAsGuest} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'generations' && <Generations {...ctx} counts={counts} onBack={back} />}

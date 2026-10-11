@@ -6,7 +6,7 @@ import { GEN_INFO } from '../game/fr'
 import { dayNumber } from '../game/info'
 import { MonOrb, TopBar } from '../ui/kit'
 
-export function Auth(c: Ctx & { onBack: () => void }) {
+export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
   const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in')
   const [mail, setMail] = useState('')
   const [pass, setPass] = useState('')
@@ -74,7 +74,7 @@ export function Auth(c: Ctx & { onBack: () => void }) {
           {mode === 'forgot' && <button type="button" className="link" style={{ alignSelf: 'center' }} onClick={() => { setMode('in'); setMsg('') }}>Retour à la connexion</button>}
           {msg && <p className="small" style={{ color: 'var(--secondary)', textAlign: 'center' }}>{msg}</p>}
         </form>
-        <button className="link" style={{ alignSelf: 'center' }} onClick={c.onBack}>Jouer en invité <span className="muted small">(partie non synchronisée)</span></button>
+        <button className="link" style={{ alignSelf: 'center' }} onClick={c.onGuest}>Jouer en invité <span className="muted small">(partie non synchronisée)</span></button>
       </div>
     </>
   )

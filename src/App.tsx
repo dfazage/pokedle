@@ -7,7 +7,7 @@ import '@fontsource/plus-jakarta-sans/500.css'
 import '@fontsource/plus-jakarta-sans/700.css'
 import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
-import type { BattleSession, BattleView } from './game/session'
+import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { dayKeyUTC } from './game/rng'
 import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
@@ -46,7 +46,7 @@ function loadOrder(day: string): number[] | null {
   }
 }
 
-type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog }
+type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog; formatSteps: typeof import('./game/session').formatSteps }
 const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result', 'generations']
 
 export default function App() {
@@ -64,7 +64,7 @@ export default function App() {
   const [rows, setRows] = useState<LeaderRow[]>([])
   const [world, setWorld] = useState<{ players: number; wins: number } | null>(null)
   const [view, setView] = useState<BattleView | null>(null)
-  const [queue, setQueue] = useState<string[]>([])
+  const [queue, setQueue] = useState<Step[]>([])
   const [pending, setPending] = useState<BattleView | null>(null)
   const [, bump] = useState(0)
   const signedIn = useRef(false)
@@ -138,7 +138,7 @@ export default function App() {
     let cancelled = false
     ;(async () => {
       const [daily, sess] = await Promise.all([import('./game/daily'), import('./game/session')])
-      engine.current = { BattleSession: sess.BattleSession, formatLog: sess.formatLog }
+      engine.current = { BattleSession: sess.BattleSession, formatLog: sess.formatLog, formatSteps: sess.formatSteps }
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
         setCounts(daily.TRAINER_COUNTS)
@@ -172,20 +172,28 @@ export default function App() {
 
   const startBattle = useCallback(() => {
     if (!challenge || !engine.current) return
-    const { BattleSession, formatLog } = engine.current
+    const { BattleSession, formatSteps } = engine.current
     const s = new BattleSession(challenge)
     session.current = s
     const saved = loadChoices(today)
     choices.current = []
-    const intro = formatLog(s.drainLog())
+    const intro = formatSteps(s.drainLog())
     for (const c of saved) {
       choices.current.push(c)
       s.choose(c)
     }
     s.drainLog()
-    setQueue(saved.length ? [] : intro.filter((l) => !l.startsWith('—')))
-    setPending(null)
-    setView(s.view())
+    const v = s.view()
+    if (saved.length) {
+      setQueue([])
+      setPending(null)
+      setView(v)
+    } else {
+      // Nouveau combat : le terrain est vide, les Pokémon entrent en scène un par un.
+      setQueue(intro)
+      setPending(v)
+      setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
+    }
     setScreen('battle')
     finish(s)
   }, [challenge, today, finish])
@@ -195,8 +203,8 @@ export default function App() {
     if (!s) return
     choices.current.push(choice)
     saveChoices(today, choices.current)
-    const lines = engine.current!.formatLog(s.choose(choice)).filter((l) => !l.startsWith('—'))
-    setQueue(lines)
+    const before = s.view()
+    setQueue(engine.current!.formatSteps(s.choose(choice), before))
     setPending(s.view()) // l'écran se met à jour une fois le texte lu
     finish(s)
     bump((n) => n + 1)
@@ -207,7 +215,7 @@ export default function App() {
     if (!s || s.view().ended) return
     if (!window.confirm('Fuir compte comme une défaite pour aujourd’hui. Continuer ?')) return
     s.forfeit()
-    setQueue(['Tu as pris la fuite… (défaite)'])
+    setQueue([{ text: 'Tu as pris la fuite… (défaite)', wait: 1000 }])
     setPending(s.view())
     finish(s)
   }

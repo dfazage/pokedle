@@ -2,6 +2,8 @@
 // Chaque espèce → une grille 64×64 déterministe : la graine vient de la ligne évolutive (même famille =
 // même silhouette), la couleur des types, la taille de la taille réelle, les détails du stade d'évolution.
 import { mulberry32 } from './rng'
+import { spriteMeta } from './spritemeta'
+import type { Arch, SpriteMeta } from './spritemeta'
 
 const N = 64
 const GROUND = 59
@@ -97,8 +99,6 @@ class Canvas64 {
   }
 }
 
-type Arch = 'biped' | 'quad' | 'blob' | 'serpent' | 'bird' | 'fish' | 'insect' | 'floater'
-
 function pickArch(types: string[], bst: number, r: () => number): Arch {
   const t = types.join(' ')
   const w: Partial<Record<Arch, number>> = { biped: 2, quad: 2, blob: 1 }
@@ -123,22 +123,30 @@ function pickArch(types: string[], bst: number, r: () => number): Arch {
   return 'biped'
 }
 
-export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array; pal: Record<number, RGB> } {
+export function renderPixels(spec: SpriteSpec, back: boolean, meta: SpriteMeta | undefined = spriteMeta(spec.num)): { px: Uint8Array; pal: Record<number, RGB> } {
   const r = mulberry32(spec.root * 7919 + 13) // même ligne → mêmes choix de forme
   const g = new Canvas64()
   const t1 = spec.types[0], t2 = spec.types[1]
-  const arch = pickArch(spec.types, spec.bst, r)
+  // Les tirages `r()` gardent le même ordre avec ou sans métadonnées : une espèce sans entrée rend comme avant.
+  const archRoll = pickArch(spec.types, spec.bst, r)
+  const arch: Arch = meta?.arch ?? archRoll
   const hs = (r() - 0.5) * 26
-  const bodyC = hueShift(hex(TYPE_HEX[t1] ?? '#999999'), hs)
-  const accC = t2 ? hueShift(hex(TYPE_HEX[t2]), hs * 0.5) : mix(bodyC, [248, 236, 205], 0.62)
-  const decoC = hex(DECO_HEX[t2 && r() > 0.5 ? t2 : t1] ?? '#ffffff')
+  const mc = meta?.colors?.filter((c) => /^#[0-9a-f]{6}$/i.test(c)) ?? []
+  const bodyC = mc[0] ? hex(mc[0]) : hueShift(hex(TYPE_HEX[t1] ?? '#999999'), hs)
+  const accDefault = t2 ? hueShift(hex(TYPE_HEX[t2]), hs * 0.5) : mix(bodyC, [248, 236, 205], 0.62)
+  const accC = mc[1] ? hex(mc[1]) : mc[0] ? mix(bodyC, [248, 236, 205], 0.62) : accDefault
+  const decoType = t2 && r() > 0.5 ? t2 : t1 // tirage conditionnel, comme avant
+  const decoC = mc[2] ? hex(mc[2]) : hex(DECO_HEX[decoType] ?? '#ffffff')
 
   const sNorm = Math.min(1, Math.max(0, (0.5 + 0.25 * Math.log2(1 + spec.heightm) - 0.5) / 0.5))
   const S = 13 + 15 * sNorm + Math.min(3, spec.stage * 1.2)
   const st = spec.stage
-  const spiky = r() < 0.5
-  const earKind = Math.floor(r() * 3) // 0 triangle pointues 1 rondes 2 cornes
-  const tailKind = Math.floor(r() * 3)
+  const spikyRoll = r() < 0.5
+  const earRoll = Math.floor(r() * 3) // 0 triangle pointues 1 rondes 2 cornes
+  const tailRoll = Math.floor(r() * 3)
+  const spiky = meta?.spiky ?? spikyRoll
+  const earKind = meta?.ear ?? earRoll
+  const tailKind = meta?.tail ?? tailRoll
   const eyeKind = Math.floor(r() * 3)
   const decoSide = r()
   const face = !back
@@ -220,6 +228,7 @@ export function renderPixels(spec: SpriteSpec, back: boolean): { px: Uint8Array;
   }
 
   const tailDraw = (x: number, y: number, dir: number, len: number) => {
+    if (meta?.noTail) return
     if (tailKind === 0) g.line(x, y, x + dir * len, y - len * 0.6, 3, 0)
     else if (tailKind === 1) {
       g.line(x, y, x + dir * len * 0.7, y + 1, 3, 0)

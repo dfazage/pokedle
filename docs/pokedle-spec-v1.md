@@ -22,6 +22,7 @@ Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + T
 - `npx tsx scripts/test_daily.ts`, `test_session.ts`, `test_history.ts` : tests rapides
 - `node scripts/e2e2.mjs <dossier>` : parcours complet dans Chromium (nécessite `npm run preview`)
 - `python3 -I scripts/analyze_sprites.py --archives generation-{1,2,3,4}.tar.gz --out-dir out` (nécessite `ANTHROPIC_API_KEY`, `pip install aiohttp pillow`) : envoie les sprites des archives PokéAPI à une API Vision (async, backoff 429/5xx, reprise via `sprite_results.jsonl`) et produit `master_sprite_dataset.json` (`{ "<n° dex>": { "<version>": { primary_colors, anatomy, distinct_features, pose } } }`) ; échecs dans `failed_images.log`. Par défaut : red-blue, crystal, emerald, platinum, sprites de face uniquement (`--versions all` / `--all-variants` pour le reste).
+- Étape suivante, une fois `master_sprite_dataset.json` produit : `npx tsx scripts/build_sprite_meta.ts <master_sprite_dataset.json>` écrit `src/data/sprite_meta.json` (archétype, couleurs hex, oreilles/queue/pics par n° de Pokédex ; version la plus récente retenue). `src/game/sprites.ts` l'utilise automatiquement ; sans entrée pour une espèce, le rendu d'origine (types + graine) est conservé. Aucun pixel officiel n'est embarqué.
 
 ## Reste à faire
 - Habillage rétro propre à chaque génération ; affiner les sprites générés (ou brancher un pack sous licence ouverte)

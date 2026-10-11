@@ -1,0 +1,768 @@
+[
+ {
+  "id": "brock",
+  "name": "Brock",
+  "class": "Gym Leader",
+  "order": 1,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "geodude",
+    "origLevel": 12,
+    "item": null,
+    "moves": [
+     "dig",
+     "fireblast",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "onix",
+    "origLevel": 14,
+    "item": null,
+    "moves": [
+     "dig",
+     "rockslide",
+     "doubleedge",
+     "earthquake"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "misty",
+  "name": "Misty",
+  "class": "Gym Leader",
+  "order": 2,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "staryu",
+    "origLevel": 18,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "blizzard",
+     "doubleedge",
+     "surf"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "starmie",
+    "origLevel": 21,
+    "item": null,
+    "moves": [
+     "surf",
+     "psychic",
+     "blizzard",
+     "doubleedge"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "ltsurge",
+  "name": "Lt. Surge",
+  "class": "Gym Leader",
+  "order": 3,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "voltorb",
+    "origLevel": 21,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "takedown",
+     "thunder",
+     "swift"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "pikachu",
+    "origLevel": 18,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "doubleedge",
+     "surf",
+     "thunder"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "raichu",
+    "origLevel": 24,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "doubleedge",
+     "submission",
+     "thunder"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "erika",
+  "name": "Erika",
+  "class": "Gym Leader",
+  "order": 4,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "victreebel",
+    "origLevel": 29,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "razorleaf",
+     "acid",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "tangela",
+    "origLevel": 24,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "megadrain",
+     "bodyslam",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "vileplume",
+    "origLevel": 29,
+    "item": null,
+    "moves": [
+     "petaldance",
+     "doubleedge",
+     "acid",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "koga",
+  "name": "Koga",
+  "class": "Gym Leader",
+  "order": 5,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "koffing",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "sludge",
+     "thunderbolt",
+     "thunder"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "muk",
+    "origLevel": 39,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "sludge",
+     "thunderbolt",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "koffing",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "sludge",
+     "thunderbolt",
+     "thunder"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "weezing",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "sludge",
+     "thunderbolt",
+     "thunder"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "sabrina",
+  "name": "Sabrina",
+  "class": "Gym Leader",
+  "order": 6,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "kadabra",
+    "origLevel": 38,
+    "item": null,
+    "moves": [
+     "psychic",
+     "dig",
+     "doubleedge",
+     "psybeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "mrmime",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "psychic",
+     "doubleedge",
+     "thunderbolt",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "venomoth",
+    "origLevel": 38,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "psychic",
+     "megadrain",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "psychic",
+     "dig",
+     "doubleedge",
+     "psybeam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "blaine",
+  "name": "Blaine",
+  "class": "Gym Leader",
+  "order": 7,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "growlithe",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "flamethrower"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "ponyta",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "doubleedge",
+     "bodyslam",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rapidash",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "doubleedge",
+     "bodyslam",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "arcanine",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "giovanni",
+  "name": "Giovanni",
+  "class": "Gym Leader",
+  "order": 8,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "rhyhorn",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "dig",
+     "fireblast",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "dugtrio",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "dig",
+     "doubleedge",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "nidoqueen",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "blizzard",
+     "fireblast",
+     "doubleedge"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "nidoking",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "blizzard",
+     "fireblast",
+     "doubleedge"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rhydon",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "dig",
+     "blizzard",
+     "fireblast",
+     "earthquake"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "blue",
+  "name": "Blue",
+  "class": "Champion",
+  "order": 13,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "pidgeot",
+    "origLevel": 61,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "fly",
+     "takedown",
+     "swift"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 59,
+    "item": null,
+    "moves": [
+     "psychic",
+     "dig",
+     "doubleedge",
+     "psybeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rhydon",
+    "origLevel": 61,
+    "item": null,
+    "moves": [
+     "dig",
+     "blizzard",
+     "fireblast",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "arcanine",
+    "origLevel": 61,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "exeggutor",
+    "origLevel": 63,
+    "item": null,
+    "moves": [
+     "psychic",
+     "doubleedge",
+     "megadrain",
+     "strength"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "blastoise",
+    "origLevel": 65,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "blizzard",
+     "dig",
+     "surf"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "lorelei",
+  "name": "Lorelei",
+  "class": "Elite Four",
+  "order": 9,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "dewgong",
+    "origLevel": 54,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "surf",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "cloyster",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "surf",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "slowbro",
+    "origLevel": 54,
+    "item": null,
+    "moves": [
+     "surf",
+     "psychic",
+     "blizzard",
+     "fireblast"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "jynx",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "psychic",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "lapras",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "hydropump",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "bruno",
+  "name": "Bruno",
+  "class": "Elite Four",
+  "order": 10,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "onix",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "dig",
+     "rockslide",
+     "doubleedge",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "hitmonchan",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "submission",
+     "firepunch",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "hitmonlee",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "highjumpkick",
+     "doubleedge",
+     "jumpkick",
+     "submission"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "onix",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "dig",
+     "rockslide",
+     "doubleedge",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "machamp",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "earthquake"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "agatha",
+  "name": "Agatha",
+  "class": "Elite Four",
+  "order": 11,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "gengar",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "thunderbolt",
+     "psychic",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "golbat",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "wingattack",
+     "megadrain",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "haunter",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "psychic",
+     "megadrain",
+     "thunder"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "arbok",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "dig",
+     "doubleedge",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "gengar",
+    "origLevel": 60,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "thunderbolt",
+     "psychic",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "lance",
+  "name": "Lance",
+  "class": "Elite Four",
+  "order": 12,
+  "gen": 1,
+  "game": "red",
+  "team": [
+   {
+    "species": "gyarados",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "blizzard",
+     "fireblast",
+     "surf"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "dragonair",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "fireblast",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "dragonair",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "fireblast",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "aerodactyl",
+    "origLevel": 60,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "doubleedge",
+     "fly",
+     "takedown"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "dragonite",
+    "origLevel": 62,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "fireblast",
+     "doubleedge",
+     "icebeam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ }
+]

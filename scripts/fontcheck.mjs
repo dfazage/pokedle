@@ -1,0 +1,12 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
+const p = await b.newPage();
+const failed = [];
+p.on('requestfailed', r => failed.push(r.url()));
+p.on('response', r => { if (/woff/.test(r.url())) console.log('font', r.status(), r.url().split('/').pop()); });
+await p.goto('http://localhost:4173/'); await p.waitForSelector('text=Lancer le combat', { timeout: 60000 });
+await p.click('text=Lancer le combat'); await p.waitForSelector('.gba');
+await p.waitForTimeout(500);
+console.log('check:', await p.evaluate(() => document.fonts.check("8px 'Press Start 2P'")), 'loaded faces:', await p.evaluate(() => [...document.fonts].map(f => f.family + ':' + f.status).join(',')));
+console.log('échecs:', failed);
+await b.close();

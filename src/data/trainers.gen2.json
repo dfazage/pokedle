@@ -1,0 +1,1206 @@
+[
+ {
+  "id": "falkner",
+  "name": "Falkner",
+  "class": "Gym Leader",
+  "order": 1,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "pidgey",
+    "origLevel": 7,
+    "item": null,
+    "moves": [
+     "tackle",
+     "mudslap"
+    ]
+   },
+   {
+    "species": "pidgeotto",
+    "origLevel": 9,
+    "item": null,
+    "moves": [
+     "tackle",
+     "mudslap",
+     "gust"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bugsy",
+  "name": "Bugsy",
+  "class": "Gym Leader",
+  "order": 2,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "metapod",
+    "origLevel": 14,
+    "item": null,
+    "moves": [
+     "tackle",
+     "stringshot",
+     "harden"
+    ]
+   },
+   {
+    "species": "kakuna",
+    "origLevel": 14,
+    "item": null,
+    "moves": [
+     "poisonsting",
+     "stringshot",
+     "harden"
+    ]
+   },
+   {
+    "species": "scyther",
+    "origLevel": 16,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "leer",
+     "furycutter"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "whitney",
+  "name": "Whitney",
+  "class": "Gym Leader",
+  "order": 3,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "clefairy",
+    "origLevel": 18,
+    "item": null,
+    "moves": [
+     "doubleslap",
+     "mimic",
+     "encore",
+     "metronome"
+    ]
+   },
+   {
+    "species": "miltank",
+    "origLevel": 20,
+    "item": null,
+    "moves": [
+     "rollout",
+     "attract",
+     "stomp",
+     "milkdrink"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "morty",
+  "name": "Morty",
+  "class": "Gym Leader",
+  "order": 4,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "gastly",
+    "origLevel": 21,
+    "item": null,
+    "moves": [
+     "lick",
+     "spite",
+     "meanlook",
+     "curse"
+    ]
+   },
+   {
+    "species": "haunter",
+    "origLevel": 21,
+    "item": null,
+    "moves": [
+     "hypnosis",
+     "mimic",
+     "curse",
+     "nightshade"
+    ]
+   },
+   {
+    "species": "gengar",
+    "origLevel": 25,
+    "item": null,
+    "moves": [
+     "hypnosis",
+     "shadowball",
+     "meanlook",
+     "dreameater"
+    ]
+   },
+   {
+    "species": "haunter",
+    "origLevel": 23,
+    "item": null,
+    "moves": [
+     "spite",
+     "meanlook",
+     "mimic",
+     "nightshade"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "chuck",
+  "name": "Chuck",
+  "class": "Gym Leader",
+  "order": 5,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "primeape",
+    "origLevel": 27,
+    "item": null,
+    "moves": [
+     "leer",
+     "rage",
+     "karatechop",
+     "furyswipes"
+    ]
+   },
+   {
+    "species": "poliwrath",
+    "origLevel": 30,
+    "item": null,
+    "moves": [
+     "hypnosis",
+     "mindreader",
+     "surf",
+     "dynamicpunch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "jasmine",
+  "name": "Jasmine",
+  "class": "Gym Leader",
+  "order": 6,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "magnemite",
+    "origLevel": 30,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "supersonic",
+     "sonicboom",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "magnemite",
+    "origLevel": 30,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "supersonic",
+     "sonicboom",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "steelix",
+    "origLevel": 35,
+    "item": null,
+    "moves": [
+     "screech",
+     "sunnyday",
+     "rockthrow",
+     "irontail"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "pryce",
+  "name": "Pryce",
+  "class": "Gym Leader",
+  "order": 7,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "seel",
+    "origLevel": 27,
+    "item": null,
+    "moves": [
+     "headbutt",
+     "icywind",
+     "aurorabeam",
+     "rest"
+    ]
+   },
+   {
+    "species": "dewgong",
+    "origLevel": 29,
+    "item": null,
+    "moves": [
+     "headbutt",
+     "icywind",
+     "aurorabeam",
+     "rest"
+    ]
+   },
+   {
+    "species": "piloswine",
+    "origLevel": 31,
+    "item": null,
+    "moves": [
+     "icywind",
+     "furyattack",
+     "mist",
+     "blizzard"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "clair",
+  "name": "Clair",
+  "class": "Gym Leader",
+  "order": 8,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "dragonair",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "surf",
+     "slam",
+     "dragonbreath"
+    ]
+   },
+   {
+    "species": "dragonair",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "thunderbolt",
+     "slam",
+     "dragonbreath"
+    ]
+   },
+   {
+    "species": "dragonair",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "icebeam",
+     "slam",
+     "dragonbreath"
+    ]
+   },
+   {
+    "species": "kingdra",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "smokescreen",
+     "surf",
+     "hyperbeam",
+     "dragonbreath"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "will",
+  "name": "Will",
+  "class": "Elite Four",
+  "order": 9,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "xatu",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "futuresight",
+     "confuseray",
+     "psychic"
+    ]
+   },
+   {
+    "species": "jynx",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "doubleslap",
+     "lovelykiss",
+     "icepunch",
+     "psychic"
+    ]
+   },
+   {
+    "species": "exeggutor",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "reflect",
+     "leechseed",
+     "eggbomb",
+     "psychic"
+    ]
+   },
+   {
+    "species": "slowbro",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "curse",
+     "amnesia",
+     "bodyslam",
+     "psychic"
+    ]
+   },
+   {
+    "species": "xatu",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "futuresight",
+     "confuseray",
+     "psychic"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "koga",
+  "name": "Koga",
+  "class": "Elite Four",
+  "order": 10,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "ariados",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "doubleteam",
+     "spiderweb",
+     "batonpass",
+     "gigadrain"
+    ]
+   },
+   {
+    "species": "venomoth",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "supersonic",
+     "gust",
+     "psychic",
+     "toxic"
+    ]
+   },
+   {
+    "species": "forretress",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "protect",
+     "swift",
+     "explosion",
+     "spikes"
+    ]
+   },
+   {
+    "species": "muk",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "minimize",
+     "acidarmor",
+     "sludgebomb",
+     "toxic"
+    ]
+   },
+   {
+    "species": "crobat",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "doubleteam",
+     "quickattack",
+     "wingattack",
+     "toxic"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bruno",
+  "name": "Bruno",
+  "class": "Elite Four",
+  "order": 11,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "hitmontop",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "pursuit",
+     "quickattack",
+     "dig",
+     "detect"
+    ]
+   },
+   {
+    "species": "hitmonlee",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "swagger",
+     "doublekick",
+     "hijumpkick",
+     "foresight"
+    ]
+   },
+   {
+    "species": "hitmonchan",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "thunderpunch",
+     "icepunch",
+     "firepunch",
+     "machpunch"
+    ]
+   },
+   {
+    "species": "onix",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "bind",
+     "earthquake",
+     "sandstorm",
+     "rockslide"
+    ]
+   },
+   {
+    "species": "machamp",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "rockslide",
+     "foresight",
+     "vitalthrow",
+     "crosschop"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "karen",
+  "name": "Karen",
+  "class": "Elite Four",
+  "order": 12,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "umbreon",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "sandattack",
+     "confuseray",
+     "faintattack",
+     "meanlook"
+    ]
+   },
+   {
+    "species": "vileplume",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "stunspore",
+     "acid",
+     "moonlight",
+     "petaldance"
+    ]
+   },
+   {
+    "species": "gengar",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "lick",
+     "spite",
+     "curse",
+     "destinybond"
+    ]
+   },
+   {
+    "species": "murkrow",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "whirlwind",
+     "pursuit",
+     "faintattack"
+    ]
+   },
+   {
+    "species": "houndoom",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "roar",
+     "pursuit",
+     "flamethrower",
+     "crunch"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lance",
+  "name": "Lance",
+  "class": "Champion",
+  "order": 13,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "gyarados",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "flail",
+     "raindance",
+     "surf",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "dragonite",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "twister",
+     "thunder",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "dragonite",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "twister",
+     "blizzard",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "aerodactyl",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "wingattack",
+     "ancientpower",
+     "rockslide",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "charizard",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "wingattack",
+     "slash",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "dragonite",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "safeguard",
+     "outrage",
+     "hyperbeam"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "brock",
+  "name": "Brock",
+  "class": "Kanto Gym Leader",
+  "order": 14,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "graveler",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "defensecurl",
+     "rockslide",
+     "rollout",
+     "earthquake"
+    ]
+   },
+   {
+    "species": "rhyhorn",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "furyattack",
+     "scaryface",
+     "earthquake",
+     "horndrill"
+    ]
+   },
+   {
+    "species": "omastar",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "bite",
+     "surf",
+     "protect",
+     "spikecannon"
+    ]
+   },
+   {
+    "species": "onix",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "bind",
+     "rockslide",
+     "bide",
+     "sandstorm"
+    ]
+   },
+   {
+    "species": "kabutops",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "slash",
+     "surf",
+     "endure",
+     "gigadrain"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "misty",
+  "name": "Misty",
+  "class": "Kanto Gym Leader",
+  "order": 15,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "golduck",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "surf",
+     "disable",
+     "psychup",
+     "psychic"
+    ]
+   },
+   {
+    "species": "quagsire",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "surf",
+     "amnesia",
+     "earthquake",
+     "raindance"
+    ]
+   },
+   {
+    "species": "lapras",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "surf",
+     "perishsong",
+     "blizzard",
+     "raindance"
+    ]
+   },
+   {
+    "species": "starmie",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "surf",
+     "confuseray",
+     "recover",
+     "icebeam"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ltsurge",
+  "name": "Lt. Surge",
+  "class": "Kanto Gym Leader",
+  "order": 16,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "raichu",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "quickattack",
+     "thunderbolt",
+     "thunder"
+    ]
+   },
+   {
+    "species": "electrode",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "screech",
+     "doubleteam",
+     "swift",
+     "explosion"
+    ]
+   },
+   {
+    "species": "magneton",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "lockon",
+     "doubleteam",
+     "swift",
+     "zapcannon"
+    ]
+   },
+   {
+    "species": "electrode",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "screech",
+     "doubleteam",
+     "swift",
+     "explosion"
+    ]
+   },
+   {
+    "species": "electabuzz",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "thunderpunch",
+     "lightscreen",
+     "thunder"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "erika",
+  "name": "Erika",
+  "class": "Kanto Gym Leader",
+  "order": 17,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "tangela",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "vinewhip",
+     "bind",
+     "gigadrain",
+     "sleeppowder"
+    ]
+   },
+   {
+    "species": "jumpluff",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "megadrain",
+     "leechseed",
+     "cottonspore",
+     "gigadrain"
+    ]
+   },
+   {
+    "species": "victreebel",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "sunnyday",
+     "synthesis",
+     "acid",
+     "razorleaf"
+    ]
+   },
+   {
+    "species": "bellossom",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "sunnyday",
+     "synthesis",
+     "petaldance",
+     "solarbeam"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "janine",
+  "name": "Janine",
+  "class": "Kanto Gym Leader",
+  "order": 18,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "crobat",
+    "origLevel": 36,
+    "item": null,
+    "moves": [
+     "screech",
+     "supersonic",
+     "confuseray",
+     "wingattack"
+    ]
+   },
+   {
+    "species": "weezing",
+    "origLevel": 36,
+    "item": null,
+    "moves": [
+     "smog",
+     "sludgebomb",
+     "toxic",
+     "explosion"
+    ]
+   },
+   {
+    "species": "weezing",
+    "origLevel": 36,
+    "item": null,
+    "moves": [
+     "smog",
+     "sludgebomb",
+     "toxic",
+     "explosion"
+    ]
+   },
+   {
+    "species": "ariados",
+    "origLevel": 33,
+    "item": null,
+    "moves": [
+     "scaryface",
+     "gigadrain",
+     "stringshot",
+     "nightshade"
+    ]
+   },
+   {
+    "species": "venomoth",
+    "origLevel": 39,
+    "item": null,
+    "moves": [
+     "foresight",
+     "doubleteam",
+     "gust",
+     "psychic"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "sabrina",
+  "name": "Sabrina",
+  "class": "Kanto Gym Leader",
+  "order": 19,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "espeon",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "sandattack",
+     "quickattack",
+     "swift",
+     "psychic"
+    ]
+   },
+   {
+    "species": "mrmime",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "barrier",
+     "reflect",
+     "batonpass",
+     "psychic"
+    ]
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 48,
+    "item": null,
+    "moves": [
+     "recover",
+     "futuresight",
+     "psychic",
+     "reflect"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blaine",
+  "name": "Blaine",
+  "class": "Kanto Gym Leader",
+  "order": 20,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "magcargo",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "curse",
+     "smog",
+     "flamethrower",
+     "rockslide"
+    ]
+   },
+   {
+    "species": "magmar",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "thunderpunch",
+     "firepunch",
+     "sunnyday",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "rapidash",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "firespin",
+     "furyattack",
+     "fireblast"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blue",
+  "name": "Blue",
+  "class": "Kanto Gym Leader",
+  "order": 21,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "pidgeot",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "whirlwind",
+     "wingattack",
+     "mirrormove"
+    ]
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 54,
+    "item": null,
+    "moves": [
+     "disable",
+     "recover",
+     "psychic",
+     "reflect"
+    ]
+   },
+   {
+    "species": "rhydon",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "furyattack",
+     "sandstorm",
+     "rockslide",
+     "earthquake"
+    ]
+   },
+   {
+    "species": "gyarados",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "twister",
+     "hydropump",
+     "raindance",
+     "hyperbeam"
+    ]
+   },
+   {
+    "species": "exeggutor",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "sunnyday",
+     "leechseed",
+     "eggbomb",
+     "solarbeam"
+    ]
+   },
+   {
+    "species": "arcanine",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "roar",
+     "swift",
+     "flamethrower",
+     "extremespeed"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "red",
+  "name": "Red",
+  "class": "Champion",
+  "order": 22,
+  "gen": 2,
+  "game": "crystal",
+  "team": [
+   {
+    "species": "pikachu",
+    "origLevel": 81,
+    "item": null,
+    "moves": [
+     "charm",
+     "quickattack",
+     "thunderbolt",
+     "thunder"
+    ]
+   },
+   {
+    "species": "espeon",
+    "origLevel": 73,
+    "item": null,
+    "moves": [
+     "mudslap",
+     "reflect",
+     "swift",
+     "psychic"
+    ]
+   },
+   {
+    "species": "snorlax",
+    "origLevel": 75,
+    "item": null,
+    "moves": [
+     "amnesia",
+     "snore",
+     "rest",
+     "bodyslam"
+    ]
+   },
+   {
+    "species": "venusaur",
+    "origLevel": 77,
+    "item": null,
+    "moves": [
+     "sunnyday",
+     "gigadrain",
+     "synthesis",
+     "solarbeam"
+    ]
+   },
+   {
+    "species": "charizard",
+    "origLevel": 77,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "wingattack",
+     "slash",
+     "firespin"
+    ]
+   },
+   {
+    "species": "blastoise",
+    "origLevel": 77,
+    "item": null,
+    "moves": [
+     "raindance",
+     "surf",
+     "blizzard",
+     "whirlpool"
+    ]
+   }
+  ]
+ }
+]

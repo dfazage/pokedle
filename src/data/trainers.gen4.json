@@ -1,0 +1,700 @@
+[
+ {
+  "id": "roark",
+  "name": "Roark",
+  "class": "Gym Leader",
+  "order": 1,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "geodude",
+    "origLevel": 12,
+    "item": null,
+    "moves": [
+     "stealthrock",
+     "rockthrow"
+    ]
+   },
+   {
+    "species": "onix",
+    "origLevel": 12,
+    "item": null,
+    "moves": [
+     "stealthrock",
+     "rockthrow",
+     "screech"
+    ]
+   },
+   {
+    "species": "cranidos",
+    "origLevel": 14,
+    "item": null,
+    "moves": [
+     "headbutt",
+     "pursuit",
+     "leer"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "gardenia",
+  "name": "Gardenia",
+  "class": "Gym Leader",
+  "order": 2,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "turtwig",
+    "origLevel": 20,
+    "item": null,
+    "moves": [
+     "grassknot",
+     "razorleaf",
+     "sunnyday",
+     "reflect"
+    ]
+   },
+   {
+    "species": "cherrim",
+    "origLevel": 20,
+    "item": null,
+    "moves": [
+     "grassknot",
+     "leechseed",
+     "magicalleaf",
+     "safeguard"
+    ]
+   },
+   {
+    "species": "roserade",
+    "origLevel": 22,
+    "item": "sitrusberry",
+    "moves": [
+     "grassknot",
+     "magicalleaf",
+     "poisonsting",
+     "stunspore"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "maylene",
+  "name": "Maylene",
+  "class": "Gym Leader",
+  "order": 3,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "meditite",
+    "origLevel": 28,
+    "item": null,
+    "moves": [
+     "drainpunch",
+     "confusion",
+     "rocktomb",
+     "fakeout"
+    ]
+   },
+   {
+    "species": "machoke",
+    "origLevel": 29,
+    "item": null,
+    "moves": [
+     "karatechop",
+     "rocktomb",
+     "strength",
+     "focusenergy"
+    ]
+   },
+   {
+    "species": "lucario",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "drainpunch",
+     "forcepalm",
+     "metalclaw",
+     "bonerush"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "crasherwake",
+  "name": "Crasher Wake",
+  "class": "Gym Leader",
+  "order": 4,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "gyarados",
+    "origLevel": 33,
+    "item": null,
+    "moves": [
+     "waterfall",
+     "brine",
+     "bite",
+     "twister"
+    ]
+   },
+   {
+    "species": "quagsire",
+    "origLevel": 34,
+    "item": null,
+    "moves": [
+     "mudshot",
+     "rocktomb",
+     "waterpulse",
+     "yawn"
+    ]
+   },
+   {
+    "species": "floatzel",
+    "origLevel": 37,
+    "item": "sitrusberry",
+    "moves": [
+     "brine",
+     "icefang",
+     "crunch",
+     "aquajet"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fantina",
+  "name": "Fantina",
+  "class": "Gym Leader",
+  "order": 5,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "duskull",
+    "origLevel": 24,
+    "item": null,
+    "moves": [
+     "willowisp",
+     "pursuit",
+     "shadowsneak",
+     "futuresight"
+    ]
+   },
+   {
+    "species": "haunter",
+    "origLevel": 24,
+    "item": null,
+    "moves": [
+     "shadowclaw",
+     "suckerpunch",
+     "hypnosis",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "mismagius",
+    "origLevel": 26,
+    "item": "sitrusberry",
+    "moves": [
+     "shadowball",
+     "psybeam",
+     "magicalleaf",
+     "confuseray"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "byron",
+  "name": "Byron",
+  "class": "Gym Leader",
+  "order": 6,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "magneton",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "flashcannon",
+     "thunderbolt",
+     "triattack",
+     "metalsound"
+    ]
+   },
+   {
+    "species": "steelix",
+    "origLevel": 38,
+    "item": null,
+    "moves": [
+     "flashcannon",
+     "icefang",
+     "earthquake",
+     "sandstorm"
+    ]
+   },
+   {
+    "species": "bastiodon",
+    "origLevel": 41,
+    "item": "sitrusberry",
+    "moves": [
+     "metalburst",
+     "stoneedge",
+     "irondefense",
+     "taunt"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "candice",
+  "name": "Candice",
+  "class": "Gym Leader",
+  "order": 7,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "sneasel",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "slash",
+     "aerialace",
+     "faintattack",
+     "iceshard"
+    ]
+   },
+   {
+    "species": "piloswine",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "avalanche",
+     "stoneedge",
+     "earthquake",
+     "hail"
+    ]
+   },
+   {
+    "species": "abomasnow",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "avalanche",
+     "woodhammer",
+     "waterpulse",
+     "focusblast"
+    ]
+   },
+   {
+    "species": "froslass",
+    "origLevel": 44,
+    "item": "sitrusberry",
+    "moves": [
+     "blizzard",
+     "doubleteam",
+     "shadowball",
+     "psychic"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "volkner",
+  "name": "Volkner",
+  "class": "Gym Leader",
+  "order": 8,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "jolteon",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "chargebeam",
+     "irontail",
+     "quickattack"
+    ]
+   },
+   {
+    "species": "raichu",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "chargebeam",
+     "focusblast",
+     "signalbeam",
+     "quickattack"
+    ]
+   },
+   {
+    "species": "luxray",
+    "origLevel": 48,
+    "item": null,
+    "moves": [
+     "icefang",
+     "thunderfang",
+     "crunch",
+     "firefang"
+    ]
+   },
+   {
+    "species": "electivire",
+    "origLevel": 50,
+    "item": "sitrusberry",
+    "moves": [
+     "thunderpunch",
+     "firepunch",
+     "quickattack",
+     "gigaimpact"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aaron",
+  "name": "Aaron",
+  "class": "Elite Four",
+  "order": 9,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "yanmega",
+    "origLevel": 49,
+    "item": null,
+    "moves": [
+     "airslash",
+     "bugbuzz",
+     "uturn",
+     "doubleteam"
+    ]
+   },
+   {
+    "species": "scizor",
+    "origLevel": 49,
+    "item": null,
+    "moves": [
+     "ironhead",
+     "xscissor",
+     "nightslash",
+     "quickattack"
+    ]
+   },
+   {
+    "species": "vespiquen",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "attackorder",
+     "defendorder",
+     "healorder",
+     "powergem"
+    ]
+   },
+   {
+    "species": "heracross",
+    "origLevel": 51,
+    "item": null,
+    "moves": [
+     "megahorn",
+     "closecombat",
+     "nightslash",
+     "stoneedge"
+    ]
+   },
+   {
+    "species": "drapion",
+    "origLevel": 53,
+    "item": "sitrusberry",
+    "moves": [
+     "xscissor",
+     "crosspoison",
+     "icefang",
+     "aerialace"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bertha",
+  "name": "Bertha",
+  "class": "Elite Four",
+  "order": 10,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "whiscash",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "earthpower",
+     "aquatail",
+     "zenheadbutt",
+     "sandstorm"
+    ]
+   },
+   {
+    "species": "gliscor",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "icefang",
+     "firefang",
+     "thunderfang"
+    ]
+   },
+   {
+    "species": "hippowdon",
+    "origLevel": 52,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "stoneedge",
+     "crunch",
+     "yawn"
+    ]
+   },
+   {
+    "species": "golem",
+    "origLevel": 52,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "firepunch",
+     "thunderpunch",
+     "sandstorm"
+    ]
+   },
+   {
+    "species": "rhyperior",
+    "origLevel": 55,
+    "item": "sitrusberry",
+    "moves": [
+     "earthquake",
+     "rockwrecker",
+     "megahorn",
+     "avalanche"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "flint",
+  "name": "Flint",
+  "class": "Elite Four",
+  "order": 11,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "houndoom",
+    "origLevel": 52,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "sludgebomb",
+     "darkpulse",
+     "sunnyday"
+    ]
+   },
+   {
+    "species": "flareon",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "overheat",
+     "gigaimpact",
+     "quickattack",
+     "willowisp"
+    ]
+   },
+   {
+    "species": "rapidash",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "flareblitz",
+     "solarbeam",
+     "bounce",
+     "sunnyday"
+    ]
+   },
+   {
+    "species": "infernape",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "flareblitz",
+     "thunderpunch",
+     "machpunch",
+     "earthquake"
+    ]
+   },
+   {
+    "species": "magmortar",
+    "origLevel": 57,
+    "item": "sitrusberry",
+    "moves": [
+     "flamethrower",
+     "thunderbolt",
+     "solarbeam",
+     "hyperbeam"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "lucian",
+  "name": "Lucian",
+  "class": "Elite Four",
+  "order": 12,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "mrmime",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "psychic",
+     "thunderbolt",
+     "reflect",
+     "lightscreen"
+    ]
+   },
+   {
+    "species": "espeon",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "psychic",
+     "shadowball",
+     "quickattack",
+     "signalbeam"
+    ]
+   },
+   {
+    "species": "bronzong",
+    "origLevel": 54,
+    "item": null,
+    "moves": [
+     "psychic",
+     "gyroball",
+     "earthquake",
+     "calmmind"
+    ]
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "psychic",
+     "energyball",
+     "focusblast",
+     "recover"
+    ]
+   },
+   {
+    "species": "gallade",
+    "origLevel": 59,
+    "item": "sitrusberry",
+    "moves": [
+     "drainpunch",
+     "psychocut",
+     "leafblade",
+     "stoneedge"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cynthia",
+  "name": "Cynthia",
+  "class": "Champion",
+  "order": 13,
+  "gen": 4,
+  "game": "platinum",
+  "team": [
+   {
+    "species": "spiritomb",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "darkpulse",
+     "psychic",
+     "silverwind",
+     "shadowball"
+    ]
+   },
+   {
+    "species": "roserade",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "energyball",
+     "sludgebomb",
+     "toxic",
+     "extrasensory"
+    ]
+   },
+   {
+    "species": "togekiss",
+    "origLevel": 60,
+    "item": null,
+    "moves": [
+     "airslash",
+     "aurasphere",
+     "waterpulse",
+     "shockwave"
+    ]
+   },
+   {
+    "species": "lucario",
+    "origLevel": 60,
+    "item": null,
+    "moves": [
+     "aurasphere",
+     "extremespeed",
+     "shadowball",
+     "stoneedge"
+    ]
+   },
+   {
+    "species": "milotic",
+    "origLevel": 58,
+    "item": null,
+    "moves": [
+     "surf",
+     "icebeam",
+     "mirrorcoat",
+     "dragonpulse"
+    ]
+   },
+   {
+    "species": "garchomp",
+    "origLevel": 62,
+    "item": "sitrusberry",
+    "moves": [
+     "dragonrush",
+     "earthquake",
+     "flamethrower",
+     "gigaimpact"
+    ]
+   }
+  ]
+ }
+]

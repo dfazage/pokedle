@@ -107,7 +107,12 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
           <span className="pill" style={{ color: 'var(--primary)' }}>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class}</span>
           <span className="pill yellow">Difficulté {stars(diff.stars)} {diff.label}</span>
         </div>
-        <MonOrb types={trainerTypes} size={120} />
+        <TrainerImg
+          id={ch.trainer.id}
+          gen={ch.gen}
+          className="trainer-sprite lg"
+          fallback={<MonOrb types={trainerTypes} size={120} />}
+        />
         <h1 className="title">{ch.trainer.name}</h1>
         <p className="muted">Pokémon {gi.game} · Ligue {gi.region} · Gen {ch.gen}</p>
       </section>

@@ -101,6 +101,7 @@ h1, h2, h3, p { margin: 0; }
 .hero-trainer-txt p { max-width: none; }
 .hero-trainer > .orb { margin-bottom: 4px; background: rgba(255, 255, 255, 0.22); }
 .trainer-sprite { flex: none; width: 96px; height: 96px; object-fit: contain; object-position: bottom; image-rendering: pixelated; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.3)); }
+.trainer-sprite.lg { width: 160px; height: 160px; }
 .hero .cta { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; margin-top: 18px; padding: 14px 18px; border-radius: 999px; background: #fff; color: #d44e47; font-weight: 800; width: 100%; justify-content: center; }
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .tile { border-radius: 20px; padding: 14px; color: #fff; display: flex; flex-direction: column; gap: 2px; min-height: 116px; }

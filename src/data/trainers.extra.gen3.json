@@ -1,0 +1,423 @@
+[
+ {
+  "id": "archie-seafloor",
+  "name": "Archie",
+  "class": "Team Boss",
+  "order": 20,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "archie",
+  "team": [
+   {
+    "species": "mightyena",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "crunch",
+     "doubleedge",
+     "shadowball",
+     "bite"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "crobat",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "sludgebomb",
+     "doubleedge",
+     "fly",
+     "aerialace"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "sharpedo",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "surf",
+     "crunch",
+     "doubleedge",
+     "waterfall"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "maxie-mossdeep",
+  "name": "Maxie",
+  "class": "Team Boss",
+  "order": 21,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "maxie",
+  "team": [
+   {
+    "species": "mightyena",
+    "origLevel": 42,
+    "item": null,
+    "moves": [
+     "crunch",
+     "doubleedge",
+     "shadowball",
+     "bite"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "crobat",
+    "origLevel": 43,
+    "item": null,
+    "moves": [
+     "sludgebomb",
+     "doubleedge",
+     "fly",
+     "aerialace"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "camerupt",
+    "origLevel": 44,
+    "item": null,
+    "moves": [
+     "eruption",
+     "earthquake",
+     "doubleedge",
+     "overheat"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "tabitha-mossdeep",
+  "name": "Tabitha",
+  "class": "Team Executive",
+  "order": 22,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "tabitha",
+  "team": [
+   {
+    "species": "camerupt",
+    "origLevel": 36,
+    "item": null,
+    "moves": [
+     "eruption",
+     "earthquake",
+     "doubleedge",
+     "overheat"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "mightyena",
+    "origLevel": 38,
+    "item": null,
+    "moves": [
+     "crunch",
+     "doubleedge",
+     "shadowball",
+     "bite"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "golbat",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "sludgebomb",
+     "doubleedge",
+     "aerialace",
+     "wingattack"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "shelly-seafloor",
+  "name": "Shelly",
+  "class": "Team Executive",
+  "order": 23,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "shelly",
+  "team": [
+   {
+    "species": "sharpedo",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "surf",
+     "crunch",
+     "doubleedge",
+     "waterfall"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "mightyena",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "crunch",
+     "doubleedge",
+     "shadowball",
+     "bite"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "matt-chimney",
+  "name": "Matt",
+  "class": "Team Executive",
+  "order": 24,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "matt",
+  "team": [
+   {
+    "species": "mightyena",
+    "origLevel": 34,
+    "item": null,
+    "moves": [
+     "crunch",
+     "doubleedge",
+     "shadowball",
+     "bite"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "golbat",
+    "origLevel": 34,
+    "item": null,
+    "moves": [
+     "sludgebomb",
+     "doubleedge",
+     "aerialace",
+     "wingattack"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "brendan-lilycove",
+  "name": "Brendan",
+  "class": "Rival",
+  "order": 25,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "brendan",
+  "team": [
+   {
+    "species": "tropius",
+    "origLevel": 31,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "earthquake",
+     "fly",
+     "aerialace"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "slugma",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "overheat",
+     "doubleedge",
+     "rockslide",
+     "fireblast"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "pelipper",
+    "origLevel": 32,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "doubleedge",
+     "fly",
+     "surf"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "grovyle",
+    "origLevel": 34,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "leafblade",
+     "brickbreak",
+     "gigadrain"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "wally-victoryroad",
+  "name": "Wally",
+  "class": "Rival",
+  "order": 26,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "wally",
+  "team": [
+   {
+    "species": "altaria",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "aerialace",
+     "safeguard",
+     "dragonbreath",
+     "dragondance"
+    ]
+   },
+   {
+    "species": "delcatty",
+    "origLevel": 55,
+    "item": null,
+    "moves": [
+     "sing",
+     "assist",
+     "charm",
+     "faintattack"
+    ]
+   },
+   {
+    "species": "roselia",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "magicalleaf",
+     "leechseed",
+     "gigadrain",
+     "toxic"
+    ]
+   },
+   {
+    "species": "magneton",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "supersonic",
+     "thunderbolt",
+     "triattack",
+     "screech"
+    ]
+   },
+   {
+    "species": "gardevoir",
+    "origLevel": 57,
+    "item": null,
+    "moves": [
+     "doubleteam",
+     "calmmind",
+     "psychic",
+     "futuresight"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "steven-meteorfalls",
+  "name": "Steven",
+  "class": "Former Champion",
+  "order": 27,
+  "gen": 3,
+  "game": "emerald",
+  "stage": null,
+  "sprite": "steven",
+  "team": [
+   {
+    "species": "skarmory",
+    "origLevel": 77,
+    "item": null,
+    "moves": [
+     "toxic",
+     "aerialace",
+     "spikes",
+     "steelwing"
+    ]
+   },
+   {
+    "species": "claydol",
+    "origLevel": 75,
+    "item": null,
+    "moves": [
+     "reflect",
+     "lightscreen",
+     "ancientpower",
+     "earthquake"
+    ]
+   },
+   {
+    "species": "aggron",
+    "origLevel": 76,
+    "item": null,
+    "moves": [
+     "thunder",
+     "earthquake",
+     "solarbeam",
+     "dragonclaw"
+    ]
+   },
+   {
+    "species": "cradily",
+    "origLevel": 76,
+    "item": null,
+    "moves": [
+     "gigadrain",
+     "ancientpower",
+     "ingrain",
+     "confuseray"
+    ]
+   },
+   {
+    "species": "armaldo",
+    "origLevel": 76,
+    "item": null,
+    "moves": [
+     "waterpulse",
+     "ancientpower",
+     "aerialace",
+     "slash"
+    ]
+   },
+   {
+    "species": "metagross",
+    "origLevel": 78,
+    "item": "sitrusberry",
+    "moves": [
+     "earthquake",
+     "psychic",
+     "meteormash",
+     "shadowball"
+    ]
+   }
+  ]
+ }
+]

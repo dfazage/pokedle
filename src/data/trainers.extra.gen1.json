@@ -1,0 +1,266 @@
+[
+ {
+  "id": "giovanni-rocket",
+  "name": "Giovanni",
+  "class": "Team Boss",
+  "order": 20,
+  "gen": 1,
+  "game": "red",
+  "stage": "Repaire Rocket",
+  "sprite": "giovanni",
+  "team": [
+   {
+    "species": "onix",
+    "origLevel": 25,
+    "item": null,
+    "moves": [
+     "dig",
+     "rockslide",
+     "doubleedge",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rhyhorn",
+    "origLevel": 24,
+    "item": null,
+    "moves": [
+     "dig",
+     "fireblast",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "kangaskhan",
+    "origLevel": 29,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "blizzard",
+     "fireblast",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "giovanni-silph",
+  "name": "Giovanni",
+  "class": "Team Boss",
+  "order": 21,
+  "gen": 1,
+  "game": "red",
+  "stage": "Sylphe SARL",
+  "sprite": "giovanni",
+  "team": [
+   {
+    "species": "nidorino",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "blizzard",
+     "doubleedge",
+     "thunderbolt",
+     "icebeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "kangaskhan",
+    "origLevel": 35,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "blizzard",
+     "fireblast",
+     "bodyslam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rhyhorn",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "dig",
+     "fireblast",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "nidoqueen",
+    "origLevel": 41,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "blizzard",
+     "fireblast",
+     "doubleedge"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "blue-silph",
+  "name": "Blue",
+  "class": "Rival",
+  "order": 22,
+  "gen": 1,
+  "game": "red",
+  "stage": "Sylphe SARL",
+  "sprite": "blue",
+  "team": [
+   {
+    "species": "pidgeot",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "fly",
+     "takedown",
+     "swift"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "exeggcute",
+    "origLevel": 38,
+    "item": null,
+    "moves": [
+     "psychic",
+     "doubleedge",
+     "takedown",
+     "eggbomb"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "gyarados",
+    "origLevel": 35,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "blizzard",
+     "fireblast",
+     "surf"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 35,
+    "item": null,
+    "moves": [
+     "psychic",
+     "dig",
+     "doubleedge",
+     "psybeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "charizard",
+    "origLevel": 40,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "flamethrower"
+    ],
+    "autoMoves": true
+   }
+  ]
+ },
+ {
+  "id": "blue-route22",
+  "name": "Blue",
+  "class": "Rival",
+  "order": 23,
+  "gen": 1,
+  "game": "red",
+  "stage": "Route 22",
+  "sprite": "blue",
+  "team": [
+   {
+    "species": "pidgeot",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "doubleedge",
+     "fly",
+     "takedown",
+     "swift"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "rhyhorn",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "dig",
+     "fireblast",
+     "rockslide",
+     "earthquake"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "exeggcute",
+    "origLevel": 45,
+    "item": null,
+    "moves": [
+     "psychic",
+     "doubleedge",
+     "takedown",
+     "eggbomb"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "gyarados",
+    "origLevel": 47,
+    "item": null,
+    "moves": [
+     "hydropump",
+     "blizzard",
+     "fireblast",
+     "surf"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "alakazam",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "psychic",
+     "dig",
+     "doubleedge",
+     "psybeam"
+    ],
+    "autoMoves": true
+   },
+   {
+    "species": "charizard",
+    "origLevel": 53,
+    "item": null,
+    "moves": [
+     "fireblast",
+     "dig",
+     "doubleedge",
+     "flamethrower"
+    ],
+    "autoMoves": true
+   }
+  ]
+ }
+]

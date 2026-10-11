@@ -25,8 +25,8 @@ async function autoMoves(dex, gen, speciesId) {
 }
 
 let problems = 0;
-for (const gen of [1, 2, 3, 4]) {
-  const file = `src/data/trainers.gen${gen}.json`;
+const FILES = (gen) => [`src/data/trainers.gen${gen}.json`, `src/data/trainers.extra.gen${gen}.json`].filter((f) => fs.existsSync(f));
+for (const gen of [1, 2, 3, 4]) for (const file of FILES(gen)) {
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
   const dex = Dex.forGen(gen);
   let filled = 0;
@@ -38,7 +38,7 @@ for (const gen of [1, 2, 3, 4]) {
     if (m.moves.length === 0) { m.moves = await autoMoves(dex, gen, m.species); filled++; m.autoMoves = true; }
   }
   fs.writeFileSync(file, JSON.stringify(data, null, 1));
-  console.log(`gen${gen}: ${data.length} dresseurs, attaques générées pour ${filled} Pokémon`);
+  console.log(`${file}: ${data.length} dresseurs, attaques générées pour ${filled} Pokémon`);
 }
 console.log(problems ? `${problems} problème(s)` : 'OK : tout est valide');
 const demo = JSON.parse(fs.readFileSync('src/data/trainers.gen1.json', 'utf8'));

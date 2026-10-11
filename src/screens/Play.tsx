@@ -2,7 +2,7 @@ import { PartyList, MonSprite } from './Party'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight } from 'lucide-react'
 import type { Ctx } from './types'
-import { CLASS_FR, GEN_INFO, mvFr, spFr } from '../game/fr'
+import { classLabel, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
@@ -47,10 +47,10 @@ export function Home(c: Ctx) {
         <div className="hero-trainer">
           <div className="hero-trainer-txt">
             <h2>{ch.trainer.name}</h2>
-            <p>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
+            <p>{classLabel(ch.trainer)} · Pokémon {gi.game}. 1 seule tentative aujourd’hui, même équipe imposée pour tous !</p>
           </div>
           <TrainerImg
-            id={ch.trainer.id}
+            id={ch.trainer.sprite ?? ch.trainer.id}
             gen={ch.gen}
             className="trainer-sprite"
             fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={72} />}
@@ -105,11 +105,11 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
       </div>
       <section className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
         <div className="row" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
-          <span className="pill" style={{ color: 'var(--primary)' }}>{CLASS_FR[ch.trainer.class] ?? ch.trainer.class}</span>
+          <span className="pill" style={{ color: 'var(--primary)' }}>{classLabel(ch.trainer)}</span>
           <span className="pill yellow">Difficulté {stars(diff.stars)} {diff.label}</span>
         </div>
         <TrainerImg
-          id={ch.trainer.id}
+          id={ch.trainer.sprite ?? ch.trainer.id}
           gen={ch.gen}
           className="trainer-sprite lg"
           fallback={<MonOrb types={trainerTypes} size={120} />}

@@ -20,4 +20,6 @@ export interface Ctx {
   /** Admin : efface le combat du jour (serveur + local) pour le rejouer. */
   onAdminReset: () => void
   onAdminReroll: () => void
+  /** Admin : efface le combat du jour de tous les joueurs. */
+  onAdminResetAll: () => void
 }

@@ -12,7 +12,7 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, type LeaderRow } from './game/cloud'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
@@ -37,6 +37,7 @@ function saveChoices(day: string, choices: string[]) {
   }
 }
 
+const resetKey = (day: string) => `pokedle:reset:${day}`
 const orderKey = (day: string) => `pokedle:order:${day}`
 function loadOrder(day: string): number[] | null {
   try {
@@ -133,6 +134,36 @@ export default function App() {
       setTimeout(() => load(sess?.user ?? null), 0)
     })
     return () => sub.subscription.unsubscribe()
+  }, [today, refreshCloud])
+
+  // Reset « pour tous » décidé par un admin : on vide l'état local du jour si le numéro de reset a changé.
+  useEffect(() => {
+    if (!supabase) return
+    let cancelled = false
+    ;(async () => {
+      const n = await fetchDailyResetN(today)
+      if (cancelled) return
+      let seen = 0
+      try {
+        seen = Number(localStorage.getItem(resetKey(today)) ?? 0)
+      } catch {
+        /* ignore */
+      }
+      if (n === seen) return
+      try {
+        localStorage.setItem(resetKey(today), String(n))
+      } catch {
+        /* ignore */
+      }
+      if (n > seen) {
+        resetLocalToday()
+        await refreshCloud()
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today, refreshCloud])
 
   // Calcul du défi du jour (quelques secondes sur mobile) : on laisse l'écran se dessiner avant.
@@ -258,6 +289,40 @@ export default function App() {
     setScreen('home')
   }
 
+  const resetLocalToday = () => {
+    try {
+      localStorage.removeItem(progressKey(today))
+      localStorage.removeItem(orderKey(today))
+    } catch {
+      /* ignore */
+    }
+    removeRecord(today)
+    session.current = null
+    choices.current = []
+    setOrder(null)
+    setView(null)
+    setQueue([])
+    setPending(null)
+  }
+
+  const adminResetAll = async () => {
+    if (!isAdmin) return
+    if (!window.confirm('Réinitialiser le combat du jour pour TOUS les joueurs ? Tous les résultats d’aujourd’hui seront supprimés (stats et séries comprises).')) return
+    const n = await adminResetTodayAll()
+    if (n === null) {
+      window.alert('Reset impossible (droits admin ou connexion).')
+      return
+    }
+    try {
+      localStorage.setItem(resetKey(today), String(n))
+    } catch {
+      /* ignore */
+    }
+    resetLocalToday()
+    await refreshCloud()
+    setScreen('home')
+  }
+
   const adminReset = async () => {
     if (!isAdmin) return
     if (!window.confirm('Réinitialiser le combat du jour (résultat, progression, ordre de l’équipe) ?')) return
@@ -326,7 +391,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll }
+  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen('home')
 
   if (screen === 'battle' && view) {

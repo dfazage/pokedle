@@ -90,6 +90,20 @@ export async function adminResetToday(): Promise<boolean> {
   return !error
 }
 
+/** Admin uniquement : efface le combat du jour de TOUS les joueurs. Renvoie le nouveau numéro de reset, ou null. */
+export async function adminResetTodayAll(): Promise<number | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.rpc('admin_reset_today_all')
+  return error || typeof data !== 'number' ? null : data
+}
+
+/** Numéro de reset du jour (0 par défaut ; incrémenté quand un admin réinitialise pour tous). */
+export async function fetchDailyResetN(day: string): Promise<number> {
+  if (!supabase) return 0
+  const { data, error } = await supabase.rpc('daily_reset_n', { p_day: day })
+  return error || typeof data !== 'number' ? 0 : data
+}
+
 export async function fetchLeaderboard(): Promise<LeaderRow[]> {
   if (!supabase) return []
   const { data, error } = await supabase.rpc('leaderboard_v2', { limit_n: 50 })

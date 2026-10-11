@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Star, Sun, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
@@ -153,6 +153,18 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
 export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: (t: 'auto' | 'light' | 'dark') => void; version: string }) {
   const opts: ['light' | 'dark' | 'auto', string, typeof Sun][] = [['light', 'Clair', Sun], ['dark', 'Sombre', Moon], ['auto', 'Auto', Monitor]]
   const rate = c.stats.played ? Math.round((c.stats.totalWins / c.stats.played) * 100) : 0
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBusy(true)
+    const r = await c.onRename(draft)
+    setBusy(false)
+    if (r === 'ok') setEditing(false)
+    else setErr(r === 'taken' ? 'Ce pseudo est déjà pris.' : r === 'invalid' ? 'Le pseudo doit faire entre 3 et 20 caractères.' : 'Impossible d’enregistrer pour le moment.')
+  }
   return (
     <>
       <TopBar title="Paramètres" right={<span className="pill yellow"><Flame size={14} /> {c.stats.currentStreak}</span>} />
@@ -160,10 +172,26 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
       <section className="card stack">
         <div className="row">
           <div className="avatar">{(c.username ?? 'I')[0].toUpperCase()}</div>
-          <div className="grow">
-            <b style={{ fontSize: 20 }}>{c.username ?? 'Invité'}</b>
-            <div className="muted small">{c.email ?? 'Partie non synchronisée'}</div>
-          </div>
+          {editing ? (
+            <form className="grow stack" style={{ gap: 6 }} onSubmit={save}>
+              <div className="row" style={{ gap: 6 }}>
+                <label className="field grow" style={{ margin: 0 }}>
+                  <input autoFocus aria-label="Pseudo" placeholder="3 à 20 caractères" minLength={3} maxLength={20} required value={draft} onChange={(e) => { setDraft(e.target.value); setErr('') }} />
+                </label>
+                <button type="submit" className="iconbtn" aria-label="Enregistrer" disabled={busy}><Check size={18} /></button>
+                <button type="button" className="iconbtn" aria-label="Annuler" onClick={() => setEditing(false)}><X size={18} /></button>
+              </div>
+              {err && <div className="small" style={{ color: 'var(--secondary)' }}>{err}</div>}
+            </form>
+          ) : (
+            <>
+              <div className="grow">
+                <b style={{ fontSize: 20 }}>{c.username ?? (c.email ? 'Choisis ton pseudo' : 'Invité')}</b>
+                <div className="muted small">{c.email ?? 'Partie non synchronisée'}</div>
+              </div>
+              {c.email && <button className="iconbtn" aria-label="Modifier le pseudo" onClick={() => { setDraft(c.username ?? ''); setErr(''); setEditing(true) }}><Pencil size={18} /></button>}
+            </>
+          )}
         </div>
         <div className="row between" style={{ padding: 14, borderRadius: 16, background: 'rgba(247, 201, 72, 0.16)', border: '1px solid rgba(247, 201, 72, 0.4)' }}>
           <span className="row" style={{ gap: 8 }}><Star size={20} fill="var(--yellow)" style={{ color: 'var(--yellow)' }} /><span className="lab" style={{ margin: 0 }}>Points</span></span>

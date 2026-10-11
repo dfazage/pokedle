@@ -1,5 +1,6 @@
 import type { DailyChallenge } from '../game/daily'
 import type { DayRecord, Stats } from '../game/history'
+import type { RenameResult } from '../game/cloud'
 import type { ScoreSummary } from '../game/scoring'
 import type { Screen } from '../ui/kit'
 
@@ -10,6 +11,8 @@ export interface Ctx {
   stats: Stats
   score: ScoreSummary
   username: string | null
+  /** Change le pseudo du compte connecté. */
+  onRename: (name: string) => Promise<RenameResult>
   email: string | null
   world: { players: number; wins: number } | null
   inProgress: boolean

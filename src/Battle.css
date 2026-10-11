@@ -9,16 +9,20 @@
 .grass { position: absolute; inset: 54% 0 0 0; background: repeating-linear-gradient(0deg, #58a840 0 calc(var(--u) * 5), #68b850 calc(var(--u) * 5) calc(var(--u) * 10)); border-top: calc(var(--u) * 2) solid #387828; }
 .plat { position: absolute; border-radius: 50%; background: radial-gradient(ellipse at center, #b8d868 0 55%, #88a840 56% 100%); box-shadow: 0 calc(var(--u) * 2) 0 #587828; }
 .foe-plat { width: calc(var(--u) * 104); height: calc(var(--u) * 24); right: calc(var(--u) * 14); top: calc(var(--u) * 66); }
-.own-plat { width: calc(var(--u) * 150); height: calc(var(--u) * 34); left: calc(var(--u) * -14); bottom: calc(var(--u) * 46); }
+.own-plat { width: calc(var(--u) * 150); height: calc(var(--u) * 34); left: calc(var(--u) * -14); bottom: calc(var(--u) * 29); }
 .spw { position: absolute; }
 .sprite { display: block; width: 100%; height: 100%; image-rendering: pixelated; object-fit: contain; animation: bob 1.1s steps(2) infinite; }
 @keyframes bob { 0% { transform: translateY(0); } 50% { transform: translateY(calc(var(--u) * -1.5)); } }
-.spw.front { width: calc(var(--u) * 64); height: calc(var(--u) * 64); right: calc(var(--u) * 34); top: calc(var(--u) * 28); }
-.spw.back { width: calc(var(--u) * 96); height: calc(var(--u) * 96); left: calc(var(--u) * 14); bottom: calc(var(--u) * 50); }
+.sprite { object-position: center bottom; }
+/* --pad = part transparente sous le Pokémon dans l'image (mesurée au chargement) : les pieds se posent toujours au même endroit. */
+/* Adverse : pieds au centre de sa plateforme. Joueur : bas du sprite collé au cadre de message (comme sur DS, le cadre en cache un peu). */
+.spw.front { --size: 80; width: calc(var(--u) * var(--size)); height: calc(var(--u) * var(--size)); right: calc(var(--u) * 26); bottom: calc(var(--u) * (112 - var(--size) * var(--pad, 0))); }
+.spw.back { --size: 96; width: calc(var(--u) * var(--size)); height: calc(var(--u) * var(--size)); left: calc(var(--u) * 14); bottom: calc(var(--u) * (42 - var(--size) * var(--pad, 0))); }
 
-.hpbox { position: absolute; background: #f8f0d8; border: calc(var(--u) * 2) solid #484858; border-radius: calc(var(--u) * 3); padding: calc(var(--u) * 3) calc(var(--u) * 5); box-shadow: 0 0 0 calc(var(--u) * 1) #d8a038; width: calc(var(--u) * 112); }
-.hpbox.foe { left: calc(var(--u) * 8); top: calc(var(--u) * 14); }
-.hpbox.own { right: calc(var(--u) * 6); bottom: calc(var(--u) * 54); width: calc(var(--u) * 118); }
+.hpcol { position: absolute; z-index: 2; display: flex; flex-direction: column; gap: calc(var(--u) * 2); }
+.hpcol.foe { left: calc(var(--u) * 5); top: calc(var(--u) * 4); width: calc(var(--u) * 116); }
+.hpcol.own { right: calc(var(--u) * 5); bottom: calc(var(--u) * 47); width: calc(var(--u) * 122); }
+.hpbox { background: #f8f0d8; border: calc(var(--u) * 2) solid #484858; border-radius: calc(var(--u) * 3); padding: calc(var(--u) * 3) calc(var(--u) * 5); box-shadow: 0 0 0 calc(var(--u) * 1) #d8a038; }
 .hpbox .hrow { display: flex; justify-content: space-between; align-items: center; }
 .hpbox .nm { font-size: calc(var(--u) * 7); }
 .hpbox .lv { font-size: calc(var(--u) * 6); }
@@ -83,3 +87,29 @@
 .st-v { background: #7a6ac8; } .st-leechseed { background: #58a838; } .st-attract { background: #e8689a; } .st-taunt { background: #c04848; } .st-encore { background: #3888b8; } .st-yawn { background: #98a0b0; }
 .spw.is-cnf .sprite { animation: wobble .6s steps(4) infinite; }
 @keyframes wobble { 25% { transform: translateX(calc(var(--u) * -2)) rotate(-4deg); } 75% { transform: translateX(calc(var(--u) * 2)) rotate(4deg); } }
+
+/* ───── Au-dessus des PV : stats modifiées, faiblesses et résistances ───── */
+.mxpanel { display: flex; flex-direction: column; gap: calc(var(--u) * 1.5); }
+.hpcol.own .mxpanel { align-items: flex-end; }
+.bsrow, .mxrow { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 1.5); align-items: center; }
+.mxrow { background: rgba(32, 32, 48, .66); border-radius: calc(var(--u) * 3); padding: calc(var(--u) * 1.6) calc(var(--u) * 2); }
+.mk { width: calc(var(--u) * 4.5); height: calc(var(--u) * 4.5); border-radius: 50%; flex: none; margin-right: calc(var(--u) * 0.6); }
+.mxrow.weak .mk { background: #f85838; } .mxrow.resist .mk { background: #48d048; }
+.mx { display: inline-flex; align-items: center; gap: calc(var(--u) * 0.8); background: var(--tc); color: #fff; border-radius: calc(var(--u) * 2); padding: calc(var(--u) * 0.8) calc(var(--u) * 1.8) calc(var(--u) * 0.8) calc(var(--u) * 1); box-shadow: inset 0 0 0 calc(var(--u) * 0.6) rgba(0, 0, 0, .38); line-height: 1; }
+.mx .ti, .tchip .ti { width: calc(var(--u) * 6.5); height: calc(var(--u) * 6.5); display: inline-grid; place-items: center; flex: none; }
+.mx .ti svg, .tchip .ti svg { width: 100%; height: 100%; }
+.mx b { font-family: system-ui, -apple-system, sans-serif; font-weight: 800; font-size: calc(var(--u) * 6.4); text-shadow: 0 calc(var(--u) * 0.5) 0 rgba(0, 0, 0, .55); }
+.mx.m4 { box-shadow: inset 0 0 0 calc(var(--u) * 0.6) rgba(0, 0, 0, .38), 0 0 0 calc(var(--u) * 0.9) #f85838; } .mx.m4 b { color: #ffe27a; }
+.mx.m0 { filter: saturate(.55) brightness(.8); } .mx.m0_25 { box-shadow: inset 0 0 0 calc(var(--u) * 0.6) rgba(0, 0, 0, .38), 0 0 0 calc(var(--u) * 0.9) #48d048; }
+.bs { font-size: calc(var(--u) * 5); line-height: 1; padding: calc(var(--u) * 1.4) calc(var(--u) * 2.2); border-radius: calc(var(--u) * 2); color: #fff; border: calc(var(--u) * 0.7) solid rgba(0, 0, 0, .4); text-shadow: 0 calc(var(--u) * 0.5) 0 rgba(0, 0, 0, .5); }
+.bs.up { background: #2e9a46; } .bs.down { background: #c0403c; }
+
+/* ───── Boutons d'attaque : icône de type, catégorie, puissance ───── */
+.tbtn.move { gap: calc(var(--u) * 2.5); }
+.tbtn.move .tchip { display: inline-flex; align-items: center; gap: calc(var(--u) * 1.5); padding: calc(var(--u) * 1) calc(var(--u) * 3) calc(var(--u) * 1) calc(var(--u) * 1.5); font-size: calc(var(--u) * 5.4); }
+.tbtn.move .mrow:last-child { color: #505058; }
+.cat { width: calc(var(--u) * 17); height: calc(var(--u) * 10.2); flex: none; }
+.cat .cb { fill: #f0f0e8; stroke-width: 1.2; }
+.cat-Physical .cb { stroke: #e0781c; } .cat-Physical .cg { fill: #f08c28; }
+.cat-Special .cb { stroke: #4a78d8; } .cat-Special .cg2 { fill: none; stroke: #4a78d8; stroke-width: 1.3; }
+.cat-Status .cb { stroke: #8890a0; } .cat-Status .cg2 { fill: none; stroke: #8890a0; stroke-width: 1.3; }

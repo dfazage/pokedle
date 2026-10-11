@@ -12,7 +12,7 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { dayKeyUTC } from './game/rng'
 import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, type LeaderRow } from './game/cloud'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
@@ -55,6 +55,7 @@ export default function App() {
   const [onboarded, setOnboarded] = useLocalState<'0' | '1'>('pokedle:onboarded', '0')
   const [screen, setScreen] = useState<Screen>(onboarded === '1' ? 'home' : 'onboarding')
   const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
+  const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
   const [counts, setCounts] = useState<Record<number, number>>({})
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
@@ -142,13 +143,14 @@ export default function App() {
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
         setCounts(daily.TRAINER_COUNTS)
-        setChallenge(daily.buildDaily(today))
+        const salt = await fetchDailySalt(today)
+        if (!cancelled) setChallenge(daily.buildDaily(today, { salt }))
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [today])
+  }, [today, rerollTick])
 
   const finish = useCallback(
     (s: BattleSession) => {
@@ -220,6 +222,30 @@ export default function App() {
     finish(s)
   }
 
+  const adminReroll = async () => {
+    if (!isAdmin) return
+    if (!window.confirm('Re-tirer le dresseur et la team du jour pour TOUT LE MONDE ? Les résultats déjà enregistrés resteront liés à l’ancien dresseur.')) return
+    if ((await adminRerollToday()) === null) {
+      window.alert('Re-tirage impossible (droits admin ou connexion).')
+      return
+    }
+    try {
+      localStorage.removeItem(progressKey(today))
+      localStorage.removeItem(orderKey(today))
+    } catch {
+      /* ignore */
+    }
+    session.current = null
+    choices.current = []
+    setOrder(null)
+    setView(null)
+    setQueue([])
+    setPending(null)
+    setChallenge(null)
+    setRerollTick((n) => n + 1)
+    setScreen('home')
+  }
+
   const adminReset = async () => {
     if (!isAdmin) return
     if (!window.confirm('Réinitialiser le combat du jour (résultat, progression, ordre de l’équipe) ?')) return
@@ -288,7 +314,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset }
+  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll }
   const back = () => setScreen('home')
 
   if (screen === 'battle' && view) {

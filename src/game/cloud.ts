@@ -69,6 +69,20 @@ export async function fetchIsAdmin(): Promise<boolean> {
   return !error && data === true
 }
 
+/** Sel de re-roll du jour (0 par défaut ; incrémenté par un admin). Lisible par tous pour que le défi reste identique. */
+export async function fetchDailySalt(day: string): Promise<number> {
+  if (!supabase) return 0
+  const { data, error } = await supabase.rpc('daily_salt', { p_day: day })
+  return error || typeof data !== 'number' ? 0 : data
+}
+
+/** Admin uniquement : re-tire le dresseur et la team du jour pour tout le monde. Renvoie le nouveau sel, ou null. */
+export async function adminRerollToday(): Promise<number | null> {
+  if (!supabase) return null
+  const { data, error } = await supabase.rpc('admin_reroll_today')
+  return error || typeof data !== 'number' ? null : data
+}
+
 /** Admin uniquement : supprime le résultat du jour (UTC) du compte connecté pour pouvoir rejouer. */
 export async function adminResetToday(): Promise<boolean> {
   if (!supabase) return false

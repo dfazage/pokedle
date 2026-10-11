@@ -19,4 +19,5 @@ export interface Ctx {
   isAdmin: boolean
   /** Admin : efface le combat du jour (serveur + local) pour le rejouer. */
   onAdminReset: () => void
+  onAdminReroll: () => void
 }

@@ -8,11 +8,11 @@ import '@fontsource/plus-jakarta-sans/700.css'
 import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView } from './game/session'
-import { computeStats, getRecord, loadHistory, saveRecord, type DayRecord } from './game/history'
+import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { dayKeyUTC } from './game/rng'
 import { CLASS_FR, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, type LeaderRow } from './game/cloud'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { BottomNav, MonOrb, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
@@ -60,6 +60,7 @@ export default function App() {
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
   const [email, setEmail] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [rows, setRows] = useState<LeaderRow[]>([])
   const [world, setWorld] = useState<{ players: number; wins: number } | null>(null)
   const [view, setView] = useState<BattleView | null>(null)
@@ -110,12 +111,14 @@ export default function App() {
       setEmail(user?.email ?? null)
       if (!user) {
         setUsername(null)
+        setIsAdmin(false)
         setRows([])
         setWorld(null)
         setHistory(loadHistory())
         return
       }
       setUsername(await ensureProfile(user as never))
+      setIsAdmin(await fetchIsAdmin())
       // Résultat joué en invité aujourd'hui : on le rattache au compte s'il n'existe pas encore en ligne.
       const cloud = await fetchHistory()
       const local = getRecord(today)
@@ -206,6 +209,30 @@ export default function App() {
     finish(s)
   }
 
+  const adminReset = async () => {
+    if (!isAdmin) return
+    if (!window.confirm('Réinitialiser le combat du jour (résultat, progression, ordre de l’équipe) ?')) return
+    if (!(await adminResetToday())) {
+      window.alert('Reset impossible (droits admin ou connexion).')
+      return
+    }
+    try {
+      localStorage.removeItem(progressKey(today))
+      localStorage.removeItem(orderKey(today))
+    } catch {
+      /* ignore */
+    }
+    removeRecord(today)
+    session.current = null
+    choices.current = []
+    setOrder(null)
+    setView(null)
+    setQueue([])
+    setPending(null)
+    await refreshCloud()
+    setScreen('home')
+  }
+
   const advance = () => {
     const rest = queue.slice(1)
     setQueue(rest)
@@ -250,7 +277,7 @@ export default function App() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done }
+  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset }
   const back = () => setScreen('home')
 
   if (screen === 'battle' && view) {

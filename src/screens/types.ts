@@ -16,4 +16,7 @@ export interface Ctx {
   /** Ordre de l'équipe du joueur (modifiable tant que le combat n'a pas commencé). */
   moveMon: (from: number, to: number) => void
   orderLocked: boolean
+  isAdmin: boolean
+  /** Admin : efface le combat du jour (serveur + local) pour le rejouer. */
+  onAdminReset: () => void
 }

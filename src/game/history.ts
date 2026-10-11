@@ -38,6 +38,16 @@ export function saveRecord(rec: DayRecord): DayRecord[] {
   return all
 }
 
+export function removeRecord(dayKey: string): DayRecord[] {
+  const all = loadHistory().filter((r) => r.dayKey !== dayKey)
+  try {
+    localStorage.setItem(KEY, JSON.stringify(all))
+  } catch {
+    /* ignore */
+  }
+  return all
+}
+
 export function getRecord(dayKey: string): DayRecord | undefined {
   return loadHistory().find((r) => r.dayKey === dayKey)
 }

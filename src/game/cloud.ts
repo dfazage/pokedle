@@ -55,6 +55,20 @@ export async function submitResult(rec: DayRecord, choices: string[]): Promise<'
   return error.code === '23505' ? 'duplicate' : 'error'
 }
 
+/** Vrai si le compte connecté figure dans la table `admins` (contrôle réel côté serveur). */
+export async function fetchIsAdmin(): Promise<boolean> {
+  if (!supabase) return false
+  const { data, error } = await supabase.rpc('is_admin')
+  return !error && data === true
+}
+
+/** Admin uniquement : supprime le résultat du jour (UTC) du compte connecté pour pouvoir rejouer. */
+export async function adminResetToday(): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.rpc('admin_reset_today')
+  return !error
+}
+
 export async function fetchLeaderboard(): Promise<LeaderRow[]> {
   if (!supabase) return []
   const { data, error } = await supabase.rpc('leaderboard_v2', { limit_n: 50 })

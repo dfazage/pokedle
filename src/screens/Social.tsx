@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Sun, Trophy, Layers } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Sun, Trophy, Layers, RotateCcw } from 'lucide-react'
 import type { Ctx } from './types'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
@@ -190,6 +190,15 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
         <div className="grow"><b>Générations & versions</b><div className="muted small">Jeux utilisés pour les combats quotidiens</div></div>
         <ChevronRight size={18} className="muted" />
       </button>
+      {c.isAdmin && (
+        <>
+          <div className="lab">Admin</div>
+          <button className="card row" onClick={c.onAdminReset} style={{ textAlign: 'left' }}>
+            <RotateCcw size={22} style={{ color: 'var(--secondary)' }} />
+            <div className="grow"><b>Réinitialiser le combat du jour</b><div className="muted small">Efface ton résultat et ta progression pour rejouer</div></div>
+          </button>
+        </>
+      )}
       <p className="muted small" style={{ textAlign: 'center' }}>Pokédle Battle · v{c.version}</p>
     </>
   )

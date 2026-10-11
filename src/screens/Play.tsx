@@ -1,7 +1,8 @@
+import { PartyList, MonSprite } from './Party'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight } from 'lucide-react'
 import type { Ctx } from './types'
-import { CLASS_FR, GEN_INFO, TYPE_FR, mvFr, spFr } from '../game/fr'
+import { CLASS_FR, GEN_INFO, mvFr, spFr } from '../game/fr'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
@@ -57,17 +58,7 @@ export function Home(c: Ctx) {
         <h2 className="h2">Ton équipe du jour</h2>
         <span className="pill">Niv. 100 · Imposée</span>
       </div>
-      <div className="hscroll">
-        {ch.playerPreview.map((m) => (
-          <div key={m.species} className="mon-card" style={monCardStyle(m.types)}>
-            <MonOrb types={m.types} size={54} />
-            <span className="n">{spFr(m.species)}</span>
-            <div className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
-              {m.types.map((t) => <span key={t} className="badge">{TYPE_FR[t]}</span>)}
-            </div>
-          </div>
-        ))}
-      </div>
+      <PartyList team={ch.playerPreview} gen={ch.gen} locked={c.orderLocked} onMove={c.moveMon} />
 
       <button className="card row" onClick={() => (c.email ? undefined : c.go('auth'))} style={{ textAlign: 'left' }}>
         <span className="orb" style={{ width: 48, height: 48, ['--c1' as string]: '#8b6cd9', ['--c2' as string]: '#5ba8f0' }}><BarChart3 size={22} /></span>
@@ -158,7 +149,7 @@ export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
           <button className="iconbtn" onClick={() => next(1)} aria-label="Suivant"><ChevronRight size={20} /></button>
         </div>
         <div className="stack" style={{ alignItems: 'center', margin: '8px 0' }}>
-          <MonOrb types={m.types} size={132} />
+          <MonSprite m={m} size={132} />
           <h1 className="title" style={{ marginTop: 6 }}>{spFr(m.species)}</h1>
           <div className="row">{m.types.map((t) => <TypeBadge key={t} type={t} />)}</div>
         </div>

@@ -1,3 +1,4 @@
+import { lineInfo } from './lineinfo'
 import { Dex } from '@pkmn/dex'
 import { Battle, Teams, type PokemonSet } from '@pkmn/sim'
 import { TeamGenerators } from '@pkmn/randoms'
@@ -36,6 +37,14 @@ export interface PreviewMon {
   stats: { hp: number; atk: number; def: number; spa: number; spd: number; spe: number }
   moves: { name: string; type: string; power: number; category: string }[]
   item: string
+  ability: string
+  nature: string
+  // Données du sprite généré (voir sprites.ts)
+  num: number
+  root: number
+  stage: number
+  heightm: number
+  bst: number
 }
 
 function previewOf(set: PokemonSet, gen: number): PreviewMon {
@@ -59,6 +68,9 @@ function previewOf(set: PokemonSet, gen: number): PreviewMon {
       return { name: mv.name, type: mv.type, power: mv.basePower, category: mv.category }
     }),
     item: set.item,
+    ability: set.ability,
+    nature: set.nature,
+    ...lineInfo(dex, sp),
   }
 }
 

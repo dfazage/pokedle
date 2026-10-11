@@ -13,4 +13,7 @@ export interface Ctx {
   inProgress: boolean
   go: (s: Screen) => void
   onPlay: () => void
+  /** Ordre de l'équipe du joueur (modifiable tant que le combat n'a pas commencé). */
+  moveMon: (from: number, to: number) => void
+  orderLocked: boolean
 }

@@ -36,6 +36,16 @@ function saveChoices(day: string, choices: string[]) {
   }
 }
 
+const orderKey = (day: string) => `pokedle:order:${day}`
+function loadOrder(day: string): number[] | null {
+  try {
+    const o = JSON.parse(localStorage.getItem(orderKey(day)) ?? 'null')
+    return Array.isArray(o) ? o : null
+  } catch {
+    return null
+  }
+}
+
 type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog }
 const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result', 'generations']
 
@@ -44,7 +54,8 @@ export default function App() {
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
   const [onboarded, setOnboarded] = useLocalState<'0' | '1'>('pokedle:onboarded', '0')
   const [screen, setScreen] = useState<Screen>(onboarded === '1' ? 'home' : 'onboarding')
-  const [challenge, setChallenge] = useState<DailyChallenge | null>(null)
+  const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
+  const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
   const [counts, setCounts] = useState<Record<number, number>>({})
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
   const [email, setEmail] = useState<string | null>(null)
@@ -59,6 +70,19 @@ export default function App() {
   const session = useRef<BattleSession | null>(null)
   const choices = useRef<string[]>([])
   const engine = useRef<Engine | null>(null)
+
+  // Équipe dans l'ordre choisi par le joueur (permutation valide, sinon ordre d'origine).
+  const challenge = useMemo(() => {
+    if (!baseChallenge) return null
+    const n = baseChallenge.playerTeam.length
+    const valid = order && order.length === n && [...order].sort((a, b) => a - b).every((v, i) => v === i)
+    if (!valid) return baseChallenge
+    return {
+      ...baseChallenge,
+      playerTeam: order.map((i) => baseChallenge.playerTeam[i]),
+      playerPreview: order.map((i) => baseChallenge.playerPreview[i]),
+    }
+  }, [baseChallenge, order])
 
   // Thème : clair / sombre / auto (suit le système).
   useEffect(() => {
@@ -216,7 +240,17 @@ export default function App() {
       </main>
     )
 
-  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay }
+  const moveMon = (from: number, to: number) => {
+    const cur = order && order.length === challenge.playerTeam.length ? [...order] : challenge.playerTeam.map((_, i) => i)
+    ;[cur[from], cur[to]] = [cur[to], cur[from]]
+    setOrder(cur)
+    try {
+      localStorage.setItem(orderKey(today), JSON.stringify(cur))
+    } catch {
+      /* ignore */
+    }
+  }
+  const ctx: Ctx = { today, challenge, history, stats, username, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done }
   const back = () => setScreen('home')
 
   if (screen === 'battle' && view) {

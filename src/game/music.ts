@@ -8,7 +8,8 @@ import { noise, tone } from './sfx'
 
 type Ctx = BaseAudioContext
 export type ThemeKind = 'gym' | 'elite' | 'champion' | 'team' | 'rival' | 'special'
-export interface MusicChoice { kind: ThemeKind; gen: number }
+/** `boosted` : adversaire redoutable (aura enflammée), qui a son propre morceau de combat. */
+export interface MusicChoice { kind: ThemeKind; gen: number; boosted?: boolean }
 
 const SCALES = {
   minor: [0, 2, 3, 5, 7, 8, 10],
@@ -62,7 +63,7 @@ const CLASS_KIND: Record<string, ThemeKind> = {
   'Gym Leader': 'gym', 'Kanto Gym Leader': 'gym', 'Elite Four': 'elite', Champion: 'champion',
   'Team Boss': 'team', 'Team Executive': 'team', Rival: 'rival', 'Former Champion': 'special',
 }
-export const musicFor = (trainerClass: string, gen: number): MusicChoice => ({ kind: CLASS_KIND[trainerClass] ?? 'gym', gen })
+export const musicFor = (trainerClass: string, gen: number, boosted = false): MusicChoice => ({ kind: CLASS_KIND[trainerClass] ?? 'gym', gen, boosted })
 
 // ——— Composition ———
 const BARS = 16 // 2 sections de 8 mesures : A (thème) puis B (variation)
@@ -297,8 +298,9 @@ export function stopMusic(fade = 0.8) {
 // la suspension en arrière-plan s'appliquent comme pour le reste. Les fichiers sont repérés par leur numéro de piste.
 const FILES = import.meta.glob('../assets/bgm/*.mp3', { query: '?url', import: 'default', eager: true }) as Record<string, string>
 const TRACKS = { team: { battle: '025', win: '026' }, other: { battle: '094', win: '097' } } as const
-const trackUrl = (kind: ThemeKind, part: 'battle' | 'win') => {
-  const n = TRACKS[kind === 'team' ? 'team' : 'other'][part]
+const BOOSTED_BATTLE = '3-105' // « Battle! (Champion) », pour les adversaires redoutables
+const trackUrl = (kind: ThemeKind, part: 'battle' | 'win', boosted = false) => {
+  const n = boosted && part === 'battle' ? BOOSTED_BATTLE : TRACKS[kind === 'team' ? 'team' : 'other'][part]
   return Object.entries(FILES).find(([path]) => (path.split('/').pop() ?? '').startsWith(n))?.[1]
 }
 
@@ -329,10 +331,10 @@ function startTrack(url: string, o: { loop: boolean; gain: number; onError?: () 
   return true
 }
 
-/** Lance la musique du combat : morceau fourni si présent (Team Magma/Aqua pour les méchants, Conseil des 4 pour le reste), sinon chiptune. À appeler depuis un geste utilisateur. */
+/** Lance la musique du combat : morceau fourni si présent (Champion pour les adversaires redoutables, sinon Team Magma/Aqua pour les méchants, Conseil des 4 pour le reste), sinon chiptune. À appeler depuis un geste utilisateur. */
 export function startMusic(choice: MusicChoice) {
   stopMusic(0.05)
-  const url = trackUrl(choice.kind, 'battle')
+  const url = trackUrl(choice.kind, 'battle', choice.boosted)
   if (url && startTrack(url, { loop: true, gain: 0.5, onError: () => { stopMusic(0.05); startChip(choice) } })) return
   startChip(choice)
 }

@@ -12,7 +12,7 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spFr } from './game/fr'
 import { dayNumber } from './game/info'
-import { scoreHistory } from './game/scoring'
+import { isFormidable, scoreHistory } from './game/scoring'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
@@ -239,7 +239,7 @@ export default function App() {
       setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
     }
     setScreen('battle')
-    startMusic(musicFor(challenge.trainer.class, challenge.gen)) // lancé par le clic sur « Lancer le combat »
+    startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name))) // lancé par le clic sur « Lancer le combat »
     finish(s)
   }, [challenge, today, finish])
 
@@ -249,7 +249,7 @@ export default function App() {
   useEffect(() => { if (screen !== 'battle' && screen !== 'result') stopMusic(0.6) }, [screen])
   useEffect(() => {
     if (!battleOver || !challenge) return
-    if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen))
+    if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name)))
     else stopMusic(1.5)
   }, [battleOver]) // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -19,7 +19,8 @@ import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
-import { Admin, Auth, Generations, Onboarding, ResetPassword } from './screens/Account'
+import { Admin, Auth, Onboarding, ResetPassword } from './screens/Account'
+import { Guide } from './screens/Guide'
 import type { Ctx } from './screens/types'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
@@ -50,7 +51,7 @@ function loadOrder(day: string): number[] | null {
 }
 
 type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog; formatSteps: typeof import('./game/session').formatSteps }
-const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result', 'generations']
+const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result']
 
 export default function App() {
   const today = useMemo(() => dayKeyUTC(), [])
@@ -63,7 +64,6 @@ export default function App() {
   const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
   const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
-  const [counts, setCounts] = useState<Record<number, number>>({})
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
   const [email, setEmail] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
@@ -184,7 +184,6 @@ export default function App() {
       engine.current = { BattleSession: sess.BattleSession, formatLog: sess.formatLog, formatSteps: sess.formatSteps }
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
-        setCounts(daily.TRAINER_COUNTS)
         const salt = await fetchDailySalt(today)
         if (!cancelled) setChallenge(daily.buildDaily(today, { salt }))
       }
@@ -451,6 +450,8 @@ export default function App() {
     )
   }
 
+  if (screen === 'guide') return <Guide {...ctx} onBack={() => setScreen('settings')} />
+
   const showNav = NAV_SCREENS.includes(screen)
   return (
     <main className={showNav ? 'app' : 'app nonav'}>
@@ -465,7 +466,6 @@ export default function App() {
       {screen === 'auth' && <Auth {...ctx} onBack={back} onGuest={playAsGuest} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
-      {screen === 'generations' && <Generations {...ctx} counts={counts} onBack={back} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
       <span hidden>{dayNumber(today)}</span>
     </main>

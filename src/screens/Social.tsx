@@ -189,9 +189,9 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
         <p className="muted small" style={{ marginTop: 10 }}>Le combat garde toujours son écran sombre façon GBA.</p>
       </section>
       <div className="lab">Jeu</div>
-      <button className="card row" onClick={() => c.go('generations')} style={{ textAlign: 'left' }}>
+      <button className="card row" onClick={() => c.go('guide')} style={{ textAlign: 'left' }}>
         <Layers size={22} style={{ color: 'var(--violet)' }} />
-        <div className="grow"><b>Générations & versions</b><div className="muted small">Jeux utilisés pour les combats quotidiens</div></div>
+        <div className="grow"><b>Guide du jeu</b><div className="muted small">Comment ça marche, le tirage du jour, les points</div></div>
         <ChevronRight size={18} className="muted" />
       </button>
       {c.isAdmin && (

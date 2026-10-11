@@ -41,7 +41,7 @@ export function Home(c: Ctx) {
 
       <section className="hero">
         <div className="row" style={{ flexWrap: 'wrap' }}>
-          <button className="chip" onClick={() => c.go('generations')}>Ligue {gi.region} · Gen {ch.gen}</button>
+          <button className="chip" onClick={() => c.go('guide')}>Ligue {gi.region} · Gen {ch.gen}</button>
           <span className="chip y">Difficulté {stars(diff.stars)}</span>
         </div>
         <div className="hero-trainer">

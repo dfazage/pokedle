@@ -1,11 +1,15 @@
-// Profils compétitifs (Pokémon Showdown / Smogon, gen 4) : nature + EV, talent et objet les plus joués par espèce.
-// Données générées par scripts/build_profiles_gen4.py (stats d'usage OU/Ubers/UU/NU/PU, sets Smogon en complément).
+// Profils compétitifs (Pokémon Showdown / Smogon, gens 4 et 5) : nature + EV, talent et objet les plus joués par espèce.
+// Données générées par scripts/build_profiles_gen4.py et build_profiles_gen5.py (stats d'usage OU/Ubers/UU/(RU)/NU/PU, sets Smogon en complément).
 import type { PokemonSet } from '@pkmn/sim'
 import type { Dex as DexType } from '@pkmn/dex'
-import PROFILES from '../data/profiles.gen4.json'
+import PROFILES4 from '../data/profiles.gen4.json'
+import PROFILES5 from '../data/profiles.gen5.json'
 
 type Profile = { s: [string, number[]][]; a: string[]; i: string[] }
-const DATA = PROFILES as unknown as Record<string, Profile>
+const DATA_BY_GEN: Record<number, Record<string, Profile>> = {
+  4: PROFILES4 as unknown as Record<string, Profile>,
+  5: PROFILES5 as unknown as Record<string, Profile>,
+}
 type Dx = ReturnType<typeof DexType.forGen>
 type Orient = 'phys' | 'spec' | 'mixed' | 'status'
 const STATS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'] as const
@@ -53,7 +57,8 @@ function pickSpread(dex: Dx, p: Profile | undefined, species: string, orient: Or
  */
 export function applyProfile(set: PokemonSet, dex: Dx, opts: { ability?: boolean; item?: boolean } = {}): PokemonSet {
   const sp = dex.species.get(set.species)
-  const p = DATA[sp.name] ?? DATA[sp.baseSpecies]
+  const data = DATA_BY_GEN[dex.gen] ?? DATA_BY_GEN[5]
+  const p = data[sp.name] ?? data[sp.baseSpecies]
   const { orient, attacks, statuses } = orientationOf(dex, set.moves)
   const [nature, evs] = pickSpread(dex, p, sp.name, orient)
   const out: PokemonSet = { ...set, nature, evs: evObj(evs) }

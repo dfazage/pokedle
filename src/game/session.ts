@@ -3,7 +3,7 @@ import { Battle, Teams } from '@pkmn/sim'
 import { aiChoose } from './ai'
 import { mvName, spName } from './fr'
 import { hasKey, t, type Key } from '../i18n'
-import { BATTLE_GEN, type DailyChallenge } from './daily'
+import { battleFormat, type DailyChallenge } from './daily'
 import type { Cue, Side, SfxId } from './battleCues'
 import { HIT_MARK } from './battleCues'
 
@@ -57,9 +57,9 @@ export class BattleSession {
   private logIdx = 0
   constructor(challenge: DailyChallenge) {
     this.challenge = challenge
-    const gen = BATTLE_GEN // moteur toujours en gen 4, quel que soit le dresseur (voir daily.ts)
+    const gen = challenge.battleGen // moteur du jour (gen 4 avant GEN5_FROM, gen 5 ensuite), quel que soit le dresseur (voir daily.ts)
     this.battle = new Battle({
-      formatid: `gen${gen}customgame` as any,
+      formatid: battleFormat(gen) as any,
       seed: challenge.battleSeed as any,
       p1: { name: 'Toi', team: Teams.pack(challenge.playerTeam) as any },
       p2: { name: challenge.trainer.name, team: Teams.pack(challenge.opponentTeam) as any },
@@ -76,7 +76,7 @@ export class BattleSession {
   private settle() {
     let guard = 0
     while (!this.battle.ended && !this.needsAction(0) && guard++ < 50) {
-      const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, BATTLE_GEN) : ''
+      const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen) : ''
       this.battle.makeChoices('', c1)
     }
   }
@@ -84,7 +84,7 @@ export class BattleSession {
   /** choice : "move N" ou "switch N" (N démarre à 1). Retourne les nouvelles lignes brutes du log. */
   choose(choice: string): string[] {
     if (this.battle.ended || !this.needsAction(0)) return []
-    const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, BATTLE_GEN) : ''
+    const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen) : ''
     const before = this.battle.log.length
     this.battle.makeChoices(choice, c1)
     this.settle()

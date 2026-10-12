@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, 
 import type { Ctx } from './types'
 import { classLabel, GEN_INFO, mvName, spName, trainerName } from '../game/fr'
 import { locale, t, tn, useLang } from '../i18n'
-import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats } from '../game/history'
 import { siteUrl } from '../game/cloud'
@@ -101,7 +100,7 @@ export function Home(c: Ctx) {
         <h2 className="h2">{t('home.team')}</h2>
         <span className="pill">{t('home.teamPill')}</span>
       </div>
-      <PartyList team={ch.playerPreview} gen={BATTLE_GEN} locked={c.orderLocked} onMove={c.moveMon} animated />
+      <PartyList team={ch.playerPreview} gen={ch.battleGen} locked={c.orderLocked} onMove={c.moveMon} animated />
 
       <button className="card row" onClick={() => (c.email ? undefined : c.go('auth'))} style={{ textAlign: 'left' }}>
         <span className="orb" style={{ width: 48, height: 48, ['--c1' as string]: '#8b6cd9', ['--c2' as string]: '#5ba8f0' }}><BarChart3 size={22} /></span>

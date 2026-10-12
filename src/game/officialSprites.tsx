@@ -1,6 +1,6 @@
 // Illustrations des Pokémon, lues à la volée dans le dépôt PokéAPI/sprites (aucun fichier hébergé chez nous) :
-//  - sprites Platine (génération 4, face et dos) pour toutes les générations du jeu : rendu uniforme, et la gen 4
-//    couvre les 493 espèces ;
+//  - sprites Noir/Blanc (génération 5, face et dos) pour toutes les générations du jeu : rendu uniforme, et la gen 5
+//    couvre les 649 espèces ; Platine (gen 4, 493 espèces) sert de repli ;
 //  - artwork officiel pour les grandes cartes (fiche, aperçu).
 // Si l'image est introuvable (forme, hors-ligne…), on retombe sur le sprite, puis sur le sprite généré par code
 // de game/sprites.ts. Les images sont mises en cache par le service worker (voir vite.config.ts).
@@ -14,9 +14,11 @@ import { spriteUrl } from './sprites'
 import type { SpriteSpec } from './sprites'
 
 const ROOT = (((import.meta.env?.VITE_SPRITES_URL as string | undefined) ?? 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon')).replace(/\/$/, '')
-const SPRITE_VERSION = 'versions/generation-iv/platinum'
+const SPRITE_VERSION = 'versions/generation-v/black-white'
+const FALLBACK_VERSION = 'versions/generation-iv/platinum'
 
 export const officialSpriteUrl = (num: number, back: boolean): string => `${ROOT}/${SPRITE_VERSION}/${back ? 'back/' : ''}${num}.png`
+const fallbackSpriteUrl = (num: number, back: boolean): string => `${ROOT}/${FALLBACK_VERSION}/${back ? 'back/' : ''}${num}.png`
 
 const SD_ROOT = (((import.meta.env?.VITE_SHOWDOWN_SPRITES_URL as string | undefined) ?? 'https://play.pokemonshowdown.com/sprites')).replace(/\/$/, '')
 
@@ -54,7 +56,7 @@ type Props = { spec: SpriteSpec; back?: boolean; artwork?: boolean; animated?: b
 export function MonImg({ spec, back = false, artwork = false, animated = false, ...img }: Props) {
   const [failed, setFailed] = useState(0) // nombre d'images déjà en échec pour cette espèce
   useEffect(() => setFailed(0), [spec.num, back, artwork, animated])
-  const candidates = [artwork && !back ? artworkUrl(spec.num) : '', animated && !artwork ? animatedSpriteUrl(spec.num, back) : '', officialSpriteUrl(spec.num, back)].filter(Boolean)
+  const candidates = [artwork && !back ? artworkUrl(spec.num) : '', animated && !artwork ? animatedSpriteUrl(spec.num, back) : '', officialSpriteUrl(spec.num, back), spec.num <= 493 ? fallbackSpriteUrl(spec.num, back) : ''].filter(Boolean)
   const remote = candidates[failed] ?? ''
   const generated = useMemo(() => (remote ? '' : spriteUrl(spec, back)), [remote, spec.num, spec.types.join('/'), back]) // eslint-disable-line react-hooks/exhaustive-deps
   // crossOrigin : réponses « non opaques » → le cache du service worker garde la vraie taille (pas de quota gonflé).

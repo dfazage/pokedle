@@ -26,7 +26,7 @@ async function autoMoves(dex, gen, speciesId) {
 
 let problems = 0;
 const FILES = (gen) => [`src/data/trainers.gen${gen}.json`, `src/data/trainers.extra.gen${gen}.json`].filter((f) => fs.existsSync(f));
-for (const gen of [1, 2, 3, 4]) for (const file of FILES(gen)) {
+for (const gen of [1, 2, 3, 4, 5]) for (const file of FILES(gen)) {
   const data = JSON.parse(fs.readFileSync(file, 'utf8'));
   const dex = Dex.forGen(gen);
   let filled = 0;

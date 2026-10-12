@@ -166,6 +166,7 @@ export const en: Record<keyof typeof fr, string> = {
   'hist.loss': 'Defeat',
   'hist.gen': 'Gen {n} · {game}',
   'hist.turns': '{n} turns · {p} pts',
+  'hist.detail': 'View details',
   'date.short': '{m} {d}',
   'date.today': 'Today · {d}',
   'date.yesterday': 'Yesterday · {d}',

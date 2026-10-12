@@ -165,6 +165,7 @@ export const fr = {
   'hist.loss': 'Défaite',
   'hist.gen': 'Gen {n} · {game}',
   'hist.turns': '{n} tours · {p} pts',
+  'hist.detail': 'Voir le détail',
   'date.short': '{d} {m}',
   'date.today': 'Aujourd’hui · {d}',
   'date.yesterday': 'Hier · {d}',

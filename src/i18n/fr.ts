@@ -145,6 +145,7 @@ export const fr = {
   'res.total': 'Total',
   'res.sharePreview': 'Aperçu du partage',
   'res.share': 'Partager mon résultat',
+  'res.shareCta': 'Fais mieux que moi 👉',
   'res.copied': 'Copié dans le presse-papier !',
   'res.next': 'Prochain défi',
   'res.nextText': 'Un nouveau dresseur et une nouvelle équipe imposée chaque jour à minuit UTC.',

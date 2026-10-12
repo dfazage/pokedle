@@ -146,6 +146,7 @@ export const en: Record<keyof typeof fr, string> = {
   'res.total': 'Total',
   'res.sharePreview': 'Share preview',
   'res.share': 'Share my result',
+  'res.shareCta': 'Think you can beat me? 👉',
   'res.copied': 'Copied to clipboard!',
   'res.next': 'Next challenge',
   'res.nextText': 'A new trainer and a new fixed team every day at midnight UTC.',

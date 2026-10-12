@@ -67,26 +67,51 @@ export async function updateUsername(raw: string): Promise<RenameResult> {
   return error.code === '23505' ? 'taken' : 'error'
 }
 
+/** Colonnes optionnelles de `results` (supabase/results_hp_left.sql et results_attempts.sql). Tant qu'une colonne n'existe pas
+ *  côté serveur, on s'en passe ; la détection est mémorisée pour la session. */
+const optional = { hp_left: true, attempts: true }
+const optionalSets = (): ('hp_left' | 'attempts')[][] => {
+  const both = (['hp_left', 'attempts'] as const).filter((c) => optional[c])
+  const sets: ('hp_left' | 'attempts')[][] = [both]
+  if (both.length === 2) sets.push(['hp_left'], ['attempts'])
+  if (both.length) sets.push([])
+  return sets
+}
+/** Exécute `run` avec le plus de colonnes optionnelles possible, en retirant celles que le serveur ne connaît pas. */
+async function withOptionalColumns<T extends { error: { code?: string } | null }>(run: (cols: ('hp_left' | 'attempts')[]) => PromiseLike<T>): Promise<T> {
+  let res = await run(optionalSets()[0])
+  for (const set of optionalSets().slice(1)) {
+    if (!missingColumn(res.error)) break
+    res = await run(set)
+    if (!missingColumn(res.error)) {
+      for (const c of ['hp_left', 'attempts'] as const) if (!set.includes(c)) optional[c] = false
+    }
+  }
+  return res
+}
+
+/** Faux une fois constaté que le serveur n'a pas la colonne `attempts` : les rejeux ne pourraient pas y être enregistrés. */
+export const serverSupportsReplay = () => optional.attempts
+
 export async function fetchHistory(): Promise<DayRecord[]> {
   if (!supabase) return []
-  const q = (cols: string) => supabase!.from('results').select(cols).order('day_key', { ascending: true })
-  let { data, error } = await q('day_key, result, turns, trainer, gen, survivors, kos, hp_left')
-  if (missingColumn(error)) ({ data, error } = await q('day_key, result, turns, trainer, gen, survivors, kos'))
+  const { data, error } = await withOptionalColumns((cols) =>
+    supabase!.from('results').select(['day_key', 'result', 'turns', 'trainer', 'gen', 'survivors', 'kos', ...cols].join(', ')).order('day_key', { ascending: true }),
+  )
   if (error || !data) return []
   return (data as unknown as Record<string, any>[]).map((r) => ({
     dayKey: r.day_key, result: r.result, turns: r.turns, trainer: r.trainer, gen: r.gen,
-    survivors: r.survivors ?? undefined, kos: r.kos ?? undefined, hpLeft: r.hp_left ?? undefined,
+    survivors: r.survivors ?? undefined, kos: r.kos ?? undefined, hpLeft: r.hp_left ?? undefined, attempts: r.attempts ?? undefined,
   }))
 }
 
-/** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour UTC courant et tout doublon. */
+/** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour UTC courant. Un doublon est refusé, sauf pour un rejeu
+ *  (attempts > 1) qui remplace une défaite du même jour par le nouveau résultat (politique SQL dans supabase/results_attempts.sql). */
 export async function submitResult(rec: DayRecord, choices: string[]): Promise<'ok' | 'duplicate' | 'error'> {
   if (!supabase) return 'error'
   const { data: u } = await supabase.auth.getUser()
   if (!u.user) return 'error'
   const row = {
-    user_id: u.user.id,
-    day_key: rec.dayKey,
     result: rec.result,
     turns: rec.turns,
     trainer: rec.trainer,
@@ -95,10 +120,19 @@ export async function submitResult(rec: DayRecord, choices: string[]): Promise<'
     kos: rec.kos ?? null,
     choices,
   }
-  let { error } = await supabase.from('results').insert({ ...row, hp_left: rec.hpLeft ?? null })
-  if (missingColumn(error)) ({ error } = await supabase.from('results').insert(row))
-  if (!error) return 'ok'
-  return error.code === '23505' ? 'duplicate' : 'error'
+  const extra = (cols: ('hp_left' | 'attempts')[]) => ({
+    ...(cols.includes('hp_left') ? { hp_left: rec.hpLeft ?? null } : {}),
+    ...(cols.includes('attempts') ? { attempts: rec.attempts ?? 1 } : {}),
+  })
+  const ins = await withOptionalColumns((cols) => supabase!.from('results').insert({ user_id: u.user!.id, day_key: rec.dayKey, ...row, ...extra(cols) }))
+  if (!ins.error) return 'ok'
+  if (ins.error.code !== '23505') return 'error'
+  if ((rec.attempts ?? 1) <= 1) return 'duplicate'
+  // Rejeu : on remplace la défaite enregistrée plus tôt dans la journée (jamais une victoire).
+  const upd = await withOptionalColumns((cols) =>
+    supabase!.from('results').update({ ...row, ...extra(cols) }).eq('user_id', u.user!.id).eq('day_key', rec.dayKey).eq('result', 'loss').select('day_key'),
+  )
+  return !upd.error && (upd.data?.length ?? 0) > 0 ? 'ok' : upd.error ? 'error' : 'duplicate'
 }
 
 /** Vrai si le compte connecté figure dans la table `admins` (contrôle réel côté serveur). */

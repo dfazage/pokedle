@@ -21,6 +21,7 @@ function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreak
           <div className="row" style={{ gap: 8 }}>
             <span className="small muted" style={{ fontWeight: 700 }}>{label(r.dayKey, today)}</span>
             <span className={win ? 'pill green' : 'pill red'}>{win ? t('hist.win') : t('hist.loss')}</span>
+            {(r.attempts ?? 1) > 1 && <span className="pill">{t('hist.attempt', { n: r.attempts })}</span>}
           </div>
           <div>
             <h2 className="h2" style={{ margin: 0, fontSize: 26 }}>{r.trainer}</h2>

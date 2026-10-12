@@ -1,5 +1,5 @@
 import { PartyList, MonSprite } from './Party'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight, Star } from 'lucide-react'
 import type { Ctx } from './types'
 import { classLabel, GEN_INFO, mvName, spName } from '../game/fr'
@@ -12,6 +12,7 @@ import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
 import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 import { MoveSheet } from '../ui/MoveInfo'
+import { PixelHearts, type HeartAnim } from '../ui/PixelHeart'
 import type { MoveFacts } from '../game/moves'
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(3 - n)
@@ -23,7 +24,7 @@ export function Home(c: Ctx) {
   const gi = GEN_INFO[ch.gen]
   const diff = difficulty(ch.estimatedWinRate)
   const left = useCountdown()
-  const done = today$(c)
+  const done = c.done
   const fire = isFormidable(ch.gen, ch.trainer.name)
   const rate = stats.played ? Math.round((stats.totalWins / stats.played) * 100) : 0
   const worldRate = c.world && c.world.players ? ((c.world.wins / c.world.players) * 100).toFixed(1) : null
@@ -35,6 +36,7 @@ export function Home(c: Ctx) {
           <div className="eyebrow muted">{t('home.trainer')}</div>
           <div className="h2">{t('home.hello', { name: c.username ?? t('guest') })}</div>
         </div>
+        <span className="pill" style={{ padding: '6px 10px' }}><PixelHearts count={c.hearts.count} max={c.hearts.max} size={16} label={tn('hearts.aria', c.hearts.count, { max: c.hearts.max })} /></span>
         <span className="pill yellow"><Flame size={14} /> {stats.currentStreak}{t('unit.day')}</span>
       </div>
       <div className="row between">
@@ -73,6 +75,15 @@ export function Home(c: Ctx) {
         <button className="cta" onClick={c.onPlay}>
           {done ? t('home.cta.result') : c.inProgress ? t('home.cta.resume') : t('home.cta.start')} <ArrowRight size={18} />
         </button>
+      </section>
+
+      <section className="card stack">
+        <div className="row between">
+          <span className="lab" style={{ margin: 0 }}>{t('hearts.title')}</span>
+          <span className="small" style={{ fontWeight: 800, color: 'var(--tertiary)' }}>{c.hearts.attempt === 0 ? t('hearts.free') : t('hearts.attempt', { n: c.hearts.attempt })}</span>
+        </div>
+        <PixelHearts count={c.hearts.count} max={c.hearts.max} size={34} label={tn('hearts.aria', c.hearts.count, { max: c.hearts.max })} />
+        <p className="muted small">{t('hearts.rule', { max: c.hearts.max })}</p>
       </section>
 
       <div className="tiles">
@@ -226,6 +237,34 @@ export function Result(c: Ctx) {
   const rec = today$(c)
   const left = useCountdown()
   const [copied, setCopied] = useState(false)
+  const gainKey = `pokedle:heartGain:${c.today}`
+  // Le cœur gagné apparaît en rebondissant, une seule fois (à l'arrivée sur l'écran juste après le combat).
+  const [anim, setAnim] = useState<HeartAnim>(() => {
+    if (!rec || rec.result !== 'win' || !c.hearts.gained) return null
+    try {
+      if (sessionStorage.getItem(gainKey)) return null
+    } catch {
+      /* ignore */
+    }
+    return { kind: 'gain', index: c.hearts.count - 1 }
+  })
+  const [breaking, setBreaking] = useState(false)
+  useEffect(() => {
+    if (anim?.kind !== 'gain') return
+    try {
+      sessionStorage.setItem(gainKey, '1')
+    } catch {
+      /* ignore */
+    }
+    const id = window.setTimeout(() => setAnim(null), 1000)
+    return () => window.clearTimeout(id)
+  }, [anim, gainKey])
+  const replay = () => {
+    if (breaking) return
+    setBreaking(true)
+    setAnim({ kind: 'lose', index: c.hearts.count - 1 }) // le dernier cœur éclate, puis le combat repart
+    window.setTimeout(c.onReplay, 950)
+  }
   if (!rec) return null
   const win = rec.result === 'win'
   const sc = c.score.byDay.get(rec.dayKey)
@@ -270,6 +309,26 @@ export function Result(c: Ctx) {
         <div className="card"><div className="lab">{t('res.survivors')}</div><b style={{ fontSize: 30 }}>{alive}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < alive ? 'on' : ''} />)}</div></div>
         <div className="card"><div className="lab">{t('res.kos')}</div><b style={{ fontSize: 30 }}>{kos}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < kos ? 'on blue' : ''} />)}</div></div>
       </div>
+      <section className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
+        <div className="lab" style={{ marginBottom: 0 }}>{t('hearts.title')}</div>
+        <div className="row" style={{ gap: 12 }}>
+          <PixelHearts count={breaking ? c.hearts.count - 1 : c.hearts.count} max={c.hearts.max} size={40} anim={anim} label={tn('hearts.aria', c.hearts.count, { max: c.hearts.max })} />
+          {win && c.hearts.gained && <span className="heart-plus">{t('hearts.gainedPlus')}</span>}
+        </div>
+        {win ? (
+          <p className="muted small">{c.hearts.gained ? t('hearts.gained') : t('hearts.full')}{rec.attempts && rec.attempts > 1 ? ` ${t('res.winAttempt', { n: rec.attempts })}.` : ''}</p>
+        ) : c.hearts.replayPending ? (
+          <p className="muted small">{t('hearts.attempt', { n: c.hearts.attempt })}</p>
+        ) : c.hearts.canReplay ? (
+          <>
+            <p className="muted small">{t('hearts.replayInfo', { left: c.hearts.count - 1 })}</p>
+            <button className="btn" onClick={replay} disabled={breaking}>{t('hearts.replay')}</button>
+            <button className="btn ghost" onClick={() => c.go('home')} disabled={breaking}>{t('hearts.later')}</button>
+          </>
+        ) : (
+          <p className="muted small">{c.hearts.count > 0 ? t('hearts.offline') : t('hearts.none')}</p>
+        )}
+      </section>
       {sc && (
         <section className="card stack">
           <div className="row between">

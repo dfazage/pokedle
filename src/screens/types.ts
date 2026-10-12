@@ -1,5 +1,6 @@
 import type { DailyChallenge } from '../game/daily'
 import type { DayRecord, Stats } from '../game/history'
+import type { HeartsInfo } from '../game/hearts'
 import type { RenameResult } from '../game/cloud'
 import type { ScoreSummary } from '../game/scoring'
 import type { Screen } from '../ui/kit'
@@ -16,6 +17,11 @@ export interface Ctx {
   email: string | null
   world: { players: number; wins: number } | null
   inProgress: boolean
+  /** Le combat du jour est terminé (aucun rejeu en cours). */
+  done: boolean
+  hearts: HeartsInfo
+  /** Dépense 1 cœur et relance le combat du jour après une défaite. */
+  onReplay: () => void
   go: (s: Screen) => void
   onPlay: () => void
   /** Ordre de l'équipe du joueur (modifiable tant que le combat n'a pas commencé). */

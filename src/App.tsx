@@ -9,12 +9,13 @@ import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
+import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/hearts'
 import { dayKeyUTC } from './game/rng'
 import { classLabel, GEN_INFO, spName } from './game/fr'
 import { t, useLang } from './i18n'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, serverSupportsReplay, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, LangNotch, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
@@ -78,9 +79,11 @@ function AppScreens() {
   const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
+  const [attemptNo, setAttemptNo] = useState(() => loadAttempt(today)) // essais commencés aujourd'hui (1 = essai offert)
   const [email, setEmail] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [replayOk, setReplayOk] = useState(true) // le serveur sait enregistrer un rejeu (supabase/results_attempts.sql appliqué)
   const [rows, setRows] = useState<LeaderRow[]>([])
   const [world, setWorld] = useState<{ players: number; wins: number } | null>(null)
   const [view, setView] = useState<BattleView | null>(null)
@@ -121,6 +124,7 @@ function AppScreens() {
   // Compte en ligne : l'historique affiché vient du serveur quand on est connecté.
   const refreshCloud = useCallback(async () => {
     setHistory(await fetchHistory())
+    setReplayOk(serverSupportsReplay())
     setRows(await fetchLeaderboard())
     setWorld(await fetchWorldStats(today))
   }, [today])
@@ -219,8 +223,11 @@ function AppScreens() {
         survivors: v.player.team.filter((m) => !m.fainted).length,
         kos: v.opponent.team.filter((m) => m.fainted).length,
         hpLeft: Math.round((100 * v.player.team.reduce((a, m) => a + Math.max(0, m.hp), 0)) / Math.max(1, v.player.team.reduce((a, m) => a + m.maxhp, 0))),
+        attempts: Math.max(1, loadAttempt(today)),
       }
-      if (!getRecord(today)) saveRecord(rec) // copie locale (invité / hors ligne)
+      // Copie locale (invité / hors ligne) : un rejeu remplace la défaite du jour, jamais une victoire.
+      const ex = getRecord(today)
+      if (!ex || (ex.result === 'loss' && (ex.attempts ?? 1) < (rec.attempts ?? 1))) saveRecord(rec)
       if (signedIn.current) submitResult(rec, choices.current).then(refreshCloud)
       else setHistory(loadHistory())
     },
@@ -232,6 +239,10 @@ function AppScreens() {
     const { BattleSession, formatSteps } = engine.current
     const s = new BattleSession(challenge)
     session.current = s
+    if (!loadAttempt(today)) {
+      saveAttempt(today, 1) // 1er essai du jour : offert
+      setAttemptNo(1)
+    }
     const saved = loadChoices(today)
     choices.current = []
     const intro = formatSteps(s.drainLog())
@@ -288,6 +299,21 @@ function AppScreens() {
     finish(s)
   }
 
+  /** Rejouer le combat du jour après une défaite : le cœur est dépensé tout de suite, les choix repartent de zéro. */
+  const onReplay = () => {
+    const info = hearts
+    if (!info.canReplay) return
+    saveAttempt(today, info.attempt + 1)
+    setAttemptNo(info.attempt + 1)
+    saveChoices(today, [])
+    choices.current = []
+    session.current = null
+    setView(null)
+    setQueue([])
+    setPending(null)
+    setScreen('team')
+  }
+
   const rename = async (name: string) => {
     const r = await updateUsername(name)
     if (r === 'ok') {
@@ -310,6 +336,8 @@ function AppScreens() {
     } catch {
       /* ignore */
     }
+    clearAttempt(today)
+    setAttemptNo(0)
     session.current = null
     choices.current = []
     setOrder(null)
@@ -328,6 +356,8 @@ function AppScreens() {
     } catch {
       /* ignore */
     }
+    clearAttempt(today)
+    setAttemptNo(0)
     removeRecord(today)
     session.current = null
     choices.current = []
@@ -368,6 +398,8 @@ function AppScreens() {
     } catch {
       /* ignore */
     }
+    clearAttempt(today)
+    setAttemptNo(0)
     removeRecord(today)
     session.current = null
     choices.current = []
@@ -390,7 +422,11 @@ function AppScreens() {
 
   const stats = computeStats(history, today)
   const score = useMemo(() => scoreHistory(history), [history])
-  const done = history.some((r) => r.dayKey === today)
+  const baseHearts = heartsInfo(history, today, attemptNo)
+  // Connecté mais serveur sans la colonne `attempts` : un rejeu ne pourrait pas être enregistré, on le désactive.
+  const hearts = isSignedIn && !replayOk ? { ...baseHearts, canReplay: false } : baseHearts
+  // Une défaite suivie d'un rejeu payé n'est plus « terminée » tant que le rejeu n'est pas fini.
+  const done = history.some((r) => r.dayKey === today) && !hearts.replayPending
   const inProgress = !done && loadChoices(today).length > 0
   const onPlay = () => {
     if (done) setScreen('result')
@@ -444,7 +480,7 @@ function AppScreens() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, score, username, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, challenge, history, stats, score, username, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'intro')

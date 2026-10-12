@@ -3,7 +3,7 @@ import { ArrowRight, RotateCcw, Shuffle, Eye, EyeOff, Lock, LogIn, Mail, User } 
 import type { Ctx } from './types'
 import { supabase, siteUrl } from '../game/cloud'
 import { dayNumber } from '../game/info'
-import { MonOrb, TopBar } from '../ui/kit'
+import { TopBar } from '../ui/kit'
 import { renderGoogleButton } from '../game/googleSignIn'
 import { t, useLang } from '../i18n'
 import { displayDay } from '../game/rng'
@@ -134,15 +134,19 @@ export function ResetPassword(c: { onDone: () => void }) {
 }
 
 const SLIDES = [
-  { n: 1, c1: '#6ad7b4', c2: '#3fb48e', types: ['Grass'] },
-  { n: 2, c1: '#8fb8f6', c2: '#5ba8f0', types: ['Water'] },
-  { n: 3, c1: '#f7c948', c2: '#f0716b', types: ['Fire'] },
+  { n: 1, c1: '#6ad7b4', c2: '#3fb48e' },
+  { n: 2, c1: '#8fb8f6', c2: '#5ba8f0' },
+  { n: 3, c1: '#f7c948', c2: '#f0716b' },
 ] as const
 export function Onboarding(c: { done: () => void; login: () => void }) {
   useLang()
   const [i, setI] = useState(0)
   const s = SLIDES[i]
   const tx = (k: 'tag' | 'a' | 'b' | 'text') => t(`ob.${s.n}.${k}` as const)
+  const shot = (n: number) => `${import.meta.env.BASE_URL}onboarding/${n}.webp`
+  useEffect(() => {
+    SLIDES.forEach((x) => { new Image().src = shot(x.n) }) // précharge : pas de flash au changement de page
+  }, [])
   return (
     <>
       <div className="row between">
@@ -151,7 +155,7 @@ export function Onboarding(c: { done: () => void; login: () => void }) {
       </div>
       <div className="ob-art" style={{ background: `linear-gradient(150deg, ${s.c1}, ${s.c2})` }}>
         <span className="pill" style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(255,255,255,.28)', border: 0, color: '#fff' }}>{tx('tag')}</span>
-        <div className="row" style={{ gap: 20, zIndex: 1 }}><MonOrb types={['Dark']} size={92} /><span className="pill" style={{ background: '#fff', color: s.c2 }}>VS</span><MonOrb types={[...s.types]} size={92} /></div>
+        <img className="ob-shot" src={shot(s.n)} alt={`${tx('a')} ${tx('b')}`} width={720} height={960} decoding="async" />
       </div>
       <div>
         <h1 className="title" style={{ fontSize: 34 }}>{tx('a')}<br /><span style={{ color: s.c2 }}>{tx('b')}</span></h1>

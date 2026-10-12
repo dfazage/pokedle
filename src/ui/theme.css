@@ -181,8 +181,9 @@ h1, h2, h3, p { margin: 0; }
 /* Connexion / onboarding */
 .purple-head { margin: -16px -16px 0; padding: 20px 20px 64px; background: linear-gradient(160deg, #8b6cd9, #6a4fc0); color: #fff; border-radius: 0 0 32px 32px; }
 .sheet { margin-top: -40px; background: var(--surface); border-radius: 28px 28px 0 0; padding: 20px 4px 4px; }
-.ob-art { border-radius: 32px; height: 300px; position: relative; overflow: hidden; background: linear-gradient(150deg, #6ad7b4, #3fb48e); display: grid; place-items: center; }
+.ob-art { border-radius: 32px; height: clamp(320px, 46dvh, 420px); position: relative; overflow: hidden; background: linear-gradient(150deg, #6ad7b4, #3fb48e); }
 .ob-art::after { content: ''; position: absolute; right: -60px; bottom: -70px; width: 240px; height: 240px; border-radius: 50%; border: 24px solid rgba(255, 255, 255, 0.18); }
+.ob-shot { position: absolute; z-index: 1; left: 50%; bottom: 0; transform: translateX(-50%); width: min(72%, 280px); height: calc(100% - 68px); object-fit: cover; object-position: top; border-radius: 22px 22px 0 0; border: 3px solid rgba(255, 255, 255, 0.85); border-bottom: 0; box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.28); background: #0b0b0f; }
 .splash-orb { width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #fff 0 16%, transparent 17%), linear-gradient(#f0716b 0 48%, #1b1b22 48% 52%, #fff 52%); animation: spin 1.2s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .splash-orb { animation: none; } }

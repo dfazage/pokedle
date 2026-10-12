@@ -1,5 +1,5 @@
--- Reset quotidien à 12h00 heure de Paris (au lieu de minuit UTC). Un jour de jeu va de 12h00 à 12h00 et porte la date de Paris
--- de son début : la clé reste une date, les clés restent consécutives (séries et statistiques inchangées, aucune donnée modifiée).
+-- Reset quotidien à 12h00 heure de Paris (au lieu de minuit UTC). Un jour de jeu va de 12h00 à 12h00 et sa clé porte la date de Paris
+-- de sa FIN (maintenant + 12 h ; l'affichage montre la date de début, voir displayDay dans rng.ts) : la clé reste une date, les clés restent consécutives (séries et statistiques inchangées, aucune donnée modifiée).
 -- Miroir de gameDayKey() dans src/game/rng.ts. À exécuter en même temps que le déploiement du front (entre 12h Paris et minuit UTC
 -- la clé du jour est identique à l'ancienne clé UTC, donc sans effet visible).
 create or replace function public.game_day() returns date

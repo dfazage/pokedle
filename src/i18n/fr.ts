@@ -172,7 +172,7 @@ export const fr = {
   'hearts.aria_other': '{n} cœurs sur {max}',
   'hearts.free': '1er essai offert',
   'hearts.attempt': 'Essai {n}',
-  'hearts.rule': 'Chaque rejeu du combat du jour coûte 1 cœur et réduit tes points de 25 % par essai. Une victoire t’en rapporte 1 (max. {max}).',
+  'hearts.rule': 'Rejeu : −1 cœur et −25 % de points par essai · Victoire : +1 cœur',
   'hearts.replay': 'Rejouer · −1 cœur',
   'hearts.replayInfo': 'Rejouer le même combat coûte 1 cœur. Il t’en restera {left}.',
   'hearts.later': 'Plus tard, garder mes cœurs',

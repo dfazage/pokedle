@@ -173,7 +173,7 @@ export const en: Record<keyof typeof fr, string> = {
   'hearts.aria_other': '{n} hearts out of {max}',
   'hearts.free': 'First attempt is free',
   'hearts.attempt': 'Attempt {n}',
-  'hearts.rule': 'Each replay of today’s battle costs 1 heart and cuts your points by 25% per attempt. A win earns you 1 (max. {max}).',
+  'hearts.rule': 'Replay: −1 heart and −25% points per attempt · Win: +1 heart',
   'hearts.replay': 'Replay · −1 heart',
   'hearts.replayInfo': 'Replaying the same battle costs 1 heart. You’ll have {left} left.',
   'hearts.later': 'Later, keep my hearts',

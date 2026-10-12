@@ -77,13 +77,12 @@ export function Home(c: Ctx) {
         </button>
       </section>
 
-      <section className="card stack">
+      <section className="card" style={{ padding: '12px 14px', display: 'grid', gap: 8 }}>
         <div className="row between">
-          <span className="lab" style={{ margin: 0 }}>{t('hearts.title')}</span>
+          <PixelHearts count={c.hearts.count} max={c.hearts.max} size={24} label={tn('hearts.aria', c.hearts.count, { max: c.hearts.max })} />
           <span className="small" style={{ fontWeight: 800, color: 'var(--tertiary)' }}>{c.hearts.attempt === 0 ? t('hearts.free') : t('hearts.attempt', { n: c.hearts.attempt })}</span>
         </div>
-        <PixelHearts count={c.hearts.count} max={c.hearts.max} size={34} label={tn('hearts.aria', c.hearts.count, { max: c.hearts.max })} />
-        <p className="muted small">{t('hearts.rule', { max: c.hearts.max })}</p>
+        <p className="muted" style={{ fontSize: 11, lineHeight: 1.35, margin: 0 }}>{t('hearts.rule')}</p>
       </section>
 
       <div className="tiles">

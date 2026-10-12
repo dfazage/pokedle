@@ -1,11 +1,65 @@
 import { useMemo, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
+import type { DayRecord } from '../game/history'
+import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
 import { TopBar } from '../ui/kit'
 import { locale, pick, t, tn, useLang } from '../i18n'
+
+function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreakdown; today: string; onClose: () => void }) {
+  const win = r.result === 'win'
+  const alive = r.survivors ?? (win ? 1 : 0)
+  const kos = r.kos ?? (win ? 6 : 0)
+  return (
+    <div className="sheet-bg" onClick={onClose} role="dialog" aria-modal="true" aria-label={r.trainer}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <button className="iconbtn sheet-x" onClick={onClose} aria-label={t('party.close')}><X size={20} /></button>
+        <div className="stack">
+          <div className="row" style={{ gap: 8 }}>
+            <span className="small muted" style={{ fontWeight: 700 }}>{label(r.dayKey, today)}</span>
+            <span className={win ? 'pill green' : 'pill red'}>{win ? t('hist.win') : t('hist.loss')}</span>
+          </div>
+          <div>
+            <h2 className="h2" style={{ margin: 0, fontSize: 26 }}>{r.trainer}</h2>
+            <div className="muted small">{t('hist.gen', { n: r.gen, game: GEN_INFO[r.gen]?.game })}</div>
+          </div>
+          <div className="tiles" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+            <div className="card"><div className="lab">{t('res.turns')}</div><b style={{ fontSize: 26 }}>{r.turns}</b></div>
+            <div className="card"><div className="lab">{t('res.survivors')}</div><b style={{ fontSize: 26 }}>{alive}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < alive ? 'on' : ''} />)}</div></div>
+            <div className="card"><div className="lab">{t('res.kos')}</div><b style={{ fontSize: 26 }}>{kos}</b><span className="muted small"> / 6</span><div className="bar6">{Array.from({ length: 6 }, (_, k) => <i key={k} className={k < kos ? 'on blue' : ''} />)}</div></div>
+          </div>
+          {sc && (
+            <section className="card stack">
+              <div className="row between">
+                <span className="lab" style={{ margin: 0 }}><Star size={13} style={{ verticalAlign: -2 }} /> {t('res.pointsDay')}</span>
+                <b style={{ fontSize: 24, color: 'var(--yellow)' }}>+{sc.points}</b>
+              </div>
+              {win ? (
+                <div className="stack small" style={{ gap: 6 }}>
+                  {([
+                    [t('sc.base'), `${sc.base}`],
+                    [t('sc.speed'), `${Math.round(sc.speed * 100)} %`],
+                    [t('sc.hp'), `${Math.round(sc.hp * 100)} %`],
+                    [t('sc.survivors'), `${Math.round(sc.survivors * 100)} %`],
+                    [t('sc.streak', { n: sc.streak }), `×${sc.streakMult.toFixed(2)}`],
+                    ...(sc.flawless ? [[t('sc.flawless'), '+10']] : []),
+                  ] as [string, string][]).map(([k, v]) => (
+                    <div key={k} className="row between"><span className="muted">{k}</span><b>{v}</b></div>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted small">{t('res.noPoints')}</p>
+              )}
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const MONTHS = () => pick(
   ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -35,6 +89,8 @@ export function History(c: Ctx) {
   const shift = (d: number) => setView((v) => { const n = new Date(Date.UTC(v.y, v.m + d, 1)); return { y: n.getUTCFullYear(), m: n.getUTCMonth() } })
   const rate = c.stats.played ? Math.round((c.stats.totalWins / c.stats.played) * 100) : 0
   const recent = [...c.history].reverse().slice(0, 20)
+  const [open, setOpen] = useState<string | null>(null)
+  const sel = open ? c.history.find((r) => r.dayKey === open) : undefined
   return (
     <>
       <div>
@@ -67,7 +123,7 @@ export function History(c: Ctx) {
       <h2 className="h2">{t('hist.recent')}</h2>
       {recent.length === 0 && <p className="muted">{t('hist.empty')}</p>}
       {recent.map((r) => (
-        <section key={r.dayKey} className="card stack">
+        <button key={r.dayKey} type="button" className="card stack hist-card" onClick={() => setOpen(r.dayKey)} aria-label={`${r.trainer} — ${t('hist.detail')}`}>
           <div className="row between">
             <span className="small" style={{ fontWeight: 700 }}>{label(r.dayKey, c.today)}</span>
             <span className={r.result === 'win' ? 'pill green' : 'pill red'}>{r.result === 'win' ? t('hist.win') : t('hist.loss')}</span>
@@ -77,13 +133,17 @@ export function History(c: Ctx) {
               <b style={{ fontSize: 18 }}>{r.trainer}</b>
               <div className="muted small">{t('hist.gen', { n: r.gen, game: GEN_INFO[r.gen]?.game })}</div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <b style={{ fontSize: 22, color: r.result === 'win' ? 'var(--tertiary)' : 'var(--secondary)' }}>{r.survivors ?? (r.result === 'win' ? '≥1' : 0)}/6</b>
-              <div className="muted small">{t('hist.turns', { n: r.turns, p: c.score.byDay.get(r.dayKey)?.points ?? 0 })}</div>
+            <div className="row" style={{ gap: 8 }}>
+              <div style={{ textAlign: 'right' }}>
+                <b style={{ fontSize: 22, color: r.result === 'win' ? 'var(--tertiary)' : 'var(--secondary)' }}>{r.survivors ?? (r.result === 'win' ? '≥1' : 0)}/6</b>
+                <div className="muted small">{t('hist.turns', { n: r.turns, p: c.score.byDay.get(r.dayKey)?.points ?? 0 })}</div>
+              </div>
+              <ChevronRight size={18} className="muted" aria-hidden="true" />
             </div>
           </div>
-        </section>
+        </button>
       ))}
+      {sel && <BattleDetail r={sel} sc={c.score.byDay.get(sel.dayKey)} today={c.today} onClose={() => setOpen(null)} />}
     </>
   )
 }

@@ -16,7 +16,8 @@ import { classLabel, GEN_INFO, spName } from './game/fr'
 import { t, useLang } from './i18n'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
-import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, serverSupportsReplay, type LeaderRow } from './game/cloud'
+import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
+import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchAvatar, updateAvatar, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, serverSupportsReplay, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, LangNotch, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
@@ -82,6 +83,7 @@ function AppScreens() {
   const [attemptNo, setAttemptNo] = useState(() => loadAttempt(today)) // essais commencés aujourd'hui (1 = essai offert)
   const [email, setEmail] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
+  const [avatar, setAvatar] = useState<string | null>(loadLocalAvatar)
   const [isAdmin, setIsAdmin] = useState(false)
   const [replayOk, setReplayOk] = useState(true) // le serveur sait enregistrer un rejeu (supabase/results_attempts.sql appliqué)
   const [rows, setRows] = useState<LeaderRow[]>([])
@@ -142,6 +144,11 @@ function AppScreens() {
         return
       }
       setUsername(await ensureProfile(user as never))
+      const cloudAvatar = await fetchAvatar()
+      if (isAvatar(cloudAvatar)) {
+        setAvatar(cloudAvatar)
+        saveLocalAvatar(cloudAvatar)
+      }
       setIsAdmin(await fetchIsAdmin())
       await refreshCloud()
     }
@@ -322,6 +329,13 @@ function AppScreens() {
     return r
   }
 
+  const chooseAvatar = async (id: string) => {
+    if (!isAvatar(id)) return
+    setAvatar(id)
+    saveLocalAvatar(id)
+    if ((await updateAvatar(id)) === 'ok') setRows(await fetchLeaderboard()) // le classement affiche la nouvelle icône
+  }
+
   const adminReroll = async () => {
     if (!isAdmin) return
     if (!window.confirm(t('adm.confirmReroll'))) return
@@ -478,7 +492,7 @@ function AppScreens() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, score, username, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, challenge, history, stats, score, username, avatar, onAvatar: chooseAvatar, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'intro')

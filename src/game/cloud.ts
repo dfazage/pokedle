@@ -23,6 +23,8 @@ export interface LeaderRow {
   /** Points cumulés et points du jour : absents tant que supabase/leaderboard_points.sql n'est pas appliqué. */
   points?: number
   points_today?: number
+  /** Icône de profil (id de src/game/avatars.ts) ; absente tant que supabase/profile_avatar.sql n'est pas appliqué. */
+  avatar?: string | null
 }
 
 /** Pseudo valide (3 à 20 caractères, lettres/chiffres/_ - .) tiré d'une chaîne quelconque ; null si inexploitable. */
@@ -68,6 +70,34 @@ export async function updateUsername(raw: string): Promise<RenameResult> {
   const { error } = await supabase.from('profiles').upsert({ id: u.user.id, username: name }, { onConflict: 'id' })
   if (!error) return 'ok'
   return error.code === '23505' ? 'taken' : 'error'
+}
+
+/** Icône de profil du compte connecté ; null si aucune ou si la colonne `avatar` n'existe pas encore côté serveur. */
+export async function fetchAvatar(): Promise<string | null> {
+  if (!supabase) return null
+  const { data: u } = await supabase.auth.getUser()
+  if (!u.user) return null
+  const { data, error } = await supabase.from('profiles').select('avatar').eq('id', u.user.id).maybeSingle()
+  return error ? null : ((data as { avatar?: string | null } | null)?.avatar ?? null)
+}
+
+/** Enregistre l'icône de profil. 'local' : colonne absente côté serveur, le choix reste sur cet appareil. */
+export async function updateAvatar(id: string): Promise<'ok' | 'local' | 'error'> {
+  if (!supabase) return 'local'
+  const { data: u } = await supabase.auth.getUser()
+  if (!u.user) return 'error'
+  const { error } = await supabase.from('profiles').update({ avatar: id }).eq('id', u.user.id)
+  if (!error) return 'ok'
+  return missingColumn(error) ? 'local' : 'error'
+}
+
+/** Avatars des joueurs d'une liste de pseudos (fonction SQL profile_avatars) ; vide si le script n'est pas appliqué. */
+async function fetchAvatars(names: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>()
+  if (!supabase || names.length === 0) return out
+  const { data, error } = await supabase.rpc('profile_avatars', { names })
+  if (!error && Array.isArray(data)) for (const r of data as { username: string; avatar: string }[]) out.set(r.username, r.avatar)
+  return out
 }
 
 /** Colonnes optionnelles de `results` (supabase/results_hp_left.sql et results_attempts.sql). Tant qu'une colonne n'existe pas
@@ -181,6 +211,12 @@ export async function fetchDailyResetN(day: string): Promise<number> {
 }
 
 export async function fetchLeaderboard(): Promise<LeaderRow[]> {
+  const rows = await fetchLeaderRows()
+  const avatars = await fetchAvatars(rows.map((r) => r.username))
+  return avatars.size ? rows.map((r) => ({ ...r, avatar: avatars.get(r.username) ?? null })) : rows
+}
+
+async function fetchLeaderRows(): Promise<LeaderRow[]> {
   if (!supabase) return []
   // v3 = avec les points (supabase/leaderboard_points.sql) ; repli sur v2 (victoires et séries seulement) si absent.
   const v3 = await supabase.rpc('leaderboard_v3', { limit_n: 50 })

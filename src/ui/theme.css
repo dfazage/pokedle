@@ -95,6 +95,13 @@ h1, h2, h3, p { margin: 0; }
 
 /* Avatar / orbes de type */
 .avatar { width: 52px; height: 52px; border-radius: 999px; display: grid; place-items: center; font-weight: 800; font-size: 20px; color: #fff; background: linear-gradient(135deg, var(--primary), var(--violet)); border: 3px solid var(--surface); box-shadow: var(--shadow); flex: none; }
+.avatar.img { display: block; object-fit: contain; padding: 0; border: 0; background: none; image-rendering: pixelated; }
+.avatar-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-items: center; }
+.avatar-pick button { padding: 6px; border-radius: 999px; border: 2px solid transparent; background: none; line-height: 0; }
+.avatar-pick button.on { border-color: var(--violet); background: var(--surface2); }
+.avatar-pick .avatar { width: 64px; height: 64px; }
+.avatar-edit { position: relative; flex: none; border-radius: 999px; line-height: 0; }
+.avatar-edit .badge-edit { position: absolute; right: -2px; bottom: -2px; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: var(--violet); color: #fff; border: 2px solid var(--surface); }
 .orb { display: grid; place-items: center; border-radius: 999px; color: #fff; flex: none; background: linear-gradient(145deg, var(--c1), var(--c2)); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25); }
 .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #fff; background: var(--c1); }
 .badge.soft { background: color-mix(in srgb, var(--c1) 22%, transparent); color: var(--c1); border: 1px solid color-mix(in srgb, var(--c1) 45%, transparent); }

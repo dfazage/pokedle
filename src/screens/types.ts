@@ -12,6 +12,10 @@ export interface Ctx {
   stats: Stats
   score: ScoreSummary
   username: string | null
+  /** Icône de profil choisie (id de src/game/avatars.ts), null = initiale du pseudo. */
+  avatar: string | null
+  /** Change l'icône de profil. */
+  onAvatar: (id: string) => void
   /** Change le pseudo du compte connecté. */
   onRename: (name: string) => Promise<RenameResult>
   email: string | null

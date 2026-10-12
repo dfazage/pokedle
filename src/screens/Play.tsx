@@ -12,7 +12,7 @@ import { buildShareText, canNativeShare, copyShare, gridFor, shareResult, type S
 import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
-import { MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
+import { Avatar, MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 import { MoveSheet } from '../ui/MoveInfo'
 import { PixelHearts, type HeartAnim } from '../ui/PixelHeart'
 import type { MoveFacts } from '../game/moves'
@@ -33,7 +33,7 @@ export function Home(c: Ctx) {
   return (
     <>
       <div className="row">
-        <div className="avatar">{(c.username ?? t('guest'))[0].toUpperCase()}</div>
+        <Avatar id={c.avatar} name={c.username ?? t('guest')} />
         <div className="grow">
           <div className="eyebrow muted">{t('home.trainer')}</div>
           <div className="h2">{t('home.hello', { name: c.username ?? t('guest') })}</div>

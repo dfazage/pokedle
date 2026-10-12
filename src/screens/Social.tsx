@@ -7,7 +7,7 @@ import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { pushConfigured } from '../game/push'
-import { PushSetting } from './PushSetting'
+import { RemindersEntry } from './Reminders'
 import { GEN_INFO } from '../game/fr'
 import { displayDay, keyForDisplayDay } from '../game/rng'
 import { Avatar, TopBar } from '../ui/kit'
@@ -325,7 +325,7 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
       {pushConfigured() && (
         <>
           <div className="lab">{t('push.label')}</div>
-          <PushSetting />
+          <RemindersEntry {...c} />
         </>
       )}
       <div className="lab">{t('set.game')}</div>

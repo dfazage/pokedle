@@ -26,6 +26,7 @@ import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
 import { Admin, Auth, Onboarding, ResetPassword } from './screens/Account'
 import { Guide } from './screens/Guide'
+import { Reminders } from './screens/Reminders'
 import { BattleIntro } from './screens/BattleIntro'
 import type { Ctx } from './screens/types'
 
@@ -540,6 +541,7 @@ function AppScreens() {
       {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.0 · ${__BUILD__}`} />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
+      {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
       <span hidden>{dayNumber(today)}</span>

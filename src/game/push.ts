@@ -13,8 +13,8 @@ export type PushState = 'off' | 'on' | 'denied' | 'ios-install' | 'unsupported'
 /** Fonctionnalité disponible dans ce build (clé VAPID publique + Supabase). */
 export const pushConfigured = (): boolean => !!VAPID_PUBLIC_KEY && !!supabase
 
-const isIos = (): boolean => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-const isStandalone = (): boolean => window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
+export const isIos = (): boolean => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+export const isStandalone = (): boolean => window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
 const hasPush = (): boolean => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window
 
 /** applicationServerKey attend des octets : la clé VAPID publique est en base64url. */
@@ -84,4 +84,53 @@ export async function syncPush(): Promise<void> {
   } catch {
     /* hors-ligne, service worker indisponible… : on réessaiera au prochain lancement */
   }
+}
+
+// ── Installation de la PWA (page « Rappels ») ──
+// Chrome/Android déclenche `beforeinstallprompt` une seule fois, parfois avant l'affichage de la page : on le garde ici.
+type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
+let installEvent: InstallEvent | null = null
+const installListeners = new Set<() => void>()
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault()
+    installEvent = e as InstallEvent
+    installListeners.forEach((fn) => fn())
+  })
+  window.addEventListener('appinstalled', () => {
+    installEvent = null
+    installListeners.forEach((fn) => fn())
+  })
+}
+export const canPromptInstall = (): boolean => installEvent !== null
+export function onInstallChange(fn: () => void): () => void {
+  installListeners.add(fn)
+  return () => void installListeners.delete(fn)
+}
+/** Ouvre la boîte d'installation du navigateur (Android/desktop). Renvoie false si elle n'est pas disponible. */
+export async function promptInstall(): Promise<boolean> {
+  const ev = installEvent
+  if (!ev) return false
+  installEvent = null
+  await ev.prompt()
+  const { outcome } = await ev.userChoice
+  installListeners.forEach((fn) => fn())
+  return outcome === 'accepted'
+}
+
+/** Notification locale (sans passer par le serveur) pour vérifier que l'affichage fonctionne sur cet appareil. */
+export async function sendTestNotification(title: string, body: string): Promise<void> {
+  const reg = await navigator.serviceWorker.ready
+  await reg.showNotification(title, { body, icon: `${import.meta.env.BASE_URL}pwa-192.png`, tag: 'daily-battle-test', data: { url: import.meta.env.BASE_URL } })
+}
+
+/** Prochain rappel (12h à Paris) dans l'heure locale de l'appareil. Les décalages horaires sont des heures entières. */
+export function nextReminder(now = new Date()): Date {
+  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hourCycle: 'h23' })
+  const start = new Date(Math.floor(now.getTime() / 3600000) * 3600000 + 3600000)
+  for (let i = 0; i < 48; i++) {
+    const d = new Date(start.getTime() + i * 3600000)
+    if (Number(fmt.format(d)) === 12) return d
+  }
+  return start
 }

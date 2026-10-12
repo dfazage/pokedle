@@ -10,7 +10,7 @@ import { LANGS, locale, setLang, t, useLang, type Lang } from '../i18n'
 
 export type Screen =
   | 'onboarding' | 'home' | 'opponent' | 'team' | 'intro' | 'battle' | 'result'
-  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'reset' | 'guide' | 'admin'
+  | 'history' | 'leaderboard' | 'settings' | 'auth' | 'reset' | 'guide' | 'admin' | 'reminders'
 
 const ICONS: Record<string, typeof Flame> = {
   Normal: Circle, Fire: Flame, Water: Droplet, Grass: Leaf, Electric: Zap, Ice: Snowflake, Fighting: Swords,

@@ -99,6 +99,22 @@ h1, h2, h3, p { margin: 0; }
 .avatar-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; justify-items: center; }
 .avatar-pick button { padding: 6px; border-radius: 999px; border: 2px solid transparent; background: none; line-height: 0; }
 .avatar-pick button.on { border-color: var(--violet); background: var(--surface2); }
+/* Page « Rappels » : checklist (compte, installation, notifications) */
+.rem-step { display: block; width: 100%; }
+.rem-ck { appearance: none; -webkit-appearance: none; flex: none; width: 28px; height: 28px; margin: 0; border-radius: 50%; border: 2px solid var(--muted); background: transparent; display: grid; place-content: center; cursor: pointer; }
+.rem-ck:disabled { cursor: default; }
+.rem-ck:checked { background: var(--tertiary); border-color: var(--tertiary); }
+.rem-ck:checked::after { content: ''; width: 8px; height: 14px; border: solid #08213a; border-width: 0 3px 3px 0; transform: rotate(45deg) translate(-1px, -1px); }
+.rem-ck:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+.rem-tag { display: inline-block; margin-bottom: 6px; padding: 3px 9px; border-radius: 999px; background: var(--surface2); color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.rem-tag.hot { background: color-mix(in srgb, var(--violet) 22%, transparent); color: var(--violet); }
+.rem-seg { flex: 1; height: 8px; border-radius: 4px; background: var(--line); }
+.rem-how { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.rem-how li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 16px; background: var(--surface2); }
+.rem-how li span { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--violet); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-content: center; }
+.rem-how li p { flex: 1; margin: 0; font-size: 14px; line-height: 1.3; }
+.rem-entry { display: block; width: 100%; color: inherit; font: inherit; border-width: 1.5px; }
+.rem-ico { flex: none; width: 48px; height: 48px; border-radius: 16px; background: var(--violet); color: #fff; display: grid; place-content: center; }
 .avatar-pick .avatar { width: 64px; height: 64px; }
 .avatar-edit { position: relative; flex: none; border-radius: 999px; line-height: 0; }
 .avatar-edit .badge-edit { position: absolute; right: -2px; bottom: -2px; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: var(--violet); color: #fff; border: 2px solid var(--surface); }

@@ -15,6 +15,8 @@ export const fr = {
   'game.crystal': 'Cristal',
   'game.emerald': 'Émeraude',
   'game.platinum': 'Platine',
+  'game.black2': 'Noir 2',
+  'region.unova': 'Unys',
 
   // ── Navigation ──
   'nav.label': 'Navigation',
@@ -316,7 +318,7 @@ export const fr = {
   'guide.2.title': 'D’où vient le défi du jour ?',
   'guide.2.lead': 'Il est tiré à la date du jour : tous les dresseurs affrontent exactement le même.',
   'guide.2.i1.t': 'Une ligue au hasard',
-  'guide.2.i1.x': 'Chaque jour, un des quatre jeux ci-dessous donne le ton.',
+  'guide.2.i1.x': 'Chaque jour, un des cinq jeux ci-dessous donne le ton.',
   'guide.2.i2.t': 'Un vrai dresseur de la saga',
   'guide.2.i2.x': 'Champions d’arène, Conseil des 4, Maîtres, et des visages moins attendus.',
   'guide.2.i3.t': 'Une équipe pour toi',

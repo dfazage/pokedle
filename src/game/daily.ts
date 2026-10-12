@@ -6,10 +6,12 @@ import trainersGen1 from '../data/trainers.gen1.json'
 import trainersGen2 from '../data/trainers.gen2.json'
 import trainersGen3 from '../data/trainers.gen3.json'
 import trainersGen4 from '../data/trainers.gen4.json'
+import trainersGen5 from '../data/trainers.gen5.json'
 import extraGen1 from '../data/trainers.extra.gen1.json'
 import extraGen2 from '../data/trainers.extra.gen2.json'
 import extraGen3 from '../data/trainers.extra.gen3.json'
 import extraGen4 from '../data/trainers.extra.gen4.json'
+import extraGen5 from '../data/trainers.extra.gen5.json'
 import { aiChoose } from './ai'
 import { applyProfile } from './profiles'
 import { dayKeyUTC, hashString, mulberry32, pick, seedArray } from './rng'
@@ -30,13 +32,28 @@ export interface TrainerData {
 }
 
 /**
- * Génération du moteur de combat : toujours la 4 (493 espèces, mécaniques Diamant/Perle/Platine), quel que soit le
- * dresseur tiré. Les dresseurs des gens 1 à 4 s'affrontent donc avec leurs équipes d'origine converties en gen 4
- * (niveau 100, nature/EV/talent/objet d'après les profils Pokémon Showdown les plus joués, voir profiles.ts), contre une
- * équipe de joueur tirée dans tout le pool gen 4.
- * `DailyChallenge.gen` reste la génération d'origine du dresseur (ligue, jeu, historique, classement).
+ * Génération du moteur de combat : 5 à partir de GEN5_FROM (649 espèces, mécaniques Noir/Blanc), 4 avant (493 espèces,
+ * Diamant/Perle/Platine). Quel que soit le dresseur tiré, tous s'affrontent dans le moteur du jour : les équipes d'origine
+ * des gens 1 à 4 sont converties (niveau 100, nature/EV/talent/objet d'après les profils Pokémon Showdown les plus joués,
+ * voir profiles.ts), contre une équipe de joueur tirée dans tout le pool de la génération du moteur.
+ * `DailyChallenge.gen` reste la génération d'origine du dresseur (ligue, jeu, historique, classement) et
+ * `DailyChallenge.battleGen` celle du moteur utilisée pour ce défi (stockée dans le défi : le combat se rejoue à l'identique).
  */
-export const BATTLE_GEN = 4
+export const BATTLE_GEN = 5
+/** Moteur utilisé avant GEN5_FROM. */
+export const LEGACY_BATTLE_GEN = 4
+/**
+ * Première clé de jour (UTC) jouée avec le moteur gen 5 et le pool de dresseurs de la gen 5. Les jours précédents (et celui en
+ * cours au moment du déploiement) gardent exactement le même défi, puisque le tirage dépend du pool et de la génération du moteur.
+ */
+export const GEN5_FROM = '2026-10-15'
+/**
+ * Format Showdown du combat. Les gens 4 et 5 partagent les mêmes règles : « Custom Game » en 6v6, sans aperçu des équipes
+ * (la gen 5 l'active par défaut ; l'ordre des Pokémon est choisi avant le combat dans l'app, le premier mène).
+ */
+export const battleFormat = (gen: number): string => `gen${gen}customgame${gen >= 5 ? '@@@!Team Preview' : ''}`
+/** Génération du moteur pour une clé de jour donnée. */
+export const battleGenFor = (dayKey: string): number => (dayKey >= GEN5_FROM ? BATTLE_GEN : LEGACY_BATTLE_GEN)
 
 /** Générations pour lesquelles les données de dresseurs sont disponibles. */
 const TRAINERS_BY_GEN: Record<number, TrainerData[]> = {
@@ -44,6 +61,7 @@ const TRAINERS_BY_GEN: Record<number, TrainerData[]> = {
   2: trainersGen2 as TrainerData[],
   3: trainersGen3 as TrainerData[],
   4: trainersGen4 as TrainerData[],
+  5: trainersGen5 as TrainerData[],
 }
 /**
  * Dresseurs « hors ligue » (boss et admins d'équipe, rivaux, Pierre Rochard…), voir scripts/extract_extra.py.
@@ -56,12 +74,15 @@ const EXTRA_BY_GEN: Record<number, TrainerData[]> = {
   2: extraGen2 as TrainerData[],
   3: extraGen3 as TrainerData[],
   4: extraGen4 as TrainerData[],
+  5: extraGen5 as TrainerData[],
 }
 /** Un re-tirage admin (salt > 0) remplace de toute façon le défi du jour : il peut donc piocher dans tout le pool, extras compris. */
 const poolFor = (gen: number, dayKey: string, salt = 0) => (salt > 0 || dayKey >= EXTRA_FROM ? [...TRAINERS_BY_GEN[gen], ...EXTRA_BY_GEN[gen]] : TRAINERS_BY_GEN[gen])
 export { GAME_NAMES } from './names'
 export const TRAINER_COUNTS: Record<number, number> = Object.fromEntries(Object.entries(TRAINERS_BY_GEN).map(([g, t]) => [g, t.length + EXTRA_BY_GEN[Number(g)].length]))
 export const AVAILABLE_GENS = Object.keys(TRAINERS_BY_GEN).map(Number)
+/** Générations d'origine tirables pour une clé de jour : la gen 5 n'entre dans le tirage qu'à partir de GEN5_FROM. */
+const gensFor = (dayKey: string): number[] => (dayKey >= GEN5_FROM ? AVAILABLE_GENS : AVAILABLE_GENS.filter((g) => g <= LEGACY_BATTLE_GEN))
 
 export interface PreviewMon {
   species: string
@@ -109,6 +130,8 @@ function previewOf(set: PokemonSet, gen: number): PreviewMon {
 export interface DailyChallenge {
   dayKey: string
   gen: number
+  /** Génération du moteur de combat de ce défi (4 avant GEN5_FROM, 5 ensuite). */
+  battleGen: number
   trainer: TrainerData
   playerTeam: PokemonSet[]
   opponentTeam: PokemonSet[]
@@ -135,8 +158,8 @@ function normalize(set: Partial<PokemonSet> & { species: string }, gen: number, 
     ivs: set.ivs ?? stat(old ? 30 : 31),
     level: 100,
   } as PokemonSet
-  // Gen 4 : nature / EV (et talent / objet des dresseurs) d'après les profils les plus joués sur Pokémon Showdown, IV à 31.
-  return gen === 4 && profile ? applyProfile(base, Dex.forGen(gen), profile) : base
+  // Gens 4 et 5 : nature / EV (et talent / objet des dresseurs) d'après les profils les plus joués sur Pokémon Showdown, IV à 31.
+  return gen >= 4 && profile ? applyProfile(base, Dex.forGen(gen), profile) : base
 }
 
 function randomTeam(
@@ -186,7 +209,7 @@ function buildOpponent(trainer: TrainerData, gen: number, seed: [number, number,
 
 function simulateOnce(gen: number, a: PokemonSet[], b: PokemonSet[], seed: number): 0 | 1 | null {
   const battle = new Battle({
-    formatid: `gen${gen}customgame` as any,
+    formatid: battleFormat(gen) as any,
     seed: seedArray(seed) as any,
     p1: { name: 'A', team: Teams.pack(a) as any },
     p2: { name: 'B', team: Teams.pack(b) as any },
@@ -220,17 +243,18 @@ export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): Dai
   const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65, salt = 0 } = opts
   const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)
-  const gen = pick(rand, AVAILABLE_GENS) // génération d'origine du dresseur
+  const battleGen = battleGenFor(dayKey)
+  const gen = pick(rand, gensFor(dayKey)) // génération d'origine du dresseur
   const trainer = pick(rand, poolFor(gen, dayKey, salt))
-  const opponentTeam = buildOpponent(trainer, BATTLE_GEN, seedArray(baseSeed ^ 0xa5a5))
+  const opponentTeam = buildOpponent(trainer, battleGen, seedArray(baseSeed ^ 0xa5a5))
 
-  const taken = new Set(opponentTeam.map((s) => Dex.forGen(BATTLE_GEN).species.get(s.species).baseSpecies))
+  const taken = new Set(opponentTeam.map((s) => Dex.forGen(battleGen).species.get(s.species).baseSpecies))
   let best: { team: PokemonSet[]; rate: number } | null = null
   for (let c = 0; c < candidates; c++) {
-    const team = randomTeam(BATTLE_GEN, seedArray(baseSeed + 1000 * (c + 1)), new Set(), 6)
+    const team = randomTeam(battleGen, seedArray(baseSeed + 1000 * (c + 1)), new Set(), 6)
     // une équipe candidate peut partager des espèces avec l'adversaire, c'est autorisé
     void taken
-    const rate = winRate(BATTLE_GEN, team, opponentTeam, simsPerCandidate, baseSeed + c)
+    const rate = winRate(battleGen, team, opponentTeam, simsPerCandidate, baseSeed + c)
     if (rate >= min && rate <= max) {
       best = { team, rate }
       break
@@ -240,12 +264,13 @@ export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): Dai
   return {
     dayKey,
     gen,
+    battleGen,
     trainer,
     playerTeam: best!.team,
     opponentTeam,
     battleSeed: seedArray(baseSeed ^ 0x5eed),
     estimatedWinRate: best!.rate,
-    playerPreview: best!.team.map((m) => previewOf(m, BATTLE_GEN)),
-    opponentPreview: opponentTeam.map((m) => previewOf(m, BATTLE_GEN)),
+    playerPreview: best!.team.map((m) => previewOf(m, battleGen)),
+    opponentPreview: opponentTeam.map((m) => previewOf(m, battleGen)),
   }
 }

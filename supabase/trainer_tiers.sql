@@ -86,5 +86,20 @@ insert into public.trainer_tiers (gen, trainer, base) values
   (4, 'Maylene', 50),
   (4, 'Roark', 50),
   (4, 'Saturn', 75),
-  (4, 'Volkner', 50)
+  (4, 'Volkner', 50),
+  (5, 'Burgh', 50),
+  (5, 'Caitlin', 100),
+  (5, 'Cheren', 50),
+  (5, 'Clay', 50),
+  (5, 'Colress', 75),
+  (5, 'Drayden', 50),
+  (5, 'Elesa', 50),
+  (5, 'Ghetsis', 125),
+  (5, 'Grimsley', 100),
+  (5, 'Iris', 150),
+  (5, 'Marlon', 50),
+  (5, 'Marshal', 100),
+  (5, 'Roxie', 50),
+  (5, 'Shauntal', 100),
+  (5, 'Skyla', 50)
 on conflict (gen, trainer) do update set base = excluded.base;

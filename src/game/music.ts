@@ -57,6 +57,7 @@ const GEN: Record<number, GenStyle> = {
   2: { duty: 0.5, chorus: 0, vib: 0, delay: 0, tempo: 1, shift: 2, saw: 0, kick: 0.8 },
   3: { duty: 0.25, chorus: 0, vib: 7, delay: 0, tempo: 1.04, shift: -2, saw: 0.5, kick: 1 },
   4: { duty: 0.125, chorus: 8, vib: 9, delay: 0.22, tempo: 1.02, shift: 1, saw: 0, kick: 1 },
+  5: { duty: 0.125, chorus: 10, vib: 9, delay: 0.26, tempo: 1.06, shift: 3, saw: 0.2, kick: 1 },
 }
 
 const CLASS_KIND: Record<string, ThemeKind> = {

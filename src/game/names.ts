@@ -6,4 +6,5 @@ export const GAME_NAMES: Record<string, string> = {
   get crystal() { return t('game.crystal') },
   get emerald() { return t('game.emerald') },
   get platinum() { return t('game.platinum') },
+  get black2() { return t('game.black2') },
 }

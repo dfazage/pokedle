@@ -258,6 +258,7 @@ h1, h2, h3, p { margin: 0; }
 .g-row span { display: block; margin-top: 2px; color: var(--muted); font-family: var(--font2); font-weight: 500; font-size: 13px; line-height: 1.4; }
 .g-gens { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .g-gen { position: relative; padding: 11px 13px; border-radius: 18px; background: var(--glass-in); border: 1px solid var(--glass-b); display: flex; align-items: center; gap: 10px; }
+.g-gen:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .g-gen > i { width: 10px; height: 10px; border-radius: 50%; background: var(--g); box-shadow: 0 0 12px var(--g); flex: none; }
 .g-gen b { font-size: 15px; font-weight: 700; display: block; line-height: 1.1; }
 .g-gen small { display: block; color: var(--muted); font-size: 11px; font-family: var(--font2); font-weight: 500; }

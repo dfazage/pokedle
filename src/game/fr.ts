@@ -66,4 +66,5 @@ export const GEN_INFO: Record<number, { roman: string; region: string; game: str
   2: { roman: 'II', region: 'Johto', get game() { return t('game.crystal') }, species: '#001 → #251' },
   3: { roman: 'III', region: 'Hoenn', get game() { return t('game.emerald') }, species: '#001 → #386' },
   4: { roman: 'IV', region: 'Sinnoh', get game() { return t('game.platinum') }, species: '#001 → #493' },
+  5: { roman: 'V', get region() { return t('region.unova') }, get game() { return t('game.black2') }, species: '#001 → #649' },
 }

@@ -17,7 +17,7 @@
 
 **Liens des e-mails (confirmation / mot de passe oublié)** : l'app envoie `redirectTo` = `VITE_SITE_URL` (ou l'origine courante). Cette URL doit figurer dans Supabase → Authentication → URL Configuration → **Redirect URLs**, et **Site URL** ne doit plus être `http://localhost:3000`.
 
-GitHub Pages (`https://dfazage.github.io/pokedle/`) : dans Supabase, **Site URL** = `https://dfazage.github.io/pokedle/` et **Redirect URLs** = `https://dfazage.github.io/pokedle/` + `https://dfazage.github.io/pokedle/**`.
+GitHub Pages (`https://pokebadle.fun/`) : dans Supabase, **Site URL** = `https://pokebadle.fun/` et **Redirect URLs** = `https://pokebadle.fun/` + `https://pokebadle.fun/**`.
 
 ## Connexion Google
 

@@ -30,10 +30,10 @@ export function useReminders(email: string | null | undefined) {
   return { push, setPush, standalone, ios, account, notifOn, done, total: 3, ready, loaded: push !== null }
 }
 
-function Step({ checked, disabled, active, onChange, children, tag, label }: { checked: boolean; disabled?: boolean; active?: boolean; onChange?: () => void; children?: ReactNode; tag?: ReactNode; label: string }) {
+function Step({ checked, disabled, locked, active, onChange, children, tag, label }: { checked: boolean; disabled?: boolean; locked?: boolean; active?: boolean; onChange?: () => void; children?: ReactNode; tag?: ReactNode; label: string }) {
   return (
     <div className="card rem-step" style={active ? { borderColor: 'var(--violet)', boxShadow: '0 0 0 4px color-mix(in srgb, var(--violet) 18%, transparent)' } : undefined}>
-      <label className="row" style={{ alignItems: 'flex-start', gap: 14, opacity: disabled && !checked ? 0.6 : 1 }}>
+      <label className="row" style={{ alignItems: 'flex-start', gap: 14, opacity: locked && !checked ? 0.6 : 1 }}>
         <input type="checkbox" className="rem-ck" checked={checked} disabled={disabled} onChange={onChange} aria-label={label} />
         <span className="grow">{tag}{children}</span>
       </label>
@@ -112,7 +112,7 @@ export function Reminders(c: Ctx & { onBack: () => void }) {
         )}
       </Step>
 
-      <Step checked={r.notifOn} disabled={busy || notifLocked || notifBlocked} onChange={toggleNotif} active={next === 'notif'} label={t('rem.s.notif')} tag={next === 'notif' ? <Tag hot>{t('rem.next')}</Tag> : undefined}>
+      <Step checked={r.notifOn} disabled={busy || notifLocked || notifBlocked} locked={notifLocked} onChange={toggleNotif} active={next === 'notif'} label={t('rem.s.notif')} tag={next === 'notif' ? <Tag hot>{t('rem.next')}</Tag> : undefined}>
         <b style={{ display: 'block', fontSize: 17 }}>{r.notifOn ? t('rem.s.notif.ok') : t('rem.s.notif')}</b>
         <span className="muted small row" style={{ gap: 6, alignItems: 'flex-start' }}>
           {notifLocked && r.push !== 'unsupported' && <Lock size={15} style={{ flex: 'none', marginTop: 2 }} />}

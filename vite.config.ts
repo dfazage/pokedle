@@ -48,6 +48,10 @@ export default defineConfig({
           handler: 'CacheFirst',
           options: { cacheName: 'cries', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // cris Pokémon : cache à la demande
         }, {
+          urlPattern: ({ url }: { url: URL }) => url.hostname === 'play.pokemonshowdown.com' && url.pathname.startsWith('/sprites/gen5ani'),
+          handler: 'CacheFirst',
+          options: { cacheName: 'sprites-bw-ani', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 } }, // GIF BW/BW2 (Showdown) : réponses opaques (pas de CORS), comptées ~7 Mo chacune dans le quota → peu d'entrées
+        }, {
           urlPattern: ({ url }: { url: URL }) => url.hostname === 'play.pokemonshowdown.com' && url.pathname.startsWith('/sprites/trainers/'),
           handler: 'CacheFirst',
           options: { cacheName: 'trainer-sprites', cacheableResponse: { statuses: [0, 200] }, expiration: { maxEntries: 150, maxAgeSeconds: 60 * 60 * 24 * 60 } }, // sprites de dresseurs (Showdown)

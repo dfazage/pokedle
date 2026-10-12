@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, RotateCcw, Shuffle, Eye, EyeOff, Lock, LogIn, Mail, User } from 'lucide-react'
 import type { Ctx } from './types'
 import { supabase, siteUrl } from '../game/cloud'
 import { dayNumber } from '../game/info'
 import { MonOrb, TopBar } from '../ui/kit'
+import { renderGoogleButton } from '../game/googleSignIn'
 import { t, useLang } from '../i18n'
 
 export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
-  useLang()
+  const { lang } = useLang()
   const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in')
   const [mail, setMail] = useState('')
   const [pass, setPass] = useState('')
@@ -15,6 +16,23 @@ export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
   const [show, setShow] = useState(false)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  // Bouton Google Identity Services (affiche pokebadle.fun au lieu de supabase.co) ; sinon repli sur le flux OAuth classique.
+  const gisRef = useRef<HTMLDivElement>(null)
+  const [gis, setGis] = useState(false)
+  useEffect(() => {
+    const el = gisRef.current
+    if (!el) return
+    let alive = true
+    renderGoogleButton(el, {
+      locale: lang,
+      width: Math.min(el.clientWidth || 320, 400),
+      onStart: () => { setBusy(true); setMsg('') },
+      onError: (m) => { setMsg(m); setBusy(false) },
+      onDone: () => c.go('home'),
+    }).then((ok) => alive && setGis(ok))
+    return () => { alive = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!supabase) return
@@ -55,7 +73,8 @@ export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
       </div>
       <div className="sheet stack">
         {!supabase && <p className="muted">{t('auth.noCloud')}</p>}
-        <button type="button" className="btn ghost" disabled={busy || !supabase} onClick={google}>
+        <div ref={gisRef} style={{ display: gis ? 'flex' : 'none', justifyContent: 'center', minHeight: 44, opacity: busy ? 0.5 : 1, pointerEvents: busy ? 'none' : 'auto' }} />
+        <button type="button" className="btn ghost" style={{ display: gis ? 'none' : undefined }} disabled={busy || !supabase} onClick={google}>
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17.1z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-2.9-.8-4.7s.3-3.3.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 12-2.1 16-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.6 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
           {t('auth.google')}
         </button>

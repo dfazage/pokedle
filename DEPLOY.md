@@ -25,3 +25,5 @@ GitHub Pages (`https://pokebadle.fun/`) : dans Supabase, **Site URL** = `https:/
    - Authorized redirect URI : `https://gcjsqxogywmgslkqoojq.supabase.co/auth/v1/callback`
 2. Supabase → Authentication → Providers → Google : activer, coller *Client ID* et *Client secret*.
 3. Supabase → Authentication → URL Configuration : **Site URL** = URL de production (jamais `localhost`), et l'URL de production + `http://localhost:5173/**` dans **Redirect URLs**.
+
+**Connexion Google (Google Identity Services)** : le bouton de la page de connexion utilise `VITE_GOOGLE_CLIENT_ID` (workflow `deploy.yml`), le même Client ID que dans Supabase → Authentication → Providers → Google. Le domaine du site doit figurer dans Google Cloud → Identifiants → *Origines JavaScript autorisées* (`https://pokebadle.fun`). Le jeton Google est échangé via `supabase.auth.signInWithIdToken` (nonce haché SHA-256). Sans `VITE_GOOGLE_CLIENT_ID` ou si le script Google est bloqué, l'app retombe sur `signInWithOAuth` (écran affichant `supabase.co`).

@@ -48,8 +48,15 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 input { font: inherit; color: inherit; }
 h1, h2, h3, p { margin: 0; }
 
-.app { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 16px 16px 120px; display: flex; flex-direction: column; gap: 16px; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 28px 16px 120px; display: flex; flex-direction: column; gap: 16px; }
 .app.nonav { padding-bottom: 28px; }
+
+/* Encoche de langue FR / EN : accrochée au bord haut de l'écran, alignée sur le coin droit de la colonne de 480 px. */
+.langnotch { position: fixed; top: env(safe-area-inset-top, 0px); right: max(16px, calc(50% - 224px)); z-index: 60; display: inline-flex; gap: 2px; padding: 0 3px 3px; border-radius: 0 0 14px 14px; background: var(--surface); border: 1px solid var(--line); border-top: 0; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12); }
+.langnotch button { min-width: 30px; height: 22px; padding: 0 7px; border-radius: 0 0 11px 11px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; color: var(--muted); transition: background 0.15s, color 0.15s; }
+.langnotch button.on { background: var(--primary); color: var(--on-primary); }
+.langnotch button:not(.on):hover { color: var(--text); }
+.langnotch button:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
 .center { align-items: center; justify-content: center; text-align: center; }
 
 .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--secondary); }
@@ -229,7 +236,7 @@ h1, h2, h3, p { margin: 0; }
 .guide-bg i:nth-child(1) { width: 340px; height: 340px; left: -90px; top: -60px; }
 .guide-bg i:nth-child(2) { width: 300px; height: 300px; right: -100px; top: 34%; }
 .guide-bg i:nth-child(3) { width: 280px; height: 280px; left: 10%; bottom: -100px; }
-.guide-in { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+.guide-in { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; min-height: 100dvh; padding: 28px 16px 24px; display: flex; flex-direction: column; gap: 16px; }
 .guide .iconbtn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; }
 .guide .topbar .pill { padding: 7px 12px; }
 .g-viewport { overflow: hidden; border-radius: 30px; margin: 0 -2px; }

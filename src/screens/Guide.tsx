@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from 'react'
 import { ArrowLeft, Crown, Flame, Globe, Repeat, Shield, Swords, Timer, Users, Zap } from 'lucide-react'
 import type { Ctx } from './types'
 import { GEN_INFO } from '../game/fr'
+import { t, useLang } from '../i18n'
 
 type Item = { icon: ReactNode; title: string; text: string }
 interface Slide {
@@ -16,48 +17,39 @@ interface Slide {
 }
 
 const S = 18
-const SLIDES: Slide[] = [
-  {
-    eyebrow: 'Le principe',
-    title: 'Un combat par jour, le même pour tous',
-    lead: 'Comme un Wordle, mais en duel Pokémon. Un dresseur à battre, une équipe confiée pour la journée.',
-    c: ['#5ba8f0', '#8b6cd9'],
-    halos: ['#5ba8f0', '#8b6cd9', '#4ec9a0'],
-    items: [
-      { icon: <Swords size={S} />, title: 'Ton objectif', text: 'Battre le dresseur du jour, avec style, et enchaîner les jours.' },
-      { icon: <Timer size={S} />, title: 'Une seule tentative', text: 'Fuir compte comme une défaite. Pas de seconde chance.' },
-      { icon: <Repeat size={S} />, title: 'Un nouveau défi chaque jour', text: 'Nouveau dresseur, nouvelle équipe. Ta série continue tant que tu gagnes.' },
-    ],
-  },
-  {
-    eyebrow: 'Le tirage',
-    title: 'D’où vient le défi du jour ?',
-    lead: 'Il est tiré à la date du jour : tous les dresseurs affrontent exactement le même.',
-    c: ['#4ec9a0', '#5ba8f0'],
-    halos: ['#4ec9a0', '#5ba8f0', '#f7c948'],
-    items: [
-      { icon: <Globe size={S} />, title: 'Une ligue au hasard', text: 'Chaque jour, un des quatre jeux ci-dessous donne le ton.' },
-      { icon: <Crown size={S} />, title: 'Un vrai dresseur de la saga', text: 'Champions d’arène, Conseil des 4, Maîtres, et des visages moins attendus.' },
-      { icon: <Users size={S} />, title: 'Une équipe pour toi', text: 'Confiée pour la journée, pensée pour que le duel reste indécis.' },
-    ],
-  },
-  {
-    eyebrow: 'Les points',
-    title: 'Score et classement',
-    lead: 'Gagner rapporte des points, bien gagner en rapporte davantage. Une défaite n’en donne pas.',
-    c: ['#f7c948', '#f0716b'],
-    halos: ['#f7c948', '#f0716b', '#8b6cd9'],
-    items: [
-      { icon: <Zap size={S} />, title: 'Du style', text: 'Un duel plié vite, avec une équipe en forme, vaut plus qu’une victoire de justesse.' },
-      { icon: <Shield size={S} />, title: 'Un adversaire à la hauteur', text: 'Plus le dresseur est redoutable, plus la victoire compte.' },
-      { icon: <Flame size={S} />, title: 'De la régularité', text: 'Enchaîner les victoires d’un jour à l’autre fait grimper ton score.' },
-    ],
-    foot: 'Tes points s’additionnent et te placent au classement : celui du jour, celui des séries et le général.',
-  },
+const ICONS: ReactNode[][] = [
+  [<Swords size={S} />, <Timer size={S} />, <Repeat size={S} />],
+  [<Globe size={S} />, <Crown size={S} />, <Users size={S} />],
+  [<Zap size={S} />, <Shield size={S} />, <Flame size={S} />],
 ]
+const COLORS: Pick<Slide, 'c' | 'halos'>[] = [
+  { c: ['#5ba8f0', '#8b6cd9'], halos: ['#5ba8f0', '#8b6cd9', '#4ec9a0'] },
+  { c: ['#4ec9a0', '#5ba8f0'], halos: ['#4ec9a0', '#5ba8f0', '#f7c948'] },
+  { c: ['#f7c948', '#f0716b'], halos: ['#f7c948', '#f0716b', '#8b6cd9'] },
+]
+/** Les diapositives sont construites au rendu : les textes suivent la langue courante. */
+function slides(): Slide[] {
+  return COLORS.map((col, k) => {
+    const n = (k + 1) as 1 | 2 | 3
+    return {
+      eyebrow: t(`guide.${n}.eyebrow` as const),
+      title: t(`guide.${n}.title` as const),
+      lead: t(`guide.${n}.lead` as const),
+      ...col,
+      items: ([1, 2, 3] as const).map((j) => ({
+        icon: ICONS[k][j - 1],
+        title: t(`guide.${n}.i${j}.t` as const),
+        text: t(`guide.${n}.i${j}.x` as const),
+      })),
+      foot: n === 3 ? t('guide.3.foot') : undefined,
+    }
+  })
+}
 const GEN_COLORS: Record<number, string> = { 1: '#f0716b', 2: '#f7c948', 3: '#4ec9a0', 4: '#8fa8f0' }
 
 export function Guide(c: Ctx & { onBack: () => void }) {
+  useLang()
+  const SLIDES = slides()
   const [i, setI] = useState(0)
   const x0 = useRef<number | null>(null)
   const go = (n: number) => setI(Math.max(0, Math.min(SLIDES.length - 1, n)))
@@ -70,8 +62,8 @@ export function Guide(c: Ctx & { onBack: () => void }) {
       </div>
       <div className="guide-in">
         <div className="topbar">
-          <button className="iconbtn glass" onClick={c.onBack} aria-label="Retour"><ArrowLeft size={20} /></button>
-          <div className="t">Guide du jeu</div>
+          <button className="iconbtn glass" onClick={c.onBack} aria-label={t('back')}><ArrowLeft size={20} /></button>
+          <div className="t">{t('guide.title')}</div>
           <span className="pill glass">{i + 1} / {SLIDES.length}</span>
         </div>
 
@@ -109,9 +101,9 @@ export function Guide(c: Ctx & { onBack: () => void }) {
                           <i />
                           <div>
                             <b>{GEN_INFO[g].game}</b>
-                            <small>Gen {GEN_INFO[g].roman} · {GEN_INFO[g].region}</small>
+                            <small>{t('guide.gen', { roman: GEN_INFO[g].roman, region: GEN_INFO[g].region })}</small>
                           </div>
-                          {c.challenge.gen === g && <em>Aujourd’hui</em>}
+                          {c.challenge.gen === g && <em>{t('guide.today')}</em>}
                         </div>
                       ))}
                     </div>
@@ -128,8 +120,8 @@ export function Guide(c: Ctx & { onBack: () => void }) {
           {SLIDES.map((_, k) => <i key={k} className={k === i ? 'on' : ''} />)}
         </div>
         <div className="g-nav">
-          <button className="g-btn glass" onClick={() => go(i - 1)} disabled={i === 0}>Précédent</button>
-          <button className="g-btn main" onClick={() => (last ? c.onBack() : go(i + 1))}>{last ? 'Terminé' : 'Suivant'}</button>
+          <button className="g-btn glass" onClick={() => go(i - 1)} disabled={i === 0}>{t('guide.prev')}</button>
+          <button className="g-btn main" onClick={() => (last ? c.onBack() : go(i + 1))}>{last ? t('guide.done') : t('guide.next')}</button>
         </div>
       </div>
     </div>

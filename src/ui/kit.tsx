@@ -4,7 +4,8 @@ import {
   Shield, Skull, Snowflake, Sparkles, Star, Swords, User, Wind, Zap, Brain, ChevronsRight,
 } from 'lucide-react'
 import { TYPE_COLORS, fmtCountdown, msToNextDay } from '../game/info'
-import { TYPE_FR } from '../game/fr'
+import { typeName } from '../game/fr'
+import { LANGS, locale, setLang, t, useLang, type Lang } from '../i18n'
 
 export type Screen =
   | 'onboarding' | 'home' | 'opponent' | 'team' | 'intro' | 'battle' | 'result'
@@ -39,7 +40,7 @@ export function MonOrb({ types, size = 56 }: { types: string[]; size?: number })
 export function TypeBadge({ type, soft }: { type: string; soft?: boolean }) {
   return (
     <span className={soft ? 'badge soft' : 'badge'} style={typeVars([type])}>
-      {TYPE_FR[type] ?? type}
+      {typeName(type)}
     </span>
   )
 }
@@ -47,10 +48,11 @@ export function TypeBadge({ type, soft }: { type: string; soft?: boolean }) {
 export const monCardStyle = typeVars
 
 export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: () => void; right?: ReactNode }) {
+  useLang()
   return (
     <div className="topbar">
       {onBack ? (
-        <button className="iconbtn" onClick={onBack} aria-label="Retour"><ArrowLeft size={20} /></button>
+        <button className="iconbtn" onClick={onBack} aria-label={t('back')}><ArrowLeft size={20} /></button>
       ) : (
         <span style={{ width: 40 }} />
       )}
@@ -62,14 +64,16 @@ export function TopBar({ title, onBack, right }: { title: ReactNode; onBack?: ()
 
 /** Pastille des points totaux, affichée en haut à gauche des écrans principaux. */
 export function ScoreBadge({ points }: { points: number }) {
+  useLang()
   return (
-    <span className="pill score" aria-label={`${points} points`}>
-      <Star size={14} fill="currentColor" /> {points.toLocaleString('fr-FR')} pts
+    <span className="pill score" aria-label={t('pts.aria', { n: points })}>
+      <Star size={14} fill="currentColor" /> {t('pts', { n: points.toLocaleString(locale()) })}
     </span>
   )
 }
 
 export function BottomNav({ screen, go, onPlay }: { screen: Screen; go: (s: Screen) => void; onPlay: () => void }) {
+  useLang()
   const item = (s: Screen, label: string, I: typeof House) => (
     <button className={screen === s ? 'on' : ''} onClick={() => go(s)} aria-label={label}>
       <I size={22} />
@@ -77,12 +81,12 @@ export function BottomNav({ screen, go, onPlay }: { screen: Screen; go: (s: Scre
     </button>
   )
   return (
-    <nav className="nav" aria-label="Navigation">
-      {item('home', 'Accueil', House)}
-      {item('history', 'Historique', CalendarDays)}
-      <button className="go" onClick={onPlay} aria-label="Combat du jour" />
-      {item('leaderboard', 'Classement', BarChart3)}
-      {item('settings', 'Profil', User)}
+    <nav className="nav" aria-label={t('nav.label')}>
+      {item('home', t('nav.home'), House)}
+      {item('history', t('nav.history'), CalendarDays)}
+      <button className="go" onClick={onPlay} aria-label={t('nav.daily')} />
+      {item('leaderboard', t('nav.ranking'), BarChart3)}
+      {item('settings', t('nav.profile'), User)}
     </nav>
   )
 }
@@ -148,4 +152,21 @@ export function useLocalState<T extends string>(key: string, initial: T): [T, (v
     }
   }
   return [v, set]
+}
+
+const LANG_LABEL: Record<Lang, string> = { fr: 'FR', en: 'EN' }
+const LANG_NAME: Record<Lang, string> = { fr: 'Français', en: 'English' }
+
+/** Encoche de langue FR / EN, accrochée en haut à droite de l'écran, présente sur tous les écrans. */
+export function LangNotch() {
+  const { lang } = useLang()
+  return (
+    <div className="langnotch" role="group" aria-label="Langue / Language">
+      {LANGS.map((l) => (
+        <button key={l} className={l === lang ? 'on' : ''} onClick={() => setLang(l)} aria-pressed={l === lang} lang={l} title={LANG_NAME[l]}>
+          {LANG_LABEL[l]}
+        </button>
+      ))}
+    </div>
+  )
 }

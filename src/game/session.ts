@@ -1,7 +1,8 @@
 import { lineInfo } from './lineinfo'
 import { Battle, Teams } from '@pkmn/sim'
 import { aiChoose } from './ai'
-import { mvFr, spFr } from './fr'
+import { mvName, spName } from './fr'
+import { hasKey, t, type Key } from '../i18n'
 import { BATTLE_GEN, type DailyChallenge } from './daily'
 import type { Cue, Side, SfxId } from './battleCues'
 import { HIT_MARK } from './battleCues'
@@ -113,7 +114,7 @@ export class BattleSession {
         fainted: p.fainted,
         active: p.isActive,
         status: p.status || '',
-        vol: p.isActive ? Object.keys(p.volatiles ?? {}).filter((k) => k in VOL_FR) : [],
+        vol: p.isActive ? Object.keys(p.volatiles ?? {}).filter((k) => VOL_IDS.has(k)) : [],
         types: [...p.species.types],
         boosts: p.isActive ? Object.fromEntries(Object.entries(p.boosts ?? {}).filter(([, v]) => v)) : {},
         ...lineInfo(b.dex, p.species),
@@ -161,20 +162,15 @@ export class BattleSession {
   }
 }
 
-/** Statuts temporaires affichés : id du simulateur → texte d'apparition. */
-export const VOL_FR: Record<string, string> = {
-  confusion: 'est confus',
-  leechseed: 'est infecté par Vampigraine',
-  attract: 'est amoureux',
-  taunt: 'est provoqué',
-  encore: 'est obligé de répéter son attaque',
-  yawn: 'a sommeil',
-}
+/** Statuts temporaires affichés (ids du simulateur). Les textes d'apparition sont dans i18n : `b.vol.<id>`. */
+export const VOL_IDS = new Set(['confusion', 'leechseed', 'attract', 'taunt', 'encore', 'yawn'])
 const VOL_ALIAS: Record<string, string> = { 'move: Attract': 'attract', 'move: Taunt': 'taunt', 'move: Encore': 'encore', 'move: Leech Seed': 'leechseed', 'move: Yawn': 'yawn' }
 const volId = (raw: string) => VOL_ALIAS[raw] ?? raw.toLowerCase().replace(/^move: /, '').replace(/[^a-z]/g, '')
 
-const STATUS_FR: Record<string, string> = {
-  brn: 'brûlé', par: 'paralysé', psn: 'empoisonné', tox: 'gravement empoisonné', slp: 'endormi', frz: 'gelé',
+/** Phrase d'apparition d'un statut (« X est brûlé ! » / « X was burned! »). */
+const statusText = (who: string, code: string) => {
+  const key = `b.status.${code}`
+  return hasKey(key) && key !== 'b.status.other' ? t(key, { who }) : t('b.status.other', { who, status: code })
 }
 
 const STOP = new Set(['move', 'switch', 'drag', 'turn', 'cant', 'upkeep', 'win'])
@@ -195,8 +191,8 @@ function plainHit(lines: string[], i: number): boolean {
 /** Traduit le protocole Showdown en lignes lisibles (noms de Pokémon/attaques en anglais pour la V1). */
 export function formatLog(lines: string[]): string[] {
   const out: string[] = []
-  const nm = (s: string) => spFr(s.replace(/^p\d[a-z]?: /, ''))
-  const who = (s: string) => (s.startsWith('p1') ? nm(s) : `${nm(s)} adverse`)
+  const nm = (s: string) => spName(s.replace(/^p\d[a-z]?: /, ''))
+  const who = (s: string) => (s.startsWith('p1') ? nm(s) : t('b.foe', { name: nm(s) }))
   // Après "|split|pX", le simulateur émet la version privée puis la version publique : on garde la publique.
   const clean: string[] = []
   for (let i = 0; i < lines.length; i++) {
@@ -208,19 +204,19 @@ export function formatLog(lines: string[]): string[] {
   for (let i = 0; i < clean.length; i++) {
     const p = clean[i].split('|')
     switch (p[1]) {
-      case 'turn': out.push(`— Tour ${p[2]} —`); break
+      case 'turn': out.push(t('b.turn', { n: p[2] })); break
       case 'switch': case 'drag':
-        out.push(p[2].startsWith('p1') ? `Vas-y, ${nm(p[2])} !` : `L'adversaire envoie ${nm(p[2].split(',')[0])} !`); break
-      case 'move': out.push(`${who(p[2])} utilise ${mvFr(p[3])} !${plainHit(clean, i) ? HIT_MARK : ''}`); break
-      case 'cant': out.push(`${who(p[2])} ne peut pas attaquer.`); break
-      case '-supereffective': out.push("C'est super efficace !"); break
-      case '-resisted': out.push("Ce n'est pas très efficace…"); break
-      case '-immune': out.push(`Ça n'affecte pas ${who(p[2])}…`); break
-      case '-crit': out.push('Coup critique !'); break
-      case '-miss': out.push("L'attaque échoue !"); break
-      case '-status': out.push(`${who(p[2])} est ${STATUS_FR[p[3]] ?? p[3]} !`); break
-      case 'faint': out.push(`${who(p[2])} est K.O. !`); break
-      case 'win': out.push(p[2] === 'Toi' ? 'Victoire !' : 'Défaite…'); break
+        out.push(p[2].startsWith('p1') ? t('b.go', { name: nm(p[2]) }) : t('b.foeSend', { name: nm(p[2].split(',')[0]) })); break
+      case 'move': out.push(t('b.move', { who: who(p[2]), move: mvName(p[3]) }) + (plainHit(clean, i) ? HIT_MARK : '')); break
+      case 'cant': out.push(t('b.cant', { who: who(p[2]) })); break
+      case '-supereffective': out.push(t('b.super')); break
+      case '-resisted': out.push(t('b.resist')); break
+      case '-immune': out.push(t('b.immune', { who: who(p[2]) })); break
+      case '-crit': out.push(t('b.crit')); break
+      case '-miss': out.push(t('b.miss')); break
+      case '-status': out.push(statusText(who(p[2]), p[3])); break
+      case 'faint': out.push(t('b.faint', { who: who(p[2]) })); break
+      case 'win': out.push(p[2] === 'Toi' ? t('b.win') : t('b.lose')); break
       default: break
     }
   }
@@ -257,24 +253,22 @@ export interface Step {
   wait: number
 }
 
-/** Stats modifiables, avec l'article contracté pour les messages (« L'Attaque de … augmente ! »). */
-const STAT_FR: Record<string, { art: string }> = {
-  atk: { art: "l'Attaque" }, def: { art: 'la Défense' }, spa: { art: "l'Attaque Spéciale" }, spd: { art: 'la Défense Spéciale' },
-  spe: { art: 'la Vitesse' }, accuracy: { art: 'la Précision' }, evasion: { art: "l'Esquive" },
-}
+/** Stats modifiables (ids du simulateur) : leur nom est dans i18n, `bst.<id>` (en français avec l'article contracté). */
+const BOOST_STATS = new Set(['atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'])
 
-const RESIDUAL_FR: Record<string, (who: string) => string> = {
-  brn: (w) => `${w} souffre de sa brûlure !`,
-  psn: (w) => `${w} souffre du poison !`,
-  tox: (w) => `${w} souffre du poison !`,
-  Recoil: (w) => `${w} subit le contrecoup !`,
-  sandstorm: (w) => `${w} est frappé par la tempête de sable !`,
-  hail: (w) => `${w} est frappé par la grêle !`,
-  'Leech Seed': (w) => `${w} voit son énergie drainée !`,
-  'item: Life Orb': (w) => `${w} perd des PV à cause de l'Orbe Vie !`,
-  'item: Rocky Helmet': (w) => `${w} est blessé par le Casque Brutal !`,
-  'Spikes': (w) => `${w} est blessé par les Picots !`,
-  'Stealth Rock': (w) => `${w} est blessé par les Pierres Pointues !`,
+/** Dégâts résiduels : cause du simulateur → clé i18n. */
+const RESIDUAL: Record<string, Key> = {
+  brn: 'b.res.brn',
+  psn: 'b.res.psn',
+  tox: 'b.res.psn',
+  Recoil: 'b.res.recoil',
+  sandstorm: 'b.res.sandstorm',
+  hail: 'b.res.hail',
+  'Leech Seed': 'b.res.leechseed',
+  'item: Life Orb': 'b.res.lifeorb',
+  'item: Rocky Helmet': 'b.res.rockyhelmet',
+  'Spikes': 'b.res.spikes',
+  'Stealth Rock': 'b.res.stealthrock',
 }
 
 const hpMs = (delta: number, max: number) => Math.round(Math.min(1500, Math.max(300, 350 + (delta / Math.max(1, max)) * 1300)))
@@ -282,9 +276,9 @@ const hpMs = (delta: number, max: number) => Math.round(Math.min(1500, Math.max(
 /** `before` : état d'avant le tour, pour savoir qui est déjà sur le terrain (texte « Reviens, … ! », PV de départ). */
 export function formatSteps(lines: string[], before?: BattleView): Step[] {
   const out: Step[] = []
-  const nm = (s: string) => spFr(s.replace(/^p\d[a-z]?: /, ''))
+  const nm = (s: string) => spName(s.replace(/^p\d[a-z]?: /, ''))
   const sideOf = (s: string): Side => (s.startsWith('p1') ? 'player' : 'opponent')
-  const who = (s: string) => (s.startsWith('p1') ? nm(s) : `${nm(s)} adverse`)
+  const who = (s: string) => (s.startsWith('p1') ? nm(s) : t('b.foe', { name: nm(s) }))
 
   // Version « privée » après |split| : PV exacts pour les deux camps (seuls ceux du joueur sont affichés en chiffres).
   const clean: string[] = []
@@ -338,7 +332,7 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         const status = (p[4] ?? '').split(' ')[1] ?? ''
         if (kind === 'switch' && active[side] && !out0[side]) {
           out.push({
-            text: side === 'player' ? `Reviens, ${spFr(active[side]!)} !` : `L'adversaire rappelle ${spFr(active[side]!)} !`,
+            text: side === 'player' ? t('b.back', { name: spName(active[side]!) }) : t('b.foeBack', { name: spName(active[side]!) }),
             cue: null,
             fx: { side, kind: 'recall' },
             leave: side,
@@ -351,7 +345,7 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         active[side] = details
         out0[side] = false
         out.push({
-          text: side === 'player' ? `Vas-y, ${nm(p[2])} !` : `L'adversaire envoie ${nm(details)} !`,
+          text: side === 'player' ? t('b.go', { name: nm(p[2]) }) : t('b.foeSend', { name: nm(details) }),
           enter: { side, name: details, hp, maxhp, status },
           fx: { side, kind: 'enter' },
           wait: 800,
@@ -367,13 +361,13 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
           if (['move', 'turn', 'switch', 'drag', 'cant', 'upkeep'].includes(q[1])) break
           if (q[1] === '-damage' && sideOf(q[2]) !== side && !(q[4] ?? '').startsWith('[from]')) dmg = true
         }
-        out.push({ text: `${who(p[2])} utilise ${mvFr(p[3])} !`, cue: null, wait: 250 })
+        out.push({ text: t('b.move', { who: who(p[2]), move: mvName(p[3]) }), cue: null, wait: 250 })
         out.push({ fx: { side, kind: dmg ? 'attack' : 'buff' }, cue: dmg ? null : { kind: 'sfx', id: 'move' }, wait: dmg ? 380 : 420 })
         break
       }
-      case '-supereffective': pend.push({ text: "C'est super efficace !", kind: 'super' }); break
-      case '-resisted': pend.push({ text: "Ce n'est pas très efficace…", kind: 'resist' }); break
-      case '-crit': pend.push({ text: 'Coup critique !', kind: 'crit' }); break
+      case '-supereffective': pend.push({ text: t('b.super'), kind: 'super' }); break
+      case '-resisted': pend.push({ text: t('b.resist'), kind: 'resist' }); break
+      case '-crit': pend.push({ text: t('b.crit'), kind: 'crit' }); break
       case '-damage': {
         const side = sideOf(p[2])
         const from = (p[4] ?? '').startsWith('[from]') ? (p[4] ?? '').slice(7).split('|')[0].trim() : ''
@@ -382,8 +376,8 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         const delta = Math.max(0, cur[side] - next.hp)
         cur[side] = next.hp
         max[side] = next.maxhp
-        const fr = from ? RESIDUAL_FR[from] : undefined
-        if (fr) out.push({ text: fr(who(p[2])), cue: null, wait: 300 })
+        const resKey = from ? RESIDUAL[from] : undefined
+        if (resKey) out.push({ text: t(resKey, { who: who(p[2]) }), cue: null, wait: 300 })
         const k = pend.find((t) => t.kind === 'super') ? 'super' : pend.find((t) => t.kind === 'resist') ? 'resist' : pend.find((t) => t.kind === 'crit') ? 'crit' : 'hit'
         out.push({
           fx: { side, kind: 'hit' },
@@ -404,29 +398,30 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
       }
       case 'cant': {
         const why = p[3]
-        const text = why === 'slp' ? `${who(p[2])} dort profondément.` : why === 'frz' ? `${who(p[2])} est gelé !` : why === 'par' ? `${who(p[2])} est paralysé ! Il ne peut pas attaquer !` : why === 'flinch' ? `${who(p[2])} est apeuré !` : why === 'recharge' ? `${who(p[2])} doit se reposer.` : `${who(p[2])} ne peut pas attaquer.`
+        const text = t(['slp', 'frz', 'par', 'flinch', 'recharge'].includes(why) ? (`b.cant.${why}` as Key) : 'b.cant', { who: who(p[2]) })
         out.push({ text, wait: 800 })
         break
       }
-      case '-immune': out.push({ text: `Ça n'affecte pas ${who(p[2])}…`, wait: 800 }); break
-      case '-miss': out.push({ text: "L'attaque échoue !", wait: 800 }); break
+      case '-immune': out.push({ text: t('b.immune', { who: who(p[2]) }), wait: 800 }); break
+      case '-miss': out.push({ text: t('b.miss'), wait: 800 }); break
       case '-status':
-        out.push({ text: `${who(p[2])} est ${STATUS_FR[p[3]] ?? p[3]} !`, status: { side: sideOf(p[2]), status: p[3] }, wait: 800 })
+        out.push({ text: statusText(who(p[2]), p[3]), status: { side: sideOf(p[2]), status: p[3] }, wait: 800 })
         break
       case '-curestatus': {
         const side = sideOf(p[2])
-        out.push({ text: p[3] === 'slp' ? `${who(p[2])} se réveille !` : p[3] === 'frz' ? `${who(p[2])} n'est plus gelé !` : undefined, status: { side, status: '' }, cue: null, wait: p[3] === 'slp' || p[3] === 'frz' ? 800 : 150 })
+        out.push({ text: p[3] === 'slp' ? t('b.wake', { who: who(p[2]) }) : p[3] === 'frz' ? t('b.thaw', { who: who(p[2]) }) : undefined, status: { side, status: '' }, cue: null, wait: p[3] === 'slp' || p[3] === 'frz' ? 800 : 150 })
         break
       }
       case '-start': {
         const id = volId(p[3] ?? '')
-        if (id in VOL_FR) out.push({ text: `${who(p[2])} ${VOL_FR[id]} !`, vol: { side: sideOf(p[2]), id, on: true }, cue: { kind: 'sfx', id: 'status' }, wait: 800 })
+        if (VOL_IDS.has(id)) out.push({ text: t(`b.vol.${id}` as Key, { who: who(p[2]) }), vol: { side: sideOf(p[2]), id, on: true }, cue: { kind: 'sfx', id: 'status' }, wait: 800 })
         break
       }
       case '-end': {
         const id = volId(p[3] ?? '')
-        if (id in VOL_FR) {
-          const text = id === 'confusion' ? `${who(p[2])} n'est plus confus !` : id === 'attract' ? `${who(p[2])} n'est plus amoureux.` : id === 'taunt' ? `${who(p[2])} n'est plus provoqué.` : undefined
+        if (VOL_IDS.has(id)) {
+          const endKey = `b.volEnd.${id}`
+          const text = hasKey(endKey) ? t(endKey, { who: who(p[2]) }) : undefined
           out.push({ text, vol: { side: sideOf(p[2]), id, on: false }, cue: null, wait: text ? 700 : 100 })
         }
         break
@@ -441,27 +436,26 @@ export function formatSteps(lines: string[], before?: BattleView): Step[] {
         if (!nb[stat]) delete nb[stat]
         const up = kind === '-boost' || (kind === '-setboost' && Number(p[4]) > 0)
         const size = kind === '-setboost' ? 3 : n
-        const verb = `${up ? 'augmente' : 'diminue'}${size >= 3 ? ' énormément' : size === 2 ? ' beaucoup' : ''}`
-        const label = STAT_FR[stat]
-        out.push(boostStep(side, nb, label ? `${label.art} de ${who(p[2])} ${verb} !`.replace(/^./, (c) => c.toUpperCase()) : undefined))
+        const verb = t(`b.boost.${up ? 'up' : 'down'}${Math.min(3, size)}` as Key)
+        out.push(boostStep(side, nb, BOOST_STATS.has(stat) ? t('b.boost', { stat: t(`bst.${stat}` as Key), who: who(p[2]), verb }).replace(/^./, (c) => c.toUpperCase()) : undefined))
         break
       }
       case '-clearboost': case '-clearnegativeboost': {
         const side = sideOf(p[2])
         const nb = kind === '-clearboost' ? {} : Object.fromEntries(Object.entries(bst[side]).filter(([, x]) => x > 0))
-        out.push(boostStep(side, nb, kind === '-clearboost' ? `Les stats de ${who(p[2])} sont réinitialisées !` : undefined))
+        out.push(boostStep(side, nb, kind === '-clearboost' ? t('b.boostReset', { who: who(p[2]) }) : undefined))
         break
       }
       case '-clearallboost':
-        out.push(boostStep('player', {}, 'Tous les changements de stats sont annulés !'), boostStep('opponent', {}))
+        out.push(boostStep('player', {}, t('b.boostResetAll')), boostStep('opponent', {}))
         break
       case 'faint': {
         const side = sideOf(p[2])
         out0[side] = true
-        out.push({ text: `${who(p[2])} est K.O. !`, fx: { side, kind: 'faint' }, faint: side, wait: 900 })
+        out.push({ text: t('b.faint', { who: who(p[2]) }), fx: { side, kind: 'faint' }, faint: side, wait: 900 })
         break
       }
-      case 'win': out.push({ text: p[2] === 'Toi' ? 'Victoire !' : 'Défaite…', wait: 900 }); break
+      case 'win': out.push({ text: p[2] === 'Toi' ? t('b.win') : t('b.lose'), wait: 900 }); break
       default: break
     }
   }

@@ -3,6 +3,7 @@ import type { DailyChallenge } from '../game/daily'
 import { classLabel, GEN_INFO } from '../game/fr'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonOrb } from '../ui/kit'
+import { t, useLang } from '../i18n'
 
 /** Durée totale de l'intro (ms) : transition, entrée des dresseurs, VS, texte, fondu. */
 export const INTRO_MS = 3950
@@ -12,8 +13,9 @@ const Balls = () => <div className="bi-balls">{BALLS.map((k) => <i key={k} style
 
 /** Petite animation jouée à la confirmation du combat, avant l'arène. Un appui l'abrège. */
 export function BattleIntro({ challenge, boosted, onDone }: { challenge: DailyChallenge; boosted: boolean; onDone: () => void }) {
-  const t = challenge.trainer
-  const text = `${t.name} veut se battre !`
+  useLang()
+  const tr = challenge.trainer
+  const text = t('bi.wants', { name: tr.name })
   const done = useRef(onDone)
   useEffect(() => { done.current = onDone }) // le minuteur ne repart pas quand le parent se redessine
   useEffect(() => {
@@ -37,13 +39,13 @@ export function BattleIntro({ challenge, boosted, onDone }: { challenge: DailyCh
               </span>
             )}
             <TrainerImg
-              id={t.sprite ?? t.id}
+              id={tr.sprite ?? tr.id}
               gen={challenge.gen}
               fallback={<MonOrb types={challenge.opponentPreview[0]?.types ?? ['Normal']} size={110} />}
             />
           </div>
-          <div className="bi-name">{t.name}</div>
-          <div className="bi-cls">{classLabel(t)} · Pokémon {GEN_INFO[challenge.gen].game}</div>
+          <div className="bi-name">{tr.name}</div>
+          <div className="bi-cls">{t('bi.cls', { class: classLabel(tr), game: GEN_INFO[challenge.gen].game })}</div>
           <Balls />
         </div>
 
@@ -51,7 +53,7 @@ export function BattleIntro({ challenge, boosted, onDone }: { challenge: DailyCh
           <div className="bi-sprite">
             <TrainerImg id="lucas" gen={4} className="flip" fallback={<MonOrb types={challenge.playerPreview[0]?.types ?? ['Normal']} size={90} />} />
           </div>
-          <div className="bi-tag">Toi</div>
+          <div className="bi-tag">{t('battle.you')}</div>
           <Balls />
         </div>
 

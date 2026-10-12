@@ -1,3 +1,5 @@
+import { t } from '../i18n'
+
 export const TYPE_COLORS: Record<string, string> = {
   Normal: '#a8a878', Fire: '#f0716b', Water: '#5ba8f0', Grass: '#4ec9a0', Electric: '#f7c948', Ice: '#7fd6e0',
   Fighting: '#d65a4a', Poison: '#a864c9', Ground: '#d9b26a', Flying: '#8fa8f0', Psychic: '#f06a9c', Bug: '#a3c13a',
@@ -13,9 +15,9 @@ export function dayNumber(dayKey: string): number {
 
 /** Difficulté d'après le taux de victoire estimé de l'équipe imposée. */
 export function difficulty(rate: number): { stars: number; label: string } {
-  if (rate < 0.42) return { stars: 3, label: 'DIFFICILE' }
-  if (rate < 0.58) return { stars: 2, label: 'ÉQUILIBRÉ' }
-  return { stars: 1, label: 'ACCESSIBLE' }
+  if (rate < 0.42) return { stars: 3, label: t('diff.hard') }
+  if (rate < 0.58) return { stars: 2, label: t('diff.balanced') }
+  return { stars: 1, label: t('diff.easy') }
 }
 
 /** Millisecondes jusqu'au prochain minuit UTC. */

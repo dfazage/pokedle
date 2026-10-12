@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Check, ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { AVATARS } from '../game/avatars'
+import { Check, ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
 import type { DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
@@ -7,7 +8,7 @@ import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
 import { displayDay, keyForDisplayDay } from '../game/rng'
-import { TopBar } from '../ui/kit'
+import { Avatar, TopBar } from '../ui/kit'
 import { locale, pick, t, tn, useLang } from '../i18n'
 
 function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreakdown; today: string; onClose: () => void }) {
@@ -206,7 +207,7 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
             const rank = sorted.indexOf(r) + 1
             return (
               <div key={r.username} className={`p ${rank === 1 ? 'first' : ''}`}>
-                <div className="avatar" style={{ margin: '0 auto 8px', width: rank === 1 ? 64 : 52, height: rank === 1 ? 64 : 52, borderColor: rank === 1 ? 'var(--yellow)' : rank === 2 ? '#aeb8c8' : '#d08a4a' }}>{r.username[0].toUpperCase()}</div>
+                <Avatar id={r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar} name={r.username} size={rank === 1 ? 64 : 52} ring={rank === 1 ? 'var(--yellow)' : rank === 2 ? '#aeb8c8' : '#d08a4a'} style={{ margin: '0 auto 8px' }} />
                 <b>{rank}. {r.username}</b>
                 <div className="small" style={{ color: 'var(--primary)', fontWeight: 700 }}>{metric(r)}</div>
               </div>
@@ -218,6 +219,7 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
         {sorted.slice(3).map((r, i) => (
           <div key={r.username} className={`lb ${r.username === c.username ? 'me' : ''}`}>
             <span className="rank">#{i + 4}</span>
+            <Avatar id={r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar} name={r.username} size={36} style={{ fontSize: 15, borderWidth: 2 }} />
             <div className="grow"><b>{r.username}</b><div className="muted small">{t('lb.best', { n: r.best_streak })}{hasPoints ? ` · ${t('lb.winsShort', { n: r.wins })}` : ''}</div></div>
             <span className="pill"><Flame size={13} /> {r.current_streak}</span>
             <b className="small">{hasPoints ? fmt((tab === 'today' ? r.points_today : r.points) ?? 0) : t('lb.winsShort', { n: r.wins })}</b>
@@ -239,6 +241,7 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
   const [draft, setDraft] = useState('')
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
+  const [picking, setPicking] = useState(false)
   const save = async (e: React.FormEvent) => {
     e.preventDefault()
     setBusy(true)
@@ -253,7 +256,14 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
       <div className="lab">{t('set.account')}</div>
       <section className="card stack">
         <div className="row">
-          <div className="avatar">{(c.username ?? t('guest'))[0].toUpperCase()}</div>
+          {c.email ? (
+            <button type="button" className="avatar-edit" aria-label={t('set.changeAvatar')} aria-expanded={picking} onClick={() => setPicking(!picking)}>
+              <Avatar id={c.avatar} name={c.username ?? t('guest')} />
+              <span className="badge-edit"><Camera size={12} /></span>
+            </button>
+          ) : (
+            <Avatar id={c.avatar} name={c.username ?? t('guest')} />
+          )}
           {editing ? (
             <form className="grow stack" style={{ gap: 6 }} onSubmit={save}>
               <div className="row" style={{ gap: 6 }}>
@@ -275,6 +285,18 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
             </>
           )}
         </div>
+        {picking && (
+          <div className="stack" style={{ gap: 10 }}>
+            <div className="lab" style={{ margin: 0 }}>{t('set.chooseAvatar')}</div>
+            <div className="avatar-pick" role="radiogroup" aria-label={t('set.chooseAvatar')}>
+              {AVATARS.map((id) => (
+                <button key={id} type="button" role="radio" aria-checked={c.avatar === id} aria-label={t(`avatar.${id}`)} className={c.avatar === id ? 'on' : ''} onClick={() => { c.onAvatar(id); setPicking(false) }}>
+                  <Avatar id={id} name={id} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="row between" style={{ padding: 14, borderRadius: 16, background: 'rgba(247, 201, 72, 0.16)', border: '1px solid rgba(247, 201, 72, 0.4)' }}>
           <span className="row" style={{ gap: 8 }}><Star size={20} fill="var(--yellow)" style={{ color: 'var(--yellow)' }} /><span className="lab" style={{ margin: 0 }}>{t('set.points')}</span></span>
           <b style={{ fontSize: 28, color: 'var(--yellow)' }}>{c.score.total.toLocaleString(locale())}</b>

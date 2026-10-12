@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { TYPE_COLORS, fmtCountdown, msToNextDay } from '../game/info'
 import { typeName } from '../game/fr'
+import { avatarSrc, isAvatar } from '../game/avatars'
 import { LANGS, locale, setLang, t, useLang, type Lang } from '../i18n'
 
 export type Screen =
@@ -35,6 +36,13 @@ export function MonOrb({ types, size = 56 }: { types: string[]; size?: number })
       <TypeIcon type={types[0]} size={Math.round(size * 0.46)} />
     </span>
   )
+}
+
+/** Icône de profil : médaillon choisi par le joueur, sinon l'initiale du pseudo. `ring` colore le contour (podium). */
+export function Avatar({ id, name, size, ring, style }: { id?: string | null; name: string; size?: number; ring?: string; style?: React.CSSProperties }) {
+  const dim = size ? { width: size, height: size } : {}
+  if (isAvatar(id)) return <img className="avatar img" src={avatarSrc(id)} alt="" draggable={false} style={{ ...dim, ...(ring ? { boxShadow: `0 0 0 3px ${ring}` } : {}), ...style }} />
+  return <div className="avatar" style={{ ...dim, ...(ring ? { borderColor: ring } : {}), ...style }}>{(name[0] ?? '?').toUpperCase()}</div>
 }
 
 export function TypeBadge({ type, soft }: { type: string; soft?: boolean }) {

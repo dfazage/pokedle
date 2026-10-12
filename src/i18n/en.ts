@@ -254,6 +254,7 @@ export const en: Record<keyof typeof fr, string> = {
   'rem.s.install.sub': 'Open Pokédle in one tap, like a real app.',
   'rem.s.install.cta': 'Install',
   'rem.s.install.manual': 'In your browser menu, choose “Install app” or “Add to home screen”.',
+  'rem.s.install.already': 'If Pokédle is already installed, open it from its icon: the box ticks itself.',
   'rem.ios.1': 'Tap Share at the bottom of Safari',
   'rem.ios.2': 'Choose “Add to Home Screen”',
   'rem.ios.3': 'Reopen Pokédle from its icon: the box ticks itself.',

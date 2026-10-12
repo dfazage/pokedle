@@ -157,7 +157,12 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
   const sorted = useMemo(() => {
     let r = [...c.rows]
     if (tab === 'today') r = r.filter((x) => x.won_today)
-    r.sort((a, b) => (tab === 'streak' ? b.current_streak - a.current_streak || b.wins - a.wins : b.wins - a.wins || b.best_streak - a.best_streak))
+    const pts = (x: LeaderRow) => (tab === 'today' ? x.points_today : x.points) ?? 0
+    r.sort((a, b) =>
+      tab === 'streak'
+        ? b.current_streak - a.current_streak || b.wins - a.wins
+        : pts(b) - pts(a) || b.wins - a.wins || b.best_streak - a.best_streak,
+    )
     return r
   }, [c.rows, tab])
   if (!c.email)
@@ -172,7 +177,10 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
         </section>
       </>
     )
-  const metric = (r: LeaderRow) => (tab === 'streak' ? t('lb.streakMetric', { n: r.current_streak }) : tn('lb.winsMetric', r.wins))
+  const hasPoints = c.rows.some((r) => r.points !== undefined)
+  const fmt = (n: number) => t('pts', { n: n.toLocaleString(locale()) })
+  const metric = (r: LeaderRow) =>
+    tab === 'streak' ? t('lb.streakMetric', { n: r.current_streak }) : hasPoints ? fmt((tab === 'today' ? r.points_today : r.points) ?? 0) : tn('lb.winsMetric', r.wins)
   const top = sorted.slice(0, 3)
   const myIdx = sorted.findIndex((r) => r.username === c.username)
   const podium = top.length >= 3 ? [top[1], top[0], top[2]] : top
@@ -208,9 +216,9 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
         {sorted.slice(3).map((r, i) => (
           <div key={r.username} className={`lb ${r.username === c.username ? 'me' : ''}`}>
             <span className="rank">#{i + 4}</span>
-            <div className="grow"><b>{r.username}</b><div className="muted small">{t('lb.best', { n: r.best_streak })}</div></div>
+            <div className="grow"><b>{r.username}</b><div className="muted small">{t('lb.best', { n: r.best_streak })}{hasPoints ? ` · ${t('lb.winsShort', { n: r.wins })}` : ''}</div></div>
             <span className="pill"><Flame size={13} /> {r.current_streak}</span>
-            <b className="small">{t('lb.winsShort', { n: r.wins })}</b>
+            <b className="small">{hasPoints ? fmt((tab === 'today' ? r.points_today : r.points) ?? 0) : t('lb.winsShort', { n: r.wins })}</b>
           </div>
         ))}
         {myIdx >= 3 ? null : myIdx === -1 && c.username ? (

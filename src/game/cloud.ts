@@ -20,6 +20,9 @@ export interface LeaderRow {
   best_streak: number
   current_streak: number
   won_today: boolean
+  /** Points cumulés et points du jour : absents tant que supabase/leaderboard_points.sql n'est pas appliqué. */
+  points?: number
+  points_today?: number
 }
 
 /** Pseudo valide (3 à 20 caractères, lettres/chiffres/_ - .) tiré d'une chaîne quelconque ; null si inexploitable. */
@@ -179,6 +182,9 @@ export async function fetchDailyResetN(day: string): Promise<number> {
 
 export async function fetchLeaderboard(): Promise<LeaderRow[]> {
   if (!supabase) return []
+  // v3 = avec les points (supabase/leaderboard_points.sql) ; repli sur v2 (victoires et séries seulement) si absent.
+  const v3 = await supabase.rpc('leaderboard_v3', { limit_n: 50 })
+  if (!v3.error && v3.data) return (v3.data as LeaderRow[]).map((r) => ({ ...r, points: Number(r.points ?? 0), points_today: Number(r.points_today ?? 0) }))
   const { data, error } = await supabase.rpc('leaderboard_v2', { limit_n: 50 })
   return error || !data ? [] : (data as LeaderRow[])
 }

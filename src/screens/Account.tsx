@@ -8,7 +8,7 @@ import { renderGoogleButton } from '../game/googleSignIn'
 import { t, useLang } from '../i18n'
 import { displayDay } from '../game/rng'
 
-export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
+export function Auth(c: Ctx & { onBack: () => void }) {
   const { lang } = useLang()
   const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in')
   const [mail, setMail] = useState('')
@@ -95,7 +95,6 @@ export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
           {mode === 'forgot' && <button type="button" className="link" style={{ alignSelf: 'center' }} onClick={() => { setMode('in'); setMsg('') }}>{t('auth.backToLogin')}</button>}
           {msg && <p className="small" style={{ color: 'var(--secondary)', textAlign: 'center' }}>{msg}</p>}
         </form>
-        <button className="link" style={{ alignSelf: 'center' }} onClick={c.onGuest}>{t('auth.guest')} <span className="muted small">{t('auth.guestNote')}</span></button>
       </div>
     </>
   )

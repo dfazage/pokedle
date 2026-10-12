@@ -35,6 +35,18 @@ export const animatedSpriteUrl = (num: number, back: boolean): string => {
   return id ? `${SD_ROOT}/gen5ani${back ? '-back' : ''}/${id}.gif` : ''
 }
 
+// Précharge les GIF du combat (équipes des deux camps) pour que le Pokémon envoyé s'affiche sans temps mort.
+// Même mode de requête que l'<img> (sans crossOrigin) : le cache HTTP et celui du service worker sont réutilisés.
+const warm = new Set<string>()
+export function preloadAnimatedSprites(items: { num: number; back: boolean }[]) {
+  for (const { num, back } of items) {
+    const url = animatedSpriteUrl(num, back)
+    if (!url || warm.has(url)) continue
+    warm.add(url)
+    new Image().src = url
+  }
+}
+
 export const artworkUrl = (num: number): string => `${ROOT}/other/official-artwork/${num}.png`
 
 type Props = { spec: SpriteSpec; back?: boolean; artwork?: boolean; animated?: boolean } & Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'>

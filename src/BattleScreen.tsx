@@ -4,7 +4,7 @@ import type { BattleView, FxKind, MonView, Step } from './game/session'
 import '@fontsource/press-start-2p'
 import { mvName, spName, typeName } from './game/fr'
 import { t, useLang } from './i18n'
-import { MonImg } from './game/officialSprites'
+import { MonImg, preloadAnimatedSprites } from './game/officialSprites'
 import { matchups } from './game/typechart'
 import { TypeIcon } from './ui/kit'
 import { MoveBody } from './ui/MoveInfo'
@@ -150,16 +150,21 @@ const Sprite = ({ mon, back, wrap }: { mon: MonView | null; back?: boolean; wrap
   useLang()
   const [pad, setPad] = useState(0)
   const [ani, setAni] = useState<{ w: number; h: number } | null>(null) // GIF animé BW chargé : taille native
+  // Id du dernier sprite réellement chargé. Quand le Pokémon change, l'<img> garde l'ancienne image jusqu'à l'arrivée de la nouvelle :
+  // on la masque tant que l'id affiché n'est pas celui du Pokémon courant, sinon l'ancien sprite traîne quelques ms.
+  const [loaded, setLoaded] = useState('')
   if (!mon) return null
+  const id = `${mon.num}${back ? 'b' : 'f'}`
   // Sprite de la génération en cours (public/sprites), repli sur le sprite généré par code (game/sprites.ts).
   return (
     <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${ani ? ' ani' : ''}${mon.status ? ` is-${mon.status}` : ''}${mon.vol.includes('confusion') ? ' is-cnf' : ''}`} style={{ ['--pad' as string]: pad, ...(ani ? { ['--nw' as string]: ani.w, ['--nh' as string]: ani.h } : null), ...(mon.fainted ? { visibility: 'hidden' } : null) }}>
-      <MonImg spec={mon} back={back} animated className="sprite" alt={spName(mon.name)} draggable={false} onLoad={(e) => {
+      <MonImg spec={mon} back={back} animated className="sprite" alt={spName(mon.name)} draggable={false} style={loaded === id ? undefined : { visibility: 'hidden' }} onLoad={(e) => {
         const im = e.currentTarget
         // GIF Showdown : pas de CORS, donc pas de mesure par canvas ; on l'ancre au sol à sa taille native.
         const gif = im.currentSrc.includes('/gen5ani')
         setAni(gif ? { w: im.naturalWidth, h: im.naturalHeight } : null)
         setPad(gif ? 0 : bottomPad(im))
+        setLoaded(id)
       }} />
     </div>
   )
@@ -308,6 +313,8 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
   // Cris des deux équipes préchargés dès l'ouverture du combat.
   const nums = [...view.player.team, ...view.opponent.team].map((m) => m.num).join(',')
   useEffect(() => preloadCries(nums.split(',').map(Number)), [nums])
+  const ownCount = view.player.team.length // nums = équipe du joueur (dos) puis équipe adverse (face)
+  useEffect(() => preloadAnimatedSprites(nums.split(',').map((n, i) => ({ num: Number(n), back: i < ownCount }))), [nums, ownCount])
 
   const monOf = (side: Side, name: string) => findMon(view[side === 'player' ? 'player' : 'opponent'].team, name, (n) => n)
 

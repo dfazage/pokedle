@@ -5,7 +5,7 @@
 create or replace function public.game_day() returns date
 language sql stable
 set search_path = ''
-as $$ select greatest(((now() at time zone 'Europe/Paris') - interval '12 hours')::date, date '2026-10-12') $$; -- plancher = jour du lancement (cf. LAUNCH_DAY dans rng.ts)
+as $$ select greatest(((now() at time zone 'Europe/Paris') + interval '12 hours')::date, date '2026-10-12') $$; -- plancher = jour du lancement (cf. LAUNCH_DAY dans rng.ts)
 grant execute on function public.game_day() to anon, authenticated;
 
 -- Fonctions : on remplace chaque `(now() at time zone 'utc')::date` par `public.game_day()` en réécrivant leur définition actuelle.

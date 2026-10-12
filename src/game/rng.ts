@@ -63,16 +63,16 @@ const parisWall = (ms: number): { wall: number; y: number; m: number; d: number;
 }
 
 /**
- * Clé du jour de jeu (YYYY-MM-DD) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain, et porte la date de Paris du
- * moment où il commence. À 11h59 le 13/10 on est encore dans le jour du 12/10. Identique côté serveur : fonction SQL
- * `public.game_day()` (supabase/reset_noon_paris.sql). Entre 00h00 UTC et le premier reset à 12h Paris, la clé du 12/10 se
- * prolonge simplement : les clés restent consécutives, aucune statistique n'est touchée.
+ * Clé du jour de jeu (YYYY-MM-DD) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain et porte la date de Paris de sa
+ * FIN (date de maintenant + 12h). Le 12/10 avant 12h Paris = jour n°1 (clé 12/10) ; dès 12h00 le 12/10 = jour n°2 (clé 13/10).
+ * Identique côté serveur : fonction SQL `public.game_day()` (supabase/reset_noon_paris.sql). Les clés restent consécutives :
+ * aucune statistique ni série n'est touchée.
  */
 export function gameDayKey(d = new Date()): string {
   const { y, m, d: day, h } = parisWall(d.getTime())
-  const key = new Date(Date.UTC(y, m - 1, day - (h < RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
-  // Jour du lancement (12/10) : avant son premier 12h Paris on est déjà dans le jour du 12/10 (ancien reset à minuit UTC),
-  // pas dans celui du 11 : la clé ne recule jamais, et le 12/10 se prolonge jusqu'au 13/10 12h Paris.
+  // Le jour de jeu N va de 12h Paris (N-1) à 12h Paris (N) : la clé est la date de Paris à (maintenant + 12h).
+  // Jour n°1 (clé 12/10) = avant le premier reset, aujourd'hui 12/10 à 12h Paris le jeu passe au 13/10 (n°2).
+  const key = new Date(Date.UTC(y, m - 1, day + (h >= RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
   return key < LAUNCH_DAY ? LAUNCH_DAY : key
 }
 

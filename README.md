@@ -3,7 +3,7 @@
 Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + TS, moteur `@pkmn/sim`).
 
 ## Règles
-- Clé du jour : un jour de jeu va de 12h00 à 12h00 (heure de Paris, heure d'été/hiver comprise) et porte la date de Paris de son début (`gameDayKey` dans `src/game/rng.ts`, `public.game_day()` côté Supabase) → seed déterministe. Reset à 12h Paris = 10h UTC l'été, 11h UTC l'hiver (18h/19h à Kuala Lumpur). Premier reset à 12h : le 13/10/2026 ; le jour du 12/10 s'est simplement prolongé, les clés restent consécutives donc les séries et statistiques sont intactes.
+- Clé du jour : un jour de jeu va de 12h00 à 12h00 (heure de Paris, heure d'été/hiver comprise) et porte la date de Paris de sa fin (maintenant + 12h) (`gameDayKey` dans `src/game/rng.ts`, `public.game_day()` côté Supabase) → seed déterministe. Reset à 12h Paris = 10h UTC l'été, 11h UTC l'hiver (18h/19h à Kuala Lumpur). Premier reset à 12h : le 12/10/2026 (jour n°1 = clé 12/10, jour n°2 = clé 13/10) ; les clés restent consécutives donc les séries et statistiques sont intactes.
 - Génération tirée au sort (1 à 4, une version par génération : Rouge, Cristal, Émeraude, Platine), puis dresseur canon (arènes, Conseil des 4, champions). Équipe d'origine montée niveau 100 et complétée à 6 avec des Pokémon du thème du dresseur.
 - Gen 1 : le jeu d'origine n'a pas d'attaques dans ses données de dresseurs, elles sont générées (`scripts/fill_moves.mjs`) à partir des attaques réellement apprenables dans la génération.
 - Équipe imposée au joueur (6 Pokémon niveau 100) tirée via `@pkmn/randoms`, filtrée par simulations IA vs IA (cible 35–65 % de victoires).

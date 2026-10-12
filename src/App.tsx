@@ -18,6 +18,7 @@ import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
 import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchAvatar, updateAvatar, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, serverSupportsReplay, type LeaderRow } from './game/cloud'
+import { syncPush } from './game/push'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
 import { BottomNav, LangNotch, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
@@ -150,6 +151,7 @@ function AppScreens() {
         saveLocalAvatar(cloudAvatar)
       }
       setIsAdmin(await fetchIsAdmin())
+      void syncPush()
       await refreshCloud()
     }
     supabase.auth.getSession().then(({ data }) => {

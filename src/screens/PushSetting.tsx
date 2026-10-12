@@ -1,0 +1,47 @@
+import { useEffect, useState } from 'react'
+import { Bell, BellOff } from 'lucide-react'
+import { disablePush, enablePush, pushState, type PushState } from '../game/push'
+import { t, useLang } from '../i18n'
+
+/** Carte des réglages : active / désactive la notification quotidienne « le combat du jour est disponible ». */
+export function PushSetting() {
+  useLang()
+  const [state, setState] = useState<PushState | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState(false)
+  useEffect(() => {
+    let alive = true
+    pushState().then((s) => alive && setState(s)).catch(() => alive && setState('unsupported'))
+    return () => { alive = false }
+  }, [])
+  if (!state) return null
+  const toggle = async () => {
+    setBusy(true)
+    setErr(false)
+    try {
+      setState(state === 'on' ? await disablePush() : await enablePush())
+    } catch {
+      setErr(true)
+    }
+    setBusy(false)
+  }
+  const note = state === 'denied' ? t('push.denied') : state === 'ios-install' ? t('push.ios') : state === 'unsupported' ? t('push.unsupported') : state === 'on' ? t('push.on') : t('push.sub')
+  const canToggle = state === 'on' || state === 'off'
+  return (
+    <section className="card stack">
+      <div className="row">
+        {state === 'on' ? <Bell size={22} style={{ color: 'var(--tertiary)' }} /> : <BellOff size={22} className="muted" />}
+        <div className="grow">
+          <b>{t('push.title')}</b>
+          <div className="muted small">{note}</div>
+        </div>
+        {canToggle && (
+          <button type="button" className={state === 'on' ? 'btn ghost' : 'btn violet'} disabled={busy} onClick={toggle}>
+            {state === 'on' ? t('push.disable') : t('push.enable')}
+          </button>
+        )}
+      </div>
+      {err && <div className="small" style={{ color: 'var(--secondary)' }}>{t('push.error')}</div>}
+    </section>
+  )
+}

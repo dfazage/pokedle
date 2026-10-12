@@ -6,6 +6,8 @@ import type { DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
+import { pushConfigured } from '../game/push'
+import { PushSetting } from './PushSetting'
 import { GEN_INFO } from '../game/fr'
 import { displayDay, keyForDisplayDay } from '../game/rng'
 import { Avatar, TopBar } from '../ui/kit'
@@ -320,6 +322,12 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
         </div>
         <p className="muted small" style={{ marginTop: 10 }}>{t('set.themeNote')}</p>
       </section>
+      {pushConfigured() && (
+        <>
+          <div className="lab">{t('push.label')}</div>
+          <PushSetting />
+        </>
+      )}
       <div className="lab">{t('set.game')}</div>
       <button className="card row" onClick={() => c.go('guide')} style={{ textAlign: 'left' }}>
         <Layers size={22} style={{ color: 'var(--violet)' }} />

@@ -17,6 +17,11 @@
 /* --pad = part transparente sous le Pokémon dans l'image (mesurée au chargement) : les pieds se posent toujours au même endroit. */
 /* Adverse : pieds au centre de sa plateforme. Joueur : bas du sprite collé au cadre de message (comme sur DS, le cadre en cache un peu). */
 .spw.front { --size: 80; width: calc(var(--u) * var(--size)); height: calc(var(--u) * var(--size)); right: calc(var(--u) * 26); bottom: calc(var(--u) * (112 - var(--size) * var(--pad, 0))); }
+/* Sprites animés BW (GIF Showdown) : taille native (1 px de sprite = 1 px DS = --u × --k), centrés sur le même emplacement, pieds au sol. */
+.spw.ani { --k: 1; }
+.spw.ani.front { width: calc(var(--u) * var(--nw) * var(--k)); height: calc(var(--u) * var(--nh) * var(--k)); right: calc(var(--u) * (66 - var(--nw) * var(--k) / 2)); bottom: calc(var(--u) * 112); }
+.spw.ani.back { width: calc(var(--u) * var(--nw) * var(--k)); height: calc(var(--u) * var(--nh) * var(--k)); left: calc(var(--u) * (62 - var(--nw) * var(--k) / 2)); bottom: calc(var(--u) * 42); }
+.spw.ani:not(.is-par):not(.is-cnf) .sprite { animation: none; }
 .spw.back { --size: 96; width: calc(var(--u) * var(--size)); height: calc(var(--u) * var(--size)); left: calc(var(--u) * 14); bottom: calc(var(--u) * (42 - var(--size) * var(--pad, 0))); }
 
 .hpcol { position: absolute; z-index: 2; display: flex; flex-direction: column; gap: calc(var(--u) * 2); }

@@ -149,11 +149,18 @@ function bottomPad(img: HTMLImageElement): number {
 const Sprite = ({ mon, back, wrap }: { mon: MonView | null; back?: boolean; wrap: React.Ref<HTMLDivElement> }) => {
   useLang()
   const [pad, setPad] = useState(0)
+  const [ani, setAni] = useState<{ w: number; h: number } | null>(null) // GIF animé BW chargé : taille native
   if (!mon) return null
   // Sprite de la génération en cours (public/sprites), repli sur le sprite généré par code (game/sprites.ts).
   return (
-    <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${mon.status ? ` is-${mon.status}` : ''}${mon.vol.includes('confusion') ? ' is-cnf' : ''}`} style={{ ['--pad' as string]: pad, ...(mon.fainted ? { visibility: 'hidden' } : null) }}>
-      <MonImg spec={mon} back={back} className="sprite" alt={spName(mon.name)} draggable={false} onLoad={(e) => setPad(bottomPad(e.currentTarget))} />
+    <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${ani ? ' ani' : ''}${mon.status ? ` is-${mon.status}` : ''}${mon.vol.includes('confusion') ? ' is-cnf' : ''}`} style={{ ['--pad' as string]: pad, ...(ani ? { ['--nw' as string]: ani.w, ['--nh' as string]: ani.h } : null), ...(mon.fainted ? { visibility: 'hidden' } : null) }}>
+      <MonImg spec={mon} back={back} animated className="sprite" alt={spName(mon.name)} draggable={false} onLoad={(e) => {
+        const im = e.currentTarget
+        // GIF Showdown : pas de CORS, donc pas de mesure par canvas ; on l'ancre au sol à sa taille native.
+        const gif = im.currentSrc.includes('/gen5ani')
+        setAni(gif ? { w: im.naturalWidth, h: im.naturalHeight } : null)
+        setPad(gif ? 0 : bottomPad(im))
+      }} />
     </div>
   )
 }

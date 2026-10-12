@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
 import type { BattleView, FxKind, MonView, Step } from './game/session'
 import '@fontsource/press-start-2p'
-import { TYPE_FR, mvFr, spFr } from './game/fr'
+import { mvName, spName, typeName } from './game/fr'
+import { t, useLang } from './i18n'
 import { MonImg } from './game/officialSprites'
 import { matchups } from './game/typechart'
 import { TypeIcon } from './ui/kit'
@@ -44,46 +45,32 @@ function useTween(target: number, ms: number, key: string | number) {
   return v
 }
 
-/** Badge de statut façon DS : abréviation FR + couleur propre à chaque statut. */
-const STATUS_BADGE: Record<string, { label: string; title: string }> = {
-  slp: { label: 'SOM', title: 'Endormi' },
-  brn: { label: 'BRU', title: 'Brûlé' },
-  par: { label: 'PAR', title: 'Paralysé' },
-  psn: { label: 'PSN', title: 'Empoisonné' },
-  tox: { label: 'PSN', title: 'Gravement empoisonné' },
-  frz: { label: 'GEL', title: 'Gelé' },
-}
-const VOL_BADGE: Record<string, { label: string; title: string }> = {
-  confusion: { label: 'CNF', title: 'Confus' },
-  leechseed: { label: 'VAM', title: 'Vampigraine' },
-  attract: { label: 'AMO', title: 'Amoureux' },
-  taunt: { label: 'PRV', title: 'Provoqué' },
-  encore: { label: 'ENC', title: 'Encore' },
-  yawn: { label: 'SOM?', title: 'Somnolent' },
-}
+/** Badge de statut façon DS : abréviation + couleur propre à chaque statut. */
+const STATUS_IDS = ['slp', 'brn', 'par', 'psn', 'tox', 'frz'] as const
+const VOL_IDS = ['confusion', 'leechseed', 'attract', 'taunt', 'encore', 'yawn'] as const
+const isStatus = (x: string): x is (typeof STATUS_IDS)[number] => (STATUS_IDS as readonly string[]).includes(x)
+const isVol = (x: string): x is (typeof VOL_IDS)[number] => (VOL_IDS as readonly string[]).includes(x)
 export function StatusBadge({ status }: { status: string }) {
-  const b = STATUS_BADGE[status]
-  if (!b) return null
-  return <span className={`st st-${status}`} title={b.title}>{b.label}</span>
+  useLang()
+  if (!isStatus(status)) return null
+  return <span className={`st st-${status}`} title={t(`st.${status}.t`)}>{t(`st.${status}`)}</span>
 }
 
 /** Abréviations (ASCII : la police pixel n'a pas tous les accents) des stats modifiables, dans l'ordre d'affichage. */
-const STAT_SHORT: [string, string, string][] = [
-  ['atk', 'ATQ', 'Attaque'], ['def', 'DEF', 'Défense'], ['spa', 'A.SP', 'Attaque Spéciale'], ['spd', 'D.SP', 'Défense Spéciale'],
-  ['spe', 'VIT', 'Vitesse'], ['accuracy', 'PRE', 'Précision'], ['evasion', 'ESQ', 'Esquive'],
-]
+const STAT_KEYS = ['atk', 'def', 'spa', 'spd', 'spe', 'accuracy', 'evasion'] as const
 const MULT_LABEL = (m: number) => (m === 0 ? '0' : m >= 1 ? `×${m}` : m === 0.5 ? '½' : '¼')
 
 /** Au-dessus des PV : modificateurs de stats en cours, puis faiblesses (×2/×4) et résistances/immunités (×½, ×¼, 0) selon les types. */
 function InfoPanel({ mon }: { mon: MonView }) {
-  const boosts = STAT_SHORT.filter(([k]) => mon.boosts?.[k])
+  useLang()
+  const boosts = STAT_KEYS.filter((k) => mon.boosts?.[k])
   const { weak, resist } = matchups(mon.types)
   const row = (list: { type: string; mult: number }[], kind: 'weak' | 'resist') =>
     list.length > 0 && (
-      <div className={`mxrow ${kind}`} title={kind === 'weak' ? 'Faiblesses' : 'Résistances et immunités'}>
+      <div className={`mxrow ${kind}`} title={kind === 'weak' ? t('bi.weak') : t('bi.resist')}>
         <i className="mk" aria-hidden />
         {list.map((a) => (
-          <span key={a.type} className={`mx m${String(a.mult).replace('.', '_')}`} style={{ ['--tc' as string]: TYPE_COLORS[a.type] }} title={`${TYPE_FR[a.type] ?? a.type} ${MULT_LABEL(a.mult)}`}>
+          <span key={a.type} className={`mx m${String(a.mult).replace('.', '_')}`} style={{ ['--tc' as string]: TYPE_COLORS[a.type] }} title={`${typeName(a.type)} ${MULT_LABEL(a.mult)}`}>
             <span className="ti"><TypeIcon type={a.type} size={10} /></span><b>{MULT_LABEL(a.mult)}</b>
           </span>
         ))}
@@ -93,9 +80,9 @@ function InfoPanel({ mon }: { mon: MonView }) {
     <div className="mxpanel">
       {boosts.length > 0 && (
         <div className="bsrow">
-          {boosts.map(([k, short, full]) => {
+          {boosts.map((k) => {
             const v = mon.boosts[k]
-            return <span key={k} className={`bs ${v > 0 ? 'up' : 'down'}`} title={`${full} ${v > 0 ? '+' : ''}${v}`}>{short} {v > 0 ? '+' : ''}{v}</span>
+            return <span key={k} className={`bs ${v > 0 ? 'up' : 'down'}`} title={`${t(`bsf.${k}`)} ${v > 0 ? '+' : ''}${v}`}>{t(`bss.${k}`)} {v > 0 ? '+' : ''}{v}</span>
           })}
         </div>
       )}
@@ -106,6 +93,7 @@ function InfoPanel({ mon }: { mon: MonView }) {
 }
 
 function HpBox({ mon, ms, own }: { mon: MonView | null; ms: number; own?: boolean }) {
+  useLang()
   const shown = useTween(mon?.hp ?? 0, ms, mon ? `${mon.idx}:${mon.maxhp}` : '')
   if (!mon || mon.fainted) return null
   const pct = Math.max(0, (shown / mon.maxhp) * 100)
@@ -114,15 +102,15 @@ function HpBox({ mon, ms, own }: { mon: MonView | null; ms: number; own?: boolea
     <div className={`hpcol ${own ? 'own' : 'foe'}`}>
       <InfoPanel mon={mon} />
       <div className="hpbox">
-        <div className="hrow"><span className="nm">{spFr(mon.name).toUpperCase()}</span><span className="lv">Nv100</span></div>
+        <div className="hrow"><span className="nm">{spName(mon.name).toUpperCase()}</span><span className="lv">{t('bs.lv')}</span></div>
         {(mon.status || mon.vol.length > 0) && (
           <div className="hrow strow">
             {mon.status && <StatusBadge status={mon.status} />}
-            {mon.vol.map((v) => VOL_BADGE[v] && <span key={v} className={`st st-v st-${v}`} title={VOL_BADGE[v].title}>{VOL_BADGE[v].label}</span>)}
+            {mon.vol.map((v) => isVol(v) && <span key={v} className={`st st-v st-${v}`} title={t(`vb.${v}.t`)}>{t(`vb.${v}`)}</span>)}
           </div>
         )}
         <div className="hrow bar">
-          <span className="hplabel">PV</span>
+          <span className="hplabel">{t('bs.hp')}</span>
           <div className="track"><div className={`fill ${tone}`} style={{ width: `${pct}%` }} /></div>
         </div>
         {own && <div className="num">{Math.ceil(shown)}/{mon.maxhp}</div>}
@@ -159,20 +147,21 @@ function bottomPad(img: HTMLImageElement): number {
 
 // Le conteneur .spw porte les animations (Web Animations API, rejouables à volonté) ; l'image garde son léger balancement.
 const Sprite = ({ mon, back, wrap }: { mon: MonView | null; back?: boolean; wrap: React.Ref<HTMLDivElement> }) => {
+  useLang()
   const [pad, setPad] = useState(0)
   if (!mon) return null
   // Sprite de la génération en cours (public/sprites), repli sur le sprite généré par code (game/sprites.ts).
   return (
     <div ref={wrap} className={`spw ${back ? 'back' : 'front'}${mon.status ? ` is-${mon.status}` : ''}${mon.vol.includes('confusion') ? ' is-cnf' : ''}`} style={{ ['--pad' as string]: pad, ...(mon.fainted ? { visibility: 'hidden' } : null) }}>
-      <MonImg spec={mon} back={back} className="sprite" alt={spFr(mon.name)} draggable={false} onLoad={(e) => setPad(bottomPad(e.currentTarget))} />
+      <MonImg spec={mon} back={back} className="sprite" alt={spName(mon.name)} draggable={false} onLoad={(e) => setPad(bottomPad(e.currentTarget))} />
     </div>
   )
 }
 
 /** Catégorie de l'attaque (icônes façon DS : physique = éclat orange, spéciale = ondes bleues, statut = ovale gris). */
-const CAT_INFO: Record<string, string> = { Physical: 'Physique', Special: 'Spéciale', Status: 'Statut' }
 function CatIcon({ cat }: { cat: string }) {
-  const title = CAT_INFO[cat] ?? cat
+  useLang()
+  const title = cat === 'Physical' || cat === 'Special' || cat === 'Status' ? t(`cat.${cat}`) : cat
   return (
     <svg className={`cat cat-${cat}`} viewBox="0 0 20 12" role="img" aria-label={title}>
       <title>{title}</title>
@@ -290,6 +279,7 @@ interface Props {
 }
 
 export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch, onForfeit }: Props) {
+  useLang()
   const [menu, setMenu] = useState<'main' | 'moves' | 'team'>('main')
   const [pick, setPick] = useState<number | null>(null) // attaque sélectionnée (fiche affichée) ; un second appui la lance
   const [typed, setTyped] = useState(0)
@@ -341,7 +331,7 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
     }
     // Son : celui de l'étape, sinon celui du message.
     const cue = step.cue !== undefined ? step.cue : step.text ? cueFor(step.text) : null
-    if (cue) playCue(cue, (side, name) => findMon((side === 'player' ? view.player : view.opponent).team, name, spFr)?.num)
+    if (cue) playCue(cue, (side, name) => findMon((side === 'player' ? view.player : view.opponent).team, name, spName)?.num)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step])
 
@@ -388,9 +378,9 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
 
   let prompt = msg.slice(0, typed)
   if (!busy && !view.ended) {
-    prompt = forced ? 'Envoyer quel POKéMON ?' : `Que doit faire ${spFr(view.player.active?.name ?? '').toUpperCase()} ?`
+    prompt = forced ? t('bs.sendWhich') : t('bs.whatDo', { name: spName(view.player.active?.name ?? '').toUpperCase() })
   }
-  if (!busy && view.ended) prompt = view.result === 'win' ? 'Tu as gagné le combat !' : 'Tu as perdu le combat…'
+  if (!busy && view.ended) prompt = view.result === 'win' ? t('bs.youWon') : t('bs.youLost')
 
   const locked = busy || view.ended
   const teamAll = view.player.team
@@ -412,7 +402,7 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
           <HpBox mon={shown.player} ms={shown.ms.player} own />
           <button
             className="mutebtn"
-            aria-label={muted ? 'Activer le son' : 'Couper le son'}
+            aria-label={muted ? t('bs.soundOn') : t('bs.soundOff')}
             onClick={(e) => {
               e.stopPropagation()
               setMuted(!muted)
@@ -434,25 +424,25 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
         </div>
         {!choosingTeam && menu === 'main' && (
           <div className="tmenu main">
-            <button className="tbtn fight" disabled={!showMenu} onClick={() => { setPick(null); setMenu('moves') }}>COMBAT</button>
-            <button className="tbtn bag" disabled>SAC</button>
-            <button className="tbtn run" disabled={!showMenu} onClick={onForfeit}>FUITE</button>
-            <button className="tbtn mons" disabled={!showMenu || view.player.trapped} onClick={() => setMenu('team')}>POKéMON</button>
+            <button className="tbtn fight" disabled={!showMenu} onClick={() => { setPick(null); setMenu('moves') }}>{t('bs.fight')}</button>
+            <button className="tbtn bag" disabled>{t('bs.bag')}</button>
+            <button className="tbtn run" disabled={!showMenu} onClick={onForfeit}>{t('bs.run')}</button>
+            <button className="tbtn mons" disabled={!showMenu || view.player.trapped} onClick={() => setMenu('team')}>{t('bs.pokemon')}</button>
           </div>
         )}
         {!choosingTeam && menu === 'moves' && (
           <div className="tmenu moves">
             {view.player.moves.map((m) => (
               <button key={m.slot} className={`tbtn move${pick === m.slot ? ' sel' : ''}`} style={{ ['--tc' as string]: TYPE_COLORS[m.type] ?? '#888' }} disabled={m.disabled || !showMenu} onClick={() => (pick === m.slot ? onMove(m.slot) : setPick(m.slot))}>
-                <b>{mvFr(m.name.replace(/^(Hidden Power) .*/, '$1')).toUpperCase()}</b>
+                <b>{mvName(m.name.replace(/^(Hidden Power) .*/, '$1')).toUpperCase()}</b>
                 <span className="mrow">
-                  <span className="tchip"><span className="ti"><TypeIcon type={m.type} size={10} /></span>{(TYPE_FR[m.type] ?? m.type).toUpperCase()}</span>
+                  <span className="tchip"><span className="ti"><TypeIcon type={m.type} size={10} /></span>{typeName(m.type).toUpperCase()}</span>
                   <CatIcon cat={m.category} />
                 </span>
-                <span className="mrow"><span>{m.power > 0 ? `PUI ${m.power}` : 'PUI --'}</span><span>PP {m.pp}/{m.maxpp}</span></span>
+                <span className="mrow"><span>{m.power > 0 ? t('bs.pow', { n: m.power }) : t('bs.powNone')}</span><span>PP {m.pp}/{m.maxpp}</span></span>
               </button>
             ))}
-            <button className="tbtn cancel" onClick={() => setMenu('main')}>ANNULER</button>
+            <button className="tbtn cancel" onClick={() => setMenu('main')}>{t('bs.cancel')}</button>
           </div>
         )}
         {choosingTeam && (
@@ -460,13 +450,13 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
             <div className={`tmenu team${!forced ? ' has-cancel' : ''}`}>
               {alive.map((m) => (
                 <button key={m.idx} className="tbtn mon" onClick={() => onSwitch(m.idx)}>
-                  <b>{spFr(m.name).toUpperCase()}</b>
-                  <small>PV {m.hp}/{m.maxhp}</small>
+                  <b>{spName(m.name).toUpperCase()}</b>
+                  <small>{t('bs.hp')} {m.hp}/{m.maxhp}</small>
                   {m.status && <StatusBadge status={m.status} />}
                 </button>
               ))}
             </div>
-            {!forced && <button className="tbtn cancel tcancel" onClick={() => setMenu('main')}>ANNULER</button>}
+            {!forced && <button className="tbtn cancel tcancel" onClick={() => setMenu('main')}>{t('bs.cancel')}</button>}
           </>
         )}
       </div>
@@ -480,10 +470,10 @@ export default function BattleScreen({ view, queue, onAdvance, onMove, onSwitch,
               m={{ name: picked.name, type: picked.type, category: picked.category, power: picked.power, acc: picked.acc, pp: picked.maxpp, ppLeft: picked.pp, priority: picked.priority, target: picked.target }}
               foe={foe ? { name: foe.name, types: foe.types } : null}
             />
-            <button className="mi-use" disabled={picked.disabled || !showMenu} onClick={() => onMove(picked.slot)}>Utiliser {mvFr(picked.name.replace(/^(Hidden Power) .*/, '$1'))}</button>
+            <button className="mi-use" disabled={picked.disabled || !showMenu} onClick={() => onMove(picked.slot)}>{t('mi.use', { name: mvName(picked.name.replace(/^(Hidden Power) .*/, '$1')) })}</button>
           </>
         ) : (
-          <p className="mi-hint">Touche une attaque pour lire sa fiche, touche-la de nouveau pour la lancer.</p>
+          <p className="mi-hint">{t('mi.hint')}</p>
         )}
       </section>
     )}

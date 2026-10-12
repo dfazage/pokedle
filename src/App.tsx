@@ -10,13 +10,14 @@ import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { dayKeyUTC } from './game/rng'
-import { classLabel, GEN_INFO, spFr } from './game/fr'
+import { classLabel, GEN_INFO, spName } from './game/fr'
+import { t, useLang } from './i18n'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, type LeaderRow } from './game/cloud'
 import BattleScreen from './BattleScreen'
 import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
-import { BottomNav, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
+import { BottomNav, LangNotch, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
 import { Admin, Auth, Onboarding, ResetPassword } from './screens/Account'
@@ -54,7 +55,18 @@ function loadOrder(day: string): number[] | null {
 type Engine = { BattleSession: typeof import('./game/session').BattleSession; formatLog: typeof import('./game/session').formatLog; formatSteps: typeof import('./game/session').formatSteps }
 const NAV_SCREENS: Screen[] = ['home', 'history', 'leaderboard', 'settings', 'result']
 
+/** Racine : l'encoche de langue est affichée une seule fois, au-dessus de tous les écrans. */
 export default function App() {
+  return (
+    <>
+      <LangNotch />
+      <AppScreens />
+    </>
+  )
+}
+
+function AppScreens() {
+  useLang() // re-rendu complet de l'app au changement de langue
   const today = useMemo(() => dayKeyUTC(), [])
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
   // Accès à l'app : il faut être connecté OU avoir explicitement choisi de jouer en invité.
@@ -269,9 +281,9 @@ export default function App() {
   const forfeit = () => {
     const s = session.current
     if (!s || s.view().ended) return
-    if (!window.confirm('Fuir compte comme une défaite pour aujourd’hui. Continuer ?')) return
+    if (!window.confirm(t('battle.forfeitConfirm'))) return
     s.forfeit()
-    setQueue([{ text: 'Tu as pris la fuite… (défaite)', wait: 1000 }])
+    setQueue([{ text: t('b.fled'), wait: 1000 }])
     setPending(s.view())
     finish(s)
   }
@@ -287,9 +299,9 @@ export default function App() {
 
   const adminReroll = async () => {
     if (!isAdmin) return
-    if (!window.confirm('Re-tirer le dresseur et la team du jour pour TOUT LE MONDE ? Les résultats déjà enregistrés resteront liés à l’ancien dresseur.')) return
+    if (!window.confirm(t('adm.confirmReroll'))) return
     if ((await adminRerollToday()) === null) {
-      window.alert('Re-tirage impossible (droits admin ou connexion).')
+      window.alert(t('adm.rerollFail'))
       return
     }
     try {
@@ -327,10 +339,10 @@ export default function App() {
 
   const adminResetAll = async () => {
     if (!isAdmin) return
-    if (!window.confirm('Réinitialiser le combat du jour pour TOUS les joueurs ? Tous les résultats d’aujourd’hui seront supprimés (stats et séries comprises).')) return
+    if (!window.confirm(t('adm.confirmResetAll'))) return
     const n = await adminResetTodayAll()
     if (n === null) {
-      window.alert('Reset impossible (droits admin ou connexion).')
+      window.alert(t('adm.resetFail'))
       return
     }
     try {
@@ -345,9 +357,9 @@ export default function App() {
 
   const adminReset = async () => {
     if (!isAdmin) return
-    if (!window.confirm('Réinitialiser le combat du jour (résultat, progression, ordre de l’équipe) ?')) return
+    if (!window.confirm(t('adm.confirmReset'))) return
     if (!(await adminResetToday())) {
-      window.alert('Reset impossible (droits admin ou connexion).')
+      window.alert(t('adm.resetFail'))
       return
     }
     try {
@@ -418,7 +430,7 @@ export default function App() {
       <main className="app center">
         <div className="splash-orb" />
         <h1 className="title">Pokédle Battle</h1>
-        <p className="muted">Préparation du combat du jour…</p>
+        <p className="muted">{t('app.preparing')}</p>
       </main>
     )
 
@@ -446,18 +458,18 @@ export default function App() {
         <main className="app nonav">
           <TopBar
             title={<>{challenge.trainer.name}<div className="muted small">{classLabel(challenge.trainer)} · {gi.game}</div></>}
-            right={<span className="pill">Tour {view.turn}</span>}
+            right={<span className="pill">{t('battle.turn', { n: view.turn })}</span>}
           />
           <BattleScreen view={view} queue={queue} onAdvance={advance} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />
           <div className="stack" style={{ gap: 8 }}>
-            {([['Toi', view.player.team], [challenge.trainer.name, view.opponent.team]] as const).map(([who, team]) => (
+            {([[t('battle.you'), view.player.team], [challenge.trainer.name, view.opponent.team]] as const).map(([who, team]) => (
               <div key={who} className="squad">
                 <span className="muted small" style={{ width: 72, fontWeight: 700 }}>{who}</span>
-                {team.map((m) => <span key={m.idx} className={m.fainted ? 'ko' : undefined} title={spFr(m.name)} style={{ display: 'contents' }}><MonOrb types={m.types} size={26} /></span>)}
+                {team.map((m) => <span key={m.idx} className={m.fainted ? 'ko' : undefined} title={spName(m.name)} style={{ display: 'contents' }}><MonOrb types={m.types} size={26} /></span>)}
               </div>
             ))}
           </div>
-          {over && <button className="btn" onClick={() => setScreen('result')}>Voir mon résultat</button>}
+          {over && <button className="btn" onClick={() => setScreen('result')}>{t('battle.seeResult')}</button>}
         </main>
       </div>
     )

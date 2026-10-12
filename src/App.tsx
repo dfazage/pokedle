@@ -71,8 +71,7 @@ function AppScreens() {
   useLang() // re-rendu complet de l'app au changement de langue
   const today = useMemo(() => gameDayKey(), [])
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
-  // Accès à l'app : il faut être connecté OU avoir explicitement choisi de jouer en invité.
-  const [guest, setGuest] = useLocalState<'0' | '1'>('pokedle:guest', '0')
+  // Accès à l'app : il faut être connecté.
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [authReady, setAuthReady] = useState(!supabase) // session Supabase restaurée ?
   const [screen, setScreen] = useState<Screen>('onboarding')
@@ -139,15 +138,11 @@ function AppScreens() {
         setIsAdmin(false)
         setRows([])
         setWorld(null)
-        setHistory(loadHistory())
+        setHistory([])
         return
       }
       setUsername(await ensureProfile(user as never))
       setIsAdmin(await fetchIsAdmin())
-      // Résultat joué en invité aujourd'hui : on le rattache au compte s'il n'existe pas encore en ligne.
-      const cloud = await fetchHistory()
-      const local = getRecord(today)
-      if (local && !cloud.some((r) => r.dayKey === today)) await submitResult(local, loadChoices(today))
       await refreshCloud()
     }
     supabase.auth.getSession().then(({ data }) => {
@@ -438,8 +433,8 @@ function AppScreens() {
     else setScreen('opponent')
   }
 
-  // Garde d'accès : ni connecté ni invité → on reste sur l'accueil/onboarding (ou la connexion).
-  const entered = isSignedIn || guest === '1'
+  // Garde d'accès : pas connecté → on reste sur l'accueil/onboarding (ou la connexion).
+  const entered = isSignedIn
   const PUBLIC_SCREENS: Screen[] = ['onboarding', 'auth', 'reset']
   if (!authReady && !entered)
     return (
@@ -451,8 +446,7 @@ function AppScreens() {
     setScreen('onboarding')
     return null
   }
-  // Une fois connecté (ou invité), on quitte l'accueil/onboarding.
-  const playAsGuest = () => { setGuest('1'); setScreen('home') }
+  // Une fois connecté, on quitte l'accueil/onboarding.
   if (entered && screen === 'onboarding') {
     setScreen('home')
     return null
@@ -461,7 +455,7 @@ function AppScreens() {
   if (screen === 'onboarding')
     return (
       <main className="app">
-        <Onboarding done={playAsGuest} login={() => setScreen('auth')} />
+        <Onboarding done={() => setScreen('auth')} login={() => setScreen('auth')} />
       </main>
     )
 
@@ -528,7 +522,7 @@ function AppScreens() {
       {screen === 'history' && <History {...ctx} />}
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
       {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.0 · ${__BUILD__}`} />}
-      {screen === 'auth' && <Auth {...ctx} onBack={back} onGuest={playAsGuest} />}
+      {screen === 'auth' && <Auth {...ctx} onBack={back} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}

@@ -261,8 +261,6 @@ export const fr = {
   'auth.submitUp': 'Créer le compte',
   'auth.submitForgot': 'Envoyer le lien',
   'auth.backToLogin': 'Retour à la connexion',
-  'auth.guest': 'Jouer en invité',
-  'auth.guestNote': '(partie non synchronisée)',
   'auth.msgForgot': 'Si un compte existe pour cette adresse, un e-mail de réinitialisation vient d’être envoyé.',
   'auth.msgCreated': 'Compte créé : confirme ton adresse e-mail, puis connecte-toi.',
   'reset.title': 'Nouveau mot de passe',

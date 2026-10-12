@@ -262,8 +262,6 @@ export const en: Record<keyof typeof fr, string> = {
   'auth.submitUp': 'Create account',
   'auth.submitForgot': 'Send link',
   'auth.backToLogin': 'Back to login',
-  'auth.guest': 'Play as guest',
-  'auth.guestNote': '(game not synced)',
   'auth.msgForgot': 'If an account exists for this address, a reset email has just been sent.',
   'auth.msgCreated': 'Account created: confirm your email address, then log in.',
   'reset.title': 'New password',

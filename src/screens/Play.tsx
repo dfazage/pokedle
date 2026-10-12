@@ -7,6 +7,7 @@ import { locale, t, tn, useLang } from '../i18n'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
 import { computeStats, type DayRecord } from '../game/history'
+import { siteUrl } from '../game/cloud'
 import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
@@ -228,7 +229,7 @@ export function shareText(c: Ctx, rec: DayRecord): string {
   const alive = rec.survivors ?? (rec.result === 'win' ? 1 : 0)
   const kos = rec.kos ?? (rec.result === 'win' ? 6 : 0)
   const row = (n: number, on: string, off: string) => on.repeat(n) + off.repeat(Math.max(0, 6 - n))
-  return `Pokédle Battle #${dayNumber(c.today)} ${rec.result === 'win' ? '🏆' : '💀'} ${alive}/6\n${row(alive, '🟩', '🟥')}\n${row(kos, '🟩', '⬛')}`
+  return `Pokédle Battle #${dayNumber(c.today)} ${rec.result === 'win' ? '🏆' : '💀'} ${alive}/6\n${row(alive, '🟩', '🟥')}\n${row(kos, '🟩', '⬛')}\n\n${t('res.shareCta')} ${siteUrl().replace(/\/$/, '')}`
 }
 
 export function Result(c: Ctx) {

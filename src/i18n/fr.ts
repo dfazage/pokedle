@@ -148,7 +148,7 @@ export const fr = {
   'res.shareCta': 'Fais mieux que moi 👉',
   'res.copied': 'Copié dans le presse-papier !',
   'res.next': 'Prochain défi',
-  'res.nextText': 'Un nouveau dresseur et une nouvelle équipe imposée chaque jour à minuit UTC.',
+  'res.nextText': 'Un nouveau dresseur et une nouvelle équipe imposée chaque jour à 12h (heure de Paris).',
   'res.board': 'Voir le classement mondial',
 
   // ── Historique ──
@@ -269,7 +269,7 @@ export const fr = {
   'ob.1.tag': 'Étape 01 · Règle d’or',
   'ob.1.a': 'Un combat par jour.',
   'ob.1.b': 'Le même pour tous.',
-  'ob.1.text': 'Chaque jour à minuit UTC, un nouveau dresseur se présente. Mesure ta stratégie à armes égales contre les joueurs du monde entier.',
+  'ob.1.text': 'Chaque jour à 12h (heure de Paris), un nouveau dresseur se présente. Mesure ta stratégie à armes égales contre les joueurs du monde entier.',
   'ob.2.tag': 'Étape 02 · Équipe imposée',
   'ob.2.a': 'Six Pokémon, niveau 100.',
   'ob.2.b': 'Une seule tentative.',

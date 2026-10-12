@@ -12,7 +12,7 @@ import extraGen3 from '../data/trainers.extra.gen3.json'
 import extraGen4 from '../data/trainers.extra.gen4.json'
 import { aiChoose } from './ai'
 import { applyProfile } from './profiles'
-import { dayKeyUTC, hashString, mulberry32, pick, seedArray } from './rng'
+import { gameDayKey, hashString, mulberry32, pick, seedArray } from './rng'
 
 Teams.setGeneratorFactory(TeamGenerators)
 
@@ -216,7 +216,7 @@ export interface BalanceOptions {
 }
 
 /** Construit le défi du jour : même résultat pour tout le monde pour une clé de jour donnée. */
-export function buildDaily(dayKey = dayKeyUTC(), opts: BalanceOptions = {}): DailyChallenge {
+export function buildDaily(dayKey = gameDayKey(), opts: BalanceOptions = {}): DailyChallenge {
   const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65, salt = 0 } = opts
   const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)

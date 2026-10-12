@@ -149,7 +149,7 @@ export const en: Record<keyof typeof fr, string> = {
   'res.shareCta': 'Think you can beat me? 👉',
   'res.copied': 'Copied to clipboard!',
   'res.next': 'Next challenge',
-  'res.nextText': 'A new trainer and a new fixed team every day at midnight UTC.',
+  'res.nextText': 'A new trainer and a new fixed team every day at 12:00 noon (Paris time).',
   'res.board': 'View the world ranking',
 
   // ── History ──
@@ -270,7 +270,7 @@ export const en: Record<keyof typeof fr, string> = {
   'ob.1.tag': 'Step 01 · Golden rule',
   'ob.1.a': 'One battle a day.',
   'ob.1.b': 'The same for everyone.',
-  'ob.1.text': 'Every day at midnight UTC, a new trainer steps up. Test your strategy on equal terms against players around the world.',
+  'ob.1.text': 'Every day at 12:00 noon (Paris time), a new trainer steps up. Test your strategy on equal terms against players around the world.',
   'ob.2.tag': 'Step 02 · Fixed team',
   'ob.2.a': 'Six Pokémon, level 100.',
   'ob.2.b': 'One single attempt.',

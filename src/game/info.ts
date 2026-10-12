@@ -1,4 +1,5 @@
 import { t } from '../i18n'
+import { msToNextReset } from './rng'
 
 export const TYPE_COLORS: Record<string, string> = {
   Normal: '#a8a878', Fire: '#f0716b', Water: '#5ba8f0', Grass: '#4ec9a0', Electric: '#f7c948', Ice: '#7fd6e0',
@@ -20,11 +21,8 @@ export function difficulty(rate: number): { stars: number; label: string } {
   return { stars: 1, label: t('diff.easy') }
 }
 
-/** Millisecondes jusqu'au prochain minuit UTC. */
-export function msToNextDay(now = new Date()): number {
-  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
-  return next - now.getTime()
-}
+/** Millisecondes jusqu'au prochain reset (12h00, heure de Paris). */
+export const msToNextDay = (now = new Date()): number => msToNextReset(now)
 export function fmtCountdown(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000))
   const p = (n: number) => String(n).padStart(2, '0')

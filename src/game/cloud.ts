@@ -108,7 +108,7 @@ export async function fetchHistory(): Promise<DayRecord[]> {
   }))
 }
 
-/** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour UTC courant. Un doublon est refusé, sauf pour un rejeu
+/** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour de jeu courant (12h-12h heure de Paris, `public.game_day()`). Un doublon est refusé, sauf pour un rejeu
  *  (attempts > 1) qui remplace une défaite du même jour par le nouveau résultat (politique SQL dans supabase/results_attempts.sql). */
 export async function submitResult(rec: DayRecord, choices: string[]): Promise<'ok' | 'duplicate' | 'error'> {
   if (!supabase) return 'error'
@@ -159,7 +159,7 @@ export async function adminRerollToday(): Promise<number | null> {
   return error || typeof data !== 'number' ? null : data
 }
 
-/** Admin uniquement : supprime le résultat du jour (UTC) du compte connecté pour pouvoir rejouer. */
+/** Admin uniquement : supprime le résultat du jour de jeu du compte connecté pour pouvoir rejouer. */
 export async function adminResetToday(): Promise<boolean> {
   if (!supabase) return false
   const { error } = await supabase.rpc('admin_reset_today')

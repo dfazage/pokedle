@@ -4,7 +4,7 @@
 -- 1) Nombre d'essais du jour (1 = premier essai offert ; au plus 3 rejeux, soit 4 essais, avec la réserve de 3 cœurs).
 alter table public.results add column if not exists attempts smallint not null default 1 check (attempts between 1 and 4);
 
--- 2) Un joueur peut remplacer SA défaite du jour (UTC) par le résultat d'un rejeu. Une victoire n'est jamais modifiable.
+-- 2) Un joueur peut remplacer SA défaite du jour de jeu (voir reset_noon_paris.sql) par le résultat d'un rejeu. Une victoire n'est jamais modifiable.
 grant update on public.results to authenticated;
 drop policy if exists results_replace_loss_today on public.results;
 create policy results_replace_loss_today on public.results

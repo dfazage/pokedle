@@ -10,7 +10,7 @@ import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
 import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/hearts'
-import { dayKeyUTC } from './game/rng'
+import { gameDayKey } from './game/rng'
 import { classLabel, GEN_INFO, spName } from './game/fr'
 import { t, useLang } from './i18n'
 import { dayNumber } from './game/info'
@@ -68,7 +68,7 @@ export default function App() {
 
 function AppScreens() {
   useLang() // re-rendu complet de l'app au changement de langue
-  const today = useMemo(() => dayKeyUTC(), [])
+  const today = useMemo(() => gameDayKey(), [])
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
   // Accès à l'app : il faut être connecté OU avoir explicitement choisi de jouer en invité.
   const [guest, setGuest] = useLocalState<'0' | '1'>('pokedle:guest', '0')

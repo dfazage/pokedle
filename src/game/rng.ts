@@ -44,7 +44,45 @@ export function seedArray(seed: number): [number, number, number, number] {
   ]
 }
 
-/** Jour de référence en UTC (YYYY-MM-DD). Le jeu change à minuit UTC. */
+/** Ancien jour de référence en UTC (YYYY-MM-DD), conservé pour les scripts. Le jeu n'en dépend plus : voir gameDayKey. */
 export function dayKeyUTC(d = new Date()): string {
   return d.toISOString().slice(0, 10)
+}
+
+/** Heure de Paris (12h) à laquelle le défi change. Le jeu suit l'heure légale de Paris (heure d'été / d'hiver comprises). */
+export const RESET_HOUR_PARIS = 12
+/** Premier jour de jeu (n°1) : plancher de la clé du jour, voir gameDayKey et public.game_day(). */
+const LAUNCH_DAY = '2026-10-12'
+const PARIS = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
+})
+/** Heure murale de Paris à l'instant `ms`, exprimée comme un « faux UTC » (comparable à ms pour obtenir le décalage). */
+const parisWall = (ms: number): { wall: number; y: number; m: number; d: number; h: number } => {
+  const p = Object.fromEntries(PARIS.formatToParts(new Date(ms)).map((x) => [x.type, Number(x.value)])) as Record<string, number>
+  return { wall: Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second), y: p.year, m: p.month, d: p.day, h: p.hour }
+}
+
+/**
+ * Clé du jour de jeu (YYYY-MM-DD) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain, et porte la date de Paris du
+ * moment où il commence. À 11h59 le 13/10 on est encore dans le jour du 12/10. Identique côté serveur : fonction SQL
+ * `public.game_day()` (supabase/reset_noon_paris.sql). Entre 00h00 UTC et le premier reset à 12h Paris, la clé du 12/10 se
+ * prolonge simplement : les clés restent consécutives, aucune statistique n'est touchée.
+ */
+export function gameDayKey(d = new Date()): string {
+  const { y, m, d: day, h } = parisWall(d.getTime())
+  const key = new Date(Date.UTC(y, m - 1, day - (h < RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
+  // Jour du lancement (12/10) : avant son premier 12h Paris on est déjà dans le jour du 12/10 (ancien reset à minuit UTC),
+  // pas dans celui du 11 : la clé ne recule jamais, et le 12/10 se prolonge jusqu'au 13/10 12h Paris.
+  return key < LAUNCH_DAY ? LAUNCH_DAY : key
+}
+
+/** Millisecondes jusqu'au prochain reset (12h00 heure de Paris). */
+export function msToNextReset(now = new Date()): number {
+  const t = now.getTime()
+  const { y, m, d, h } = parisWall(t)
+  const noon = Date.UTC(y, m - 1, d + (h < RESET_HOUR_PARIS ? 0 : 1), RESET_HOUR_PARIS)
+  // 12h est loin des changements d'heure (2h-3h du matin) : un seul réajustement du décalage suffit.
+  let utc = noon - (parisWall(noon).wall - noon)
+  utc = noon - (parisWall(utc).wall - utc)
+  return utc - t
 }

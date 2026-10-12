@@ -6,8 +6,9 @@ import { classLabel, GEN_INFO, mvName, spName } from '../game/fr'
 import { locale, t, tn, useLang } from '../i18n'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
-import { computeStats, type DayRecord } from '../game/history'
+import { computeStats } from '../game/history'
 import { siteUrl } from '../game/cloud'
+import { buildShareText, canNativeShare, copyShare, gridFor, shareResult, type ShareOutcome } from '../game/share'
 import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
@@ -225,18 +226,11 @@ export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
   )
 }
 
-export function shareText(c: Ctx, rec: DayRecord): string {
-  const alive = rec.survivors ?? (rec.result === 'win' ? 1 : 0)
-  const kos = rec.kos ?? (rec.result === 'win' ? 6 : 0)
-  const row = (n: number, on: string, off: string) => on.repeat(n) + off.repeat(Math.max(0, 6 - n))
-  return `Pokédle Battle #${dayNumber(c.today)} ${rec.result === 'win' ? '🏆' : '💀'} ${alive}/6\n${row(alive, '🟩', '🟥')}\n${row(kos, '🟩', '⬛')}\n\n${t('res.shareCta')} ${siteUrl().replace(/\/$/, '')}`
-}
-
 export function Result(c: Ctx) {
   useLang()
   const rec = today$(c)
   const left = useCountdown()
-  const [copied, setCopied] = useState(false)
+  const [outcome, setOutcome] = useState<ShareOutcome | null>(null)
   const gainKey = `pokedle:heartGain:${c.today}`
   // Le cœur gagné apparaît en rebondissant, une seule fois (à l'arrivée sur l'écran juste après le combat).
   const [anim, setAnim] = useState<HeartAnim>(() => {
@@ -271,18 +265,20 @@ export function Result(c: Ctx) {
   const alive = rec.survivors ?? (win ? 1 : 0)
   const kos = rec.kos ?? (win ? 6 : 0)
   const prev = computeStats(c.history.filter((r) => r.dayKey !== c.today), c.today).currentStreak
-  const text = shareText(c, rec)
-  const share = async () => {
-    try {
-      if (navigator.share) await navigator.share({ text })
-      else {
-        await navigator.clipboard.writeText(text)
-        setCopied(true)
-      }
-    } catch {
-      /* partage annulé */
-    }
+  const text = buildShareText({
+    rec,
+    dayNo: dayNumber(c.today),
+    grid: gridFor(c.today, rec),
+    streak: c.stats.currentStreak,
+    points: sc?.points,
+    url: siteUrl().replace(/\/$/, ''),
+  })
+  const flash = (o: ShareOutcome) => {
+    setOutcome(o === 'shared' || o === 'cancelled' ? null : o)
+    if (o === 'copied') window.setTimeout(() => setOutcome((cur) => (cur === 'copied' ? null : cur)), 2500)
   }
+  const share = async () => flash(await shareResult(text))
+  const copy = async () => flash(await copyShare(text))
   return (
     <>
       <TopBar
@@ -357,8 +353,10 @@ export function Result(c: Ctx) {
       )}
       <section className="card stack">
         <div className="lab" style={{ marginBottom: 0 }}>{t('res.sharePreview')}</div>
-        <div className="share-grid" style={{ whiteSpace: 'pre-line', fontSize: 18 }}>{text}</div>
-        <button className={win ? 'btn' : 'btn red'} onClick={share}><Share2 size={18} /> {copied ? t('res.copied') : t('res.share')}</button>
+        <div className="share-grid" style={{ whiteSpace: 'pre-line', fontSize: 16, letterSpacing: 1, lineHeight: 1.6, userSelect: 'text' }}>{text}</div>
+        <button className={win ? 'btn' : 'btn red'} onClick={share}><Share2 size={18} /> {outcome === 'copied' ? t('res.copied') : t('res.share')}</button>
+        {canNativeShare() && <button className="btn ghost" onClick={copy}>{t('res.copy')}</button>}
+        {outcome === 'failed' && <p className="muted small" role="status">{t('res.copyFailed')}</p>}
       </section>
       <section className="card stack" style={{ textAlign: 'center' }}>
         <div className="lab" style={{ marginBottom: 0 }}><Clock size={13} style={{ verticalAlign: -2 }} /> {t('res.next')}</div>

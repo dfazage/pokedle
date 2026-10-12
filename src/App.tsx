@@ -9,6 +9,7 @@ import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
 import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
+import { gridFromTeams, saveGrid } from './game/share'
 import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/hearts'
 import { gameDayKey } from './game/rng'
 import { classLabel, GEN_INFO, spName } from './game/fr'
@@ -227,7 +228,10 @@ function AppScreens() {
       }
       // Copie locale (invité / hors ligne) : un rejeu remplace la défaite du jour, jamais une victoire.
       const ex = getRecord(today)
-      if (!ex || (ex.result === 'loss' && (ex.attempts ?? 1) < (rec.attempts ?? 1))) saveRecord(rec)
+      if (!ex || (ex.result === 'loss' && (ex.attempts ?? 1) < (rec.attempts ?? 1))) {
+        saveRecord(rec)
+        saveGrid(today, gridFromTeams(v.player.team, v.opponent.team)) // détail par Pokémon pour la grille de partage
+      }
       if (signedIn.current) submitResult(rec, choices.current).then(refreshCloud)
       else setHistory(loadHistory())
     },

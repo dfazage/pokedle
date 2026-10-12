@@ -6,6 +6,7 @@ import { dayNumber } from '../game/info'
 import { MonOrb, TopBar } from '../ui/kit'
 import { renderGoogleButton } from '../game/googleSignIn'
 import { t, useLang } from '../i18n'
+import { displayDay } from '../game/rng'
 
 export function Auth(c: Ctx & { onBack: () => void; onGuest: () => void }) {
   const { lang } = useLang()
@@ -170,7 +171,7 @@ export function Admin(c: Ctx & { onBack: () => void }) {
     <>
       <TopBar title={t('adm.title')} onBack={c.onBack} />
       <p className="muted">{t('adm.sub')}{c.username ? t('adm.subUser', { name: c.username }) : ''}.</p>
-      <div className="lab">{t('adm.today', { day: c.today })}</div>
+      <div className="lab">{t('adm.today', { day: displayDay(c.today) })}</div>
       <button className="card row" onClick={c.onAdminReset} style={{ textAlign: 'left' }}>
         <RotateCcw size={22} style={{ color: 'var(--secondary)' }} />
         <div className="grow"><b>{t('adm.reset')}</b><div className="muted small">{t('adm.resetSub')}</div></div>

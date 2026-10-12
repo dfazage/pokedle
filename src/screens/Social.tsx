@@ -6,6 +6,7 @@ import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { GEN_INFO } from '../game/fr'
+import { displayDay, keyForDisplayDay } from '../game/rng'
 import { TopBar } from '../ui/kit'
 import { locale, pick, t, tn, useLang } from '../i18n'
 
@@ -74,7 +75,7 @@ const MON_SHORT = () => pick(
 )
 
 function label(day: string, today: string) {
-  const [, m, d] = day.split('-').map(Number)
+  const [, m, d] = displayDay(day).split('-').map(Number)
   const diff = Math.round((Date.parse(today) - Date.parse(day)) / 86400000)
   const base = t('date.short', { d, m: MON_SHORT()[m - 1] })
   return diff === 0 ? t('date.today', { d: base }) : diff === 1 ? t('date.yesterday', { d: base }) : base
@@ -82,7 +83,7 @@ function label(day: string, today: string) {
 
 export function History(c: Ctx) {
   useLang()
-  const [ty, tm] = c.today.split('-').map(Number)
+  const [ty, tm] = displayDay(c.today).split('-').map(Number)
   const [view, setView] = useState({ y: ty, m: tm - 1 })
   const byDay = useMemo(() => new Map(c.history.map((r) => [r.dayKey, r])), [c.history])
   const first = new Date(Date.UTC(view.y, view.m, 1))
@@ -111,7 +112,8 @@ export function History(c: Ctx) {
           {DOW().map((d, i) => <div key={i} className="h">{d}</div>)}
           {Array.from({ length: offset }, (_, i) => <div key={'e' + i} className="d empty" />)}
           {Array.from({ length: days }, (_, i) => {
-            const key = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
+            const date = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
+            const key = keyForDisplayDay(date, (k) => byDay.has(k) || k === c.today) // la clé stockée porte la date de fin du jour de jeu
             const r = byDay.get(key)
             return <div key={key} className={`d ${r ? (r.result === 'win' ? 'w' : 'l') : ''} ${key === c.today ? 'today' : ''}`}>{i + 1}</div>
           })}

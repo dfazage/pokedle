@@ -65,7 +65,7 @@ const parisWall = (ms: number): { wall: number; y: number; m: number; d: number;
 }
 
 /**
- * Clé du jour de jeu (YYYY-MM-DD) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain et porte la date de Paris de sa
+ * Clé du jour de jeu (YYYY-MM-DD, non affichée telle quelle : voir displayDay) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain et porte la date de Paris de sa
  * FIN (date de maintenant + 12h). Le 12/10 avant 12h Paris = jour n°1 (clé 12/10) ; dès 12h00 le 12/10 = jour n°2 (clé 13/10).
  * Identique côté serveur : fonction SQL `public.game_day()` (supabase/reset_noon_paris.sql). Les clés restent consécutives :
  * aucune statistique ni série n'est touchée.
@@ -77,6 +77,27 @@ export function gameDayKey(d = new Date()): string {
   const key = new Date(Date.UTC(y, m - 1, day + (h >= RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
   if (d.getTime() >= FIRST_RESET_MS && key < '2026-10-13') return '2026-10-13'
   return key < LAUNCH_DAY ? LAUNCH_DAY : key
+}
+
+/** Ajoute `n` jours à une clé YYYY-MM-DD. */
+export function addDays(key: string, n: number): string {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10)
+}
+
+/**
+ * Date AFFICHÉE d'un jour de jeu : celle du jour où il commence (la clé, elle, porte la date de sa fin, voir gameDayKey).
+ * Affichage seulement : les clés stockées (historique, séries, serveur) ne changent pas. Plancher = jour du lancement.
+ */
+export function displayDay(key: string): string {
+  const d = addDays(key, -1)
+  return d < LAUNCH_DAY ? LAUNCH_DAY : d
+}
+
+/** Clé du jour de jeu à afficher à la date `date` du calendrier (inverse de displayDay ; le 12/10 abrite les jours 1 et 2 : on prend le plus récent présent). */
+export function keyForDisplayDay(date: string, has: (k: string) => boolean): string {
+  const next = addDays(date, 1)
+  return date === LAUNCH_DAY && !has(next) ? LAUNCH_DAY : next
 }
 
 /** Millisecondes jusqu'au prochain reset (12h00 heure de Paris). */

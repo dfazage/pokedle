@@ -61,8 +61,10 @@ export function Reminders(c: Ctx & { onBack: () => void }) {
     }
     setBusy(false)
   }
+  const [showHow, setShowHow] = useState(false)
   const install = async () => {
-    await promptInstall()
+    // Pas de boîte d'installation (déjà installée, ou navigateur qui ne la propose pas) : on affiche les explications.
+    if (!(await promptInstall())) setShowHow(true)
     bump((n) => n + 1)
   }
   const test = async () => {
@@ -106,8 +108,9 @@ export function Reminders(c: Ctx & { onBack: () => void }) {
           </ol>
         ) : (
           <>
-            <span className="muted small">{canPromptInstall() ? t('rem.s.install.sub') : t('rem.s.install.manual')}</span>
-            {canPromptInstall() && <button type="button" className="btn ghost" style={{ marginTop: 12 }} onClick={install}><Download size={18} /> {t('rem.s.install.cta')}</button>}
+            <span className="muted small">{canPromptInstall() || !showHow ? t('rem.s.install.sub') : t('rem.s.install.manual')}</span>
+            {showHow && !canPromptInstall() && <span className="muted small" style={{ display: 'block', marginTop: 6 }}>{t('rem.s.install.already')}</span>}
+            <button type="button" className="btn ghost" style={{ marginTop: 12 }} onClick={install}><Download size={18} /> {t('rem.s.install.cta')}</button>
           </>
         )}
       </Step>

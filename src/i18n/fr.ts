@@ -253,6 +253,7 @@ export const fr = {
   'rem.s.install.sub': 'Ouvre Pokédle en un tap, comme une vraie app.',
   'rem.s.install.cta': 'Installer',
   'rem.s.install.manual': 'Dans le menu de ton navigateur, choisis « Installer l’application » ou « Ajouter à l’écran d’accueil ».',
+  'rem.s.install.already': 'Si Pokédle est déjà installé, ouvre-le depuis son icône : la case se coche toute seule.',
   'rem.ios.1': 'Touche Partager en bas de Safari',
   'rem.ios.2': 'Choisis « Sur l’écran d’accueil »',
   'rem.ios.3': 'Rouvre Pokédle depuis l’icône : la case se coche toute seule.',

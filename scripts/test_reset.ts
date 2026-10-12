@@ -6,6 +6,8 @@ const at = (iso: string) => new Date(iso)
 const next = (iso: string) => new Date(at(iso).getTime() + msToNextReset(at(iso))).toISOString()
 // Été (CEST = UTC+2) : le reset tombe à 10h00 UTC
 eq('11h59 Paris', gameDayKey(at('2026-10-13T09:59:59Z')), '2026-10-12')
+eq('lancement : 10h52 Paris le 12/10 (avant le 1er 12h)', gameDayKey(at('2026-10-12T08:52:00Z')), '2026-10-12')
+eq('lancement : 12h00 Paris le 12/10', gameDayKey(at('2026-10-12T10:00:00Z')), '2026-10-12')
 eq('12h00 Paris', gameDayKey(at('2026-10-13T10:00:00Z')), '2026-10-13')
 eq('aujourd\'hui 12h44 Paris', gameDayKey(at('2026-10-12T10:44:00Z')), '2026-10-12')
 eq('00h UTC (continuité)', gameDayKey(at('2026-10-13T00:00:00Z')), '2026-10-12')

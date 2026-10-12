@@ -51,6 +51,8 @@ export function dayKeyUTC(d = new Date()): string {
 
 /** Heure de Paris (12h) à laquelle le défi change. Le jeu suit l'heure légale de Paris (heure d'été / d'hiver comprises). */
 export const RESET_HOUR_PARIS = 12
+/** Premier jour de jeu (n°1) : plancher de la clé du jour, voir gameDayKey et public.game_day(). */
+const LAUNCH_DAY = '2026-10-12'
 const PARIS = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
 })
@@ -68,7 +70,10 @@ const parisWall = (ms: number): { wall: number; y: number; m: number; d: number;
  */
 export function gameDayKey(d = new Date()): string {
   const { y, m, d: day, h } = parisWall(d.getTime())
-  return new Date(Date.UTC(y, m - 1, day - (h < RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
+  const key = new Date(Date.UTC(y, m - 1, day - (h < RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
+  // Jour du lancement (12/10) : avant son premier 12h Paris on est déjà dans le jour du 12/10 (ancien reset à minuit UTC),
+  // pas dans celui du 11 : la clé ne recule jamais, et le 12/10 se prolonge jusqu'au 13/10 12h Paris.
+  return key < LAUNCH_DAY ? LAUNCH_DAY : key
 }
 
 /** Millisecondes jusqu'au prochain reset (12h00 heure de Paris). */

@@ -344,6 +344,7 @@ export function Result(c: Ctx) {
                 [t('sc.survivors'), `${Math.round(sc.survivors * 100)} %`],
                 [t('sc.streak', { n: sc.streak }), `×${sc.streakMult.toFixed(2)}`],
                 ...(sc.flawless ? [[t('sc.flawless'), '+10']] : []),
+                ...(sc.attempt > 1 ? [[t('sc.attempt', { n: sc.attempt }), `×${sc.attemptMult}`]] : []),
               ] as [string, string][]).map(([k, v]) => (
                 <div key={k} className="row between"><span className="muted">{k}</span><b>{v}</b></div>
               ))}

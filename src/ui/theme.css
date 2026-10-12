@@ -392,3 +392,38 @@ h1, h2, h3, p { margin: 0; }
 .mi-in.glass { background: color-mix(in srgb, var(--surface) 95%, transparent); }
 .mi-card.glass { background: color-mix(in srgb, var(--surface) 92%, transparent); }
 .mi-scrim { background: rgba(0, 0, 0, 0.62); }
+
+/* ——— Cœurs pixel (système de vies) ——— */
+.px-hearts { display: inline-flex; align-items: center; gap: 6px; }
+.px-slot { position: relative; display: inline-block; line-height: 0; }
+.px-top { position: absolute; inset: 0; display: block; transform-origin: 50% 60%; }
+.px-heart .px-line { fill: #14141c; }
+[data-theme='dark'] .px-heart .px-line { fill: #05050a; }
+.px-heart.full .px-fill { fill: #ff2a2a; }
+.px-heart.full .px-shine { fill: #fff; }
+.px-heart.empty .px-fill { fill: color-mix(in srgb, var(--muted) 22%, transparent); }
+.px-heart.empty .px-shine { fill: color-mix(in srgb, var(--muted) 30%, transparent); }
+.px-heart.empty .px-line { fill: color-mix(in srgb, var(--muted) 55%, transparent); }
+/* Perte : le cœur tremble, clignote en blanc puis éclate vers le bas. */
+.px-top.lose { animation: heart-lose 0.9s steps(9, end) forwards; }
+@keyframes heart-lose {
+  0% { transform: translate(0, 0) rotate(0); filter: none; opacity: 1; }
+  15% { transform: translate(-2px, 0) rotate(-6deg); }
+  30% { transform: translate(2px, 0) rotate(6deg); filter: brightness(3) saturate(0); }
+  45% { transform: translate(-2px, 0) rotate(-6deg); filter: none; }
+  60% { transform: translate(0, 0) scale(1.18); filter: brightness(3) saturate(0); opacity: 1; }
+  100% { transform: translate(0, 14px) scale(0.5) rotate(18deg); filter: none; opacity: 0; }
+}
+/* Gain : le cœur apparaît en rebondissant, avec un halo. */
+.px-top.gain { animation: heart-gain 0.85s steps(10, end) both; }
+@keyframes heart-gain {
+  0% { transform: scale(0); opacity: 0; filter: none; }
+  40% { transform: scale(1.5); opacity: 1; filter: drop-shadow(0 0 6px #ff2a2a); }
+  65% { transform: scale(0.85); filter: drop-shadow(0 0 4px #ff2a2a); }
+  100% { transform: scale(1); opacity: 1; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) { .px-top.lose, .px-top.gain { animation-duration: 0.01s; } }
+.heart-plus { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: rgba(78, 201, 160, 0.16); color: #1f9b78; border: 1px solid rgba(78, 201, 160, 0.4); animation: heart-plus 0.6s ease-out both; }
+[data-theme='dark'] .heart-plus { color: #72d9bb; }
+@keyframes heart-plus { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { .heart-plus { animation: none; } }

@@ -29,6 +29,8 @@ export const SCORING = {
   streakCap: 10,
   /** Bonus fixe quand aucun Pokémon du joueur n'est K.O. */
   flawlessBonus: 10,
+  /** Multiplicateur selon l'essai de la victoire (système de cœurs) : 1er essai ×1, chaque rejeu retire 25 %. Au-delà du tableau : dernière valeur. */
+  attemptMult: [1, 0.75, 0.5, 0.25],
   teamSize: 6,
 }
 
@@ -44,6 +46,9 @@ export interface ScoreBreakdown {
   streak: number
   streakMult: number
   flawless: boolean
+  /** Essai de la victoire (1 = premier essai) et multiplicateur de points associé. */
+  attempt: number
+  attemptMult: number
 }
 
 export interface ScoreSummary {
@@ -72,9 +77,11 @@ export function scoreRecord(r: DayRecord, streak: number): ScoreBreakdown {
   const perf = S.weights.speed * speed + S.weights.hp * hp + S.weights.survivors * survivors
   const streakMult = 1 + S.streakStep * Math.min(streak, S.streakCap)
   const flawless = r.result === 'win' && r.survivors === S.teamSize
-  const points =
-    r.result === 'win' ? Math.round(base * (S.floor + (1 - S.floor) * perf) * streakMult) + (flawless ? S.flawlessBonus : 0) : 0
-  return { points, base, speed, hp, survivors, perf, streak, streakMult, flawless }
+  const attempt = Math.max(1, r.attempts ?? 1)
+  const attemptMult = S.attemptMult[Math.min(attempt, S.attemptMult.length) - 1]
+  const raw = base * (S.floor + (1 - S.floor) * perf) * streakMult + (flawless ? S.flawlessBonus : 0)
+  const points = r.result === 'win' ? Math.round(raw * attemptMult) : 0
+  return { points, base, speed, hp, survivors, perf, streak, streakMult, flawless, attempt, attemptMult }
 }
 
 export function scoreHistory(history: DayRecord[]): ScoreSummary {

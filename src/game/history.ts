@@ -9,6 +9,8 @@ export interface DayRecord {
   kos?: number
   /** PV restants de l'équipe du joueur en fin de combat, en % (0-100). */
   hpLeft?: number
+  /** Nombre d'essais utilisés ce jour-là (1 = premier essai ; défaut 1). Sert au calcul des cœurs. */
+  attempts?: number
 }
 export interface Stats {
   totalWins: number

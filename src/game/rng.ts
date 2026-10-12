@@ -53,6 +53,8 @@ export function dayKeyUTC(d = new Date()): string {
 export const RESET_HOUR_PARIS = 12
 /** Premier jour de jeu (n°1) : plancher de la clé du jour, voir gameDayKey et public.game_day(). */
 const LAUNCH_DAY = '2026-10-12'
+/** Premier reset exceptionnel (lancement) : le 12/10/2026 à 09h10 UTC (17h10 Kuala Lumpur), puis 12h Paris chaque jour. */
+const FIRST_RESET_MS = Date.UTC(2026, 9, 12, 9, 10)
 const PARIS = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Europe/Paris', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23',
 })
@@ -73,12 +75,14 @@ export function gameDayKey(d = new Date()): string {
   // Le jour de jeu N va de 12h Paris (N-1) à 12h Paris (N) : la clé est la date de Paris à (maintenant + 12h).
   // Jour n°1 (clé 12/10) = avant le premier reset, aujourd'hui 12/10 à 12h Paris le jeu passe au 13/10 (n°2).
   const key = new Date(Date.UTC(y, m - 1, day + (h >= RESET_HOUR_PARIS ? 1 : 0))).toISOString().slice(0, 10)
+  if (d.getTime() >= FIRST_RESET_MS && key < '2026-10-13') return '2026-10-13'
   return key < LAUNCH_DAY ? LAUNCH_DAY : key
 }
 
 /** Millisecondes jusqu'au prochain reset (12h00 heure de Paris). */
 export function msToNextReset(now = new Date()): number {
   const t = now.getTime()
+  if (t < FIRST_RESET_MS) return FIRST_RESET_MS - t
   const { y, m, d, h } = parisWall(t)
   const noon = Date.UTC(y, m - 1, d + (h < RESET_HOUR_PARIS ? 0 : 1), RESET_HOUR_PARIS)
   // 12h est loin des changements d'heure (2h-3h du matin) : un seul réajustement du décalage suffit.

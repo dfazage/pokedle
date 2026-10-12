@@ -27,3 +27,18 @@ GitHub Pages (`https://pokebadle.fun/`) : dans Supabase, **Site URL** = `https:/
 3. Supabase → Authentication → URL Configuration : **Site URL** = URL de production (jamais `localhost`), et l'URL de production + `http://localhost:5173/**` dans **Redirect URLs**.
 
 **Connexion Google (Google Identity Services)** : le bouton de la page de connexion utilise `VITE_GOOGLE_CLIENT_ID` (workflow `deploy.yml`), le même Client ID que dans Supabase → Authentication → Providers → Google. Le domaine du site doit figurer dans Google Cloud → Identifiants → *Origines JavaScript autorisées* (`https://pokebadle.fun`). Le jeton Google est échangé via `supabase.auth.signInWithIdToken` (nonce haché SHA-256). Sans `VITE_GOOGLE_CLIENT_ID` ou si le script Google est bloqué, l'app retombe sur `signInWithOAuth` (écran affichant `supabase.co`).
+
+## Notifications push (combat du jour disponible)
+
+Une notification est envoyée à 12h00 (heure de Paris), au reset du jeu, aux appareils qui l'ont activée dans Paramètres → Notifications. Android et ordinateur : directement dans le navigateur. iPhone/iPad : uniquement si Pokédle est ajouté à l'écran d'accueil (l'app l'indique dans la carte).
+
+1. **Clés VAPID** (une seule fois) : `npx web-push generate-vapid-keys`. La clé publique est publique ; la privée ne doit jamais être committée.
+2. **Front** : GitHub → Settings → Secrets and variables → Actions → *Variables* : `VITE_VAPID_PUBLIC_KEY` = clé publique, puis relancer le déploiement. Tant que la variable est vide, la carte Notifications reste cachée.
+3. **Base** : exécuter `supabase/push_subscriptions.sql` dans l'éditeur SQL Supabase.
+4. **Edge Function** : `supabase functions deploy send-daily-push --no-verify-jwt`, puis
+   `supabase secrets set VAPID_PUBLIC_KEY=… VAPID_PRIVATE_KEY=… VAPID_SUBJECT=mailto:… CRON_SECRET=<valeur aléatoire>`.
+5. **Planification** : dans l'éditeur SQL, `select vault.create_secret('<CRON_SECRET>', 'push_cron_secret');` (même valeur que ci-dessus), puis exécuter `supabase/push_cron.sql`. Deux appels (10h et 11h UTC) couvrent l'heure d'été et d'hiver : la fonction ignore celui qui ne tombe pas à 12h Paris.
+6. **Test** : activer les notifications sur son téléphone, puis appeler la fonction à la main (hors horaire) :
+   `curl -X POST https://<ref>.supabase.co/functions/v1/send-daily-push -H "x-cron-secret: <CRON_SECRET>" -H "Content-Type: application/json" -d '{"force":true,"only_user_id":"<ton user id>"}'`
+
+Les abonnements morts (site désinstallé, permission retirée) sont supprimés automatiquement quand le service push répond 404/410.

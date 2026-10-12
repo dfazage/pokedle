@@ -12,8 +12,10 @@ eq('12h00 Paris le 12/10 (reset)', gameDayKey(at('2026-10-12T10:00:00Z')), '2026
 eq('12h00 Paris le 13/10 (reset)', gameDayKey(at('2026-10-13T10:00:00Z')), '2026-10-14')
 eq('aujourd\'hui 12h44 Paris', gameDayKey(at('2026-10-12T10:44:00Z')), '2026-10-13')
 eq('00h UTC le 13/10', gameDayKey(at('2026-10-13T00:00:00Z')), '2026-10-13')
-eq('prochain reset depuis 10h52 Paris', next('2026-10-12T08:52:00Z'), '2026-10-12T10:00:00.000Z')
-eq('prochain reset depuis 12h44', next('2026-10-12T10:44:00Z'), '2026-10-13T10:00:00.000Z')
+eq('prochain reset avant le premier (17h10 KL)', next('2026-10-12T08:52:00Z'), '2026-10-12T09:10:00.000Z')
+eq('17h10 KL = n°2', gameDayKey(at('2026-10-12T09:10:00Z')), '2026-10-13')
+eq('17h09 KL = n°1', gameDayKey(at('2026-10-12T09:09:59Z')), '2026-10-12')
+eq('prochain reset depuis 17h44 KL', next('2026-10-12T09:44:00Z'), '2026-10-12T10:00:00.000Z')
 eq('prochain reset depuis 11h Paris', next('2026-10-13T09:00:00Z'), '2026-10-13T10:00:00.000Z')
 // Heure d'hiver dès le 25/10/2026 à 3h (CET = UTC+1) : le reset de 12h passe à 11h00 UTC
 eq('veille du changement', next('2026-10-24T10:30:00Z'), '2026-10-25T11:00:00.000Z')
@@ -26,7 +28,7 @@ eq('12h00 Paris hiver', gameDayKey(at('2026-10-26T11:00:00Z')), '2026-10-27')
 // Passage à l'heure d'été le 29/03/2026 → et en 2027 le 28/03
 eq('printemps 2027', next('2027-03-27T12:00:00Z'), '2027-03-28T10:00:00.000Z')
 // Les clés sont consécutives sur 800 jours (aucun jour sauté ni répété)
-let prev = gameDayKey(at('2026-10-12T10:44:00Z')); const start = at('2026-10-12T10:44:00Z').getTime()
+let prev = gameDayKey(at('2026-10-12T09:44:00Z')); const start = at('2026-10-12T09:44:00Z').getTime()
 for (let h = 1; h < 24 * 800; h++) {
   const k = gameDayKey(new Date(start + h * 3600_000))
   const d = (Date.parse(k) - Date.parse(prev)) / 86400000

@@ -26,6 +26,8 @@ jobs:
           VITE_SUPABASE_URL: https://gcjsqxogywmgslkqoojq.supabase.co
           # Clé publishable : publique par conception (protégée par RLS côté Supabase).
           VITE_SUPABASE_KEY: sb_publishable_ZRMYB5vjufp7pW5OocL4Wg_TUiojclo
+          # Client ID OAuth Web de Google (public) : active le bouton Google Identity Services (affiche pokebadle.fun).
+          VITE_GOOGLE_CLIENT_ID: 158019592036-87g2qp041uq50s3ke0mg9513a3kun5la.apps.googleusercontent.com
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:

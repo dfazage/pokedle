@@ -21,9 +21,10 @@ function detect(): Lang {
   } catch {
     /* stockage indisponible */
   }
-  // Première visite : langue du navigateur (français si fr-*, anglais sinon). Hors navigateur (scripts de test) : français.
+  // Première visite : anglais par défaut, quelle que soit la langue du navigateur (le sélecteur permet de passer en français).
+  // Hors navigateur (scripts de test) : français.
   if (typeof window === 'undefined') return 'fr'
-  return (navigator.languages?.[0] ?? navigator.language ?? 'fr').toLowerCase().startsWith('fr') ? 'fr' : 'en'
+  return 'en'
 }
 
 let current: Lang = detect()

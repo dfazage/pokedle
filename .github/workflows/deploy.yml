@@ -22,7 +22,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_BASE: /pokedle/
+          VITE_BASE: /
           VITE_SUPABASE_URL: https://gcjsqxogywmgslkqoojq.supabase.co
           # Clé publishable : publique par conception (protégée par RLS côté Supabase).
           VITE_SUPABASE_KEY: sb_publishable_ZRMYB5vjufp7pW5OocL4Wg_TUiojclo

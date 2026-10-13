@@ -52,7 +52,7 @@ export function dayKeyUTC(d = new Date()): string {
 /** Heure de Paris (12h) à laquelle le défi change. Le jeu suit l'heure légale de Paris (heure d'été / d'hiver comprises). */
 export const RESET_HOUR_PARIS = 12
 /** Premier jour de jeu (n°1) : plancher de la clé du jour, voir gameDayKey et public.game_day(). */
-const LAUNCH_DAY = '2026-10-12'
+export const LAUNCH_DAY = '2026-10-12'
 /** Premier reset exceptionnel (lancement) : le 12/10/2026 à 09h10 UTC (17h10 Kuala Lumpur), puis 12h Paris chaque jour. */
 const FIRST_RESET_MS = Date.UTC(2026, 9, 12, 9, 10)
 const PARIS = new Intl.DateTimeFormat('en-GB', {

@@ -1,6 +1,7 @@
 // Bande « ta semaine » de l'écran Résultat : les 6 derniers jours jusqu'à aujourd'hui, puis demain (à jouer).
 // Module pur (aucune dépendance React / DOM) pour rester testable avec scripts/test_week.ts.
 import { prevDay, type DayRecord } from './history'
+import { addDays, displayDay, LAUNCH_DAY } from './rng'
 
 export type WeekState = 'win' | 'loss' | 'none' | 'tomorrow'
 export interface WeekCell {
@@ -26,16 +27,22 @@ export function weekCells(history: DayRecord[], today: string): WeekCell[] {
 }
 
 // ── Semaine calendaire (lundi → dimanche), pour la carte « Ta semaine » de l'accueil ──
+// Un jour de jeu va de 12h Paris à 12h Paris et sa clé porte la date de sa FIN ; on AFFICHE la date de son début
+// (displayDay, comme l'Historique). Les cases sont donc rangées par date affichée, les clés restent celles de l'historique.
 export type CalState = 'win' | 'loss' | 'none' | 'today' | 'future'
 export interface CalCell {
+  /** Date affichée de la case (YYYY-MM-DD). */
+  label: string
+  /** Clé de jour de jeu la plus récente de la case (celle de l'historique). */
   dayKey: string
   state: CalState
   isToday: boolean
 }
 export interface CalWeek {
   cells: CalCell[]
-  /** Numéro de semaine ISO. */
+  /** Numéro de semaine ISO (de la date affichée). */
   number: number
+  /** Lundi et dimanche affichés. */
   from: string
   to: string
   /** Victoires de la semaine. */
@@ -44,12 +51,6 @@ export interface CalWeek {
   run: number
   /** Aujourd'hui est déjà gagné. */
   todayDone: boolean
-}
-
-const addDays = (key: string, n: number): string => {
-  const d = new Date(key + 'T00:00:00Z')
-  d.setUTCDate(d.getUTCDate() + n)
-  return d.toISOString().slice(0, 10)
 }
 
 /** 0 = lundi … 6 = dimanche. */
@@ -66,26 +67,26 @@ export function isoWeek(key: string): number {
   return Math.floor((thursday.getTime() - jan1) / 86400000 / 7) + 1
 }
 
+/** Clés de jeu affichées à la date `label` : en général une seule ; le jour du lancement en abrite deux (jours n°1 et n°2). */
+const keysFor = (label: string): string[] => (label === LAUNCH_DAY ? [LAUNCH_DAY, addDays(label, 1)] : [addDays(label, 1)])
+
 export function calendarWeek(history: DayRecord[], today: string): CalWeek {
   const byDay = new Map(history.map((r) => [r.dayKey, r.result]))
-  const from = mondayOf(today)
+  const todayLabel = displayDay(today)
+  const from = mondayOf(todayLabel)
   const cells: CalCell[] = []
   for (let i = 0; i < 7; i++) {
-    const dayKey = addDays(from, i)
-    const played = byDay.get(dayKey)
-    const state: CalState = dayKey > today ? 'future' : (played ?? (dayKey === today ? 'today' : 'none'))
-    cells.push({ dayKey, state, isToday: dayKey === today })
+    const label = addDays(from, i)
+    const keys = keysFor(label).filter((k) => k <= today)
+    const results = keys.map((k) => byDay.get(k)).filter((x) => x !== undefined)
+    const state: CalState =
+      label > todayLabel ? 'future' : results.includes('win') ? 'win' : results.includes('loss') ? 'loss' : label === todayLabel ? 'today' : 'none'
+    cells.push({ label, dayKey: keys[keys.length - 1] ?? addDays(label, 1), state, isToday: label === todayLabel })
   }
-  const todayIdx = mondayIndex(today)
+  const inWeek = (key: string) => displayDay(key) >= from && displayDay(key) <= addDays(from, 6)
+  const wins = history.filter((r) => r.result === 'win' && r.dayKey <= today && inWeek(r.dayKey)).length
+  const todayDone = byDay.get(today) === 'win'
   let run = 0
-  for (let i = cells[todayIdx].state === 'win' ? todayIdx : todayIdx - 1; i >= 0 && cells[i].state === 'win'; i--) run++
-  return {
-    cells,
-    number: isoWeek(today),
-    from,
-    to: cells[6].dayKey,
-    wins: cells.filter((c) => c.state === 'win').length,
-    run,
-    todayDone: cells[todayIdx].state === 'win',
-  }
+  for (let k = todayDone ? today : prevDay(today); byDay.get(k) === 'win' && inWeek(k); k = prevDay(k)) run++
+  return { cells, number: isoWeek(todayLabel), from, to: addDays(from, 6), wins, run, todayDone }
 }

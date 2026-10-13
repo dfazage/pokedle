@@ -3,10 +3,11 @@ import { Bell, Flame, X } from 'lucide-react'
 import type { DayRecord } from '../game/history'
 import { calendarWeek, weekCells, type CalState } from '../game/week'
 import { enablePush, pushConfigured, pushState } from '../game/push'
+import { displayDay } from '../game/rng'
 import { loadSnooze, saveSnooze, shouldAskPush } from '../game/pushAsk'
 import { locale, t, tn, useLang } from '../i18n'
 
-const dayLetter = (key: string) => new Date(key + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
+const dayLetter = (key: string) => new Date(displayDay(key) + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
 
 /** Ta semaine en sept points : victoires, défaites, jours manqués, et demain en pointillés. */
 export function WeekStrip({ history, today }: { history: DayRecord[]; today: string }) {
@@ -65,12 +66,12 @@ export function WeekCard({ history, today }: { history: DayRecord[]; today: stri
       <section className="card cw">
         <div className="cw-days" role="list" aria-label={t('res.week')}>
           {w.cells.map((c) => (
-            <div key={c.dayKey} className={c.isToday ? 'cw-d today' : 'cw-d'} role="listitem" aria-label={`${dayName(c.dayKey)} ${new Date(c.dayKey + 'T00:00:00Z').getUTCDate()} · ${t(STATE_LABEL[c.state])}`}>
+            <div key={c.label} className={c.isToday ? 'cw-d today' : 'cw-d'} role="listitem" aria-label={`${dayName(c.label)} ${new Date(c.label + 'T00:00:00Z').getUTCDate()} · ${t(STATE_LABEL[c.state])}`}>
               <span className={`cw-dot ${c.state}`} aria-hidden>
                 {c.state === 'win' ? <BallIcon /> : c.state === 'loss' ? <X size={16} strokeWidth={3.2} /> : c.state === 'today' ? <i /> : null}
               </span>
-              <span className="cw-l">{dayName(c.dayKey)}</span>
-              <span className="cw-n">{new Date(c.dayKey + 'T00:00:00Z').getUTCDate()}</span>
+              <span className="cw-l">{dayName(c.label)}</span>
+              <span className="cw-n">{new Date(c.label + 'T00:00:00Z').getUTCDate()}</span>
             </div>
           ))}
         </div>

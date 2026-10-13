@@ -75,18 +75,18 @@ export function MonSheet({ m, gen, onClose }: { m: PreviewMon; gen: number; onCl
 
 /** Équipe façon écran Pokémon : un emplacement par Pokémon, tête de liste en premier, détails au toucher, ordre modifiable. */
 export function PartyList({
-  team, gen, locked, onMove,
-}: { team: PreviewMon[]; gen: number; locked: boolean; onMove: (from: number, to: number) => void }) {
+  team, gen, locked, onMove, animated = false,
+}: { team: PreviewMon[]; gen: number; locked: boolean; onMove: (from: number, to: number) => void; animated?: boolean }) {
   useLang()
   const [open, setOpen] = useState<number | null>(null)
   return (
     <>
-      <div className="party">
+      <div className={animated ? 'party anim' : 'party'}>
         {team.map((m, i) => (
           <div key={m.species + i} className={i === 0 ? 'slot lead' : 'slot'} style={monCardStyle(m.types)}>
             <button className="slot-main" onClick={() => setOpen(i)} aria-label={t('party.details', { name: spName(m.species) })}>
               <span className="slot-top">
-                <span className="slot-sprite"><MonSprite m={m} size={48} /></span>
+                <span className="slot-sprite"><MonSprite m={m} size={animated ? 56 : 48} animated={animated} /></span>
                 <span className="slot-id">
                   <b className="slot-name">{spName(m.species)}</b>
                   <span className="row" style={{ gap: 5 }}>

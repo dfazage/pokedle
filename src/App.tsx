@@ -12,7 +12,7 @@ import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type Da
 import { gridFromTeams, saveGrid } from './game/share'
 import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/hearts'
 import { gameDayKey } from './game/rng'
-import { classLabel, GEN_INFO, spName } from './game/fr'
+import { classLabel, GEN_INFO, spName, trainerName } from './game/fr'
 import { t, useLang } from './i18n'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
@@ -508,12 +508,12 @@ function AppScreens() {
       <div className="arena" data-theme="dark">
         <main className="app nonav">
           <TopBar
-            title={<>{challenge.trainer.name}<div className="muted small">{classLabel(challenge.trainer)} · {gi.game}</div></>}
+            title={<>{trainerName(challenge.trainer.name)}<div className="muted small">{classLabel(challenge.trainer)} · {gi.game}</div></>}
             right={<span className="pill">{t('battle.turn', { n: view.turn })}</span>}
           />
           <BattleScreen view={view} queue={queue} onAdvance={advance} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />
           <div className="stack" style={{ gap: 8 }}>
-            {([[t('battle.you'), view.player.team], [challenge.trainer.name, view.opponent.team]] as const).map(([who, team]) => (
+            {([[t('battle.you'), view.player.team], [trainerName(challenge.trainer.name), view.opponent.team]] as const).map(([who, team]) => (
               <div key={who} className="squad">
                 <span className="muted small" style={{ width: 72, fontWeight: 700 }}>{who}</span>
                 {team.map((m) => <span key={m.idx} className={m.fainted ? 'ko' : undefined} title={spName(m.name)} style={{ display: 'contents' }}><MonOrb types={m.types} size={26} /></span>)}

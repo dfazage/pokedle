@@ -1,6 +1,7 @@
 // Noms d'affichage localisés (FR / EN) : espèces, attaques, talents, objets, natures, types, classes de dresseurs, versions du jeu.
 // Les données sources (Showdown, trainers*.json) sont en anglais : en EN on les affiche telles quelles.
 import names from '../data/names.fr.json'
+import trainersFr from '../data/trainers.fr.json'
 import { getLang, hasKey, t } from '../i18n'
 
 const toId = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -23,6 +24,8 @@ export const spName = (name: string) => {
   }
   return name
 }
+/** Nom d'un dresseur dans la langue courante (« Wallace » → « Marc »). Les noms sans entrée (Erika, Cynthia, Giovanni…) sont identiques en français. */
+export const trainerName = (name: string) => (getLang() === 'en' ? name : ((trainersFr as Record<string, string>)[toId(name)] ?? name))
 /** Nom d'une attaque dans la langue courante (retombe sur le nom anglais). */
 export const mvName = (name: string) => (getLang() === 'en' ? name : (mv[toId(name)] ?? name))
 /** Talent, objet et nature dans la langue courante (retombent sur le nom anglais). */

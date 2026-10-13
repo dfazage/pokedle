@@ -1,3 +1,28 @@
+# Environnements et workflow
+
+| Environnement | Branche | URL | Hébergement |
+|---|---|---|---|
+| Prod | `main` | https://pokebadle.fun | GitHub Pages (`.github/workflows/deploy.yml`) |
+| QA | `dev` | https://qa.pokebadle.fun (et https://pokedle-qa.pages.dev) | Cloudflare Pages, projet `pokedle-qa` |
+
+Flux de travail :
+
+1. Les PR de fonctionnalités ciblent `dev`.
+2. Le merge sur `dev` déploie automatiquement sur QA (branche de production du projet Cloudflare = `dev`).
+3. Après validation sur QA, ouvrir une PR `dev` → `main`.
+4. Le merge sur `main` déploie en prod via GitHub Pages.
+
+Notes :
+
+- Les autres branches et PR obtiennent une preview Cloudflare (`*.pokedle-qa.pages.dev`).
+- DNS : `pokebadle.fun` est géré chez GoDaddy ; `qa` est un CNAME vers `pokedle-qa.pages.dev`.
+- QA et prod partagent la même base Supabase : les tests en QA touchent les vraies données (scores, séries).
+- Variables du projet Cloudflare : `NODE_VERSION=22`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_KEY`, `VITE_GOOGLE_CLIENT_ID` (mêmes valeurs publiques que dans `deploy.yml`).
+- Pour que la connexion fonctionne en QA : ajouter `https://qa.pokebadle.fun/**` dans Supabase → Authentication → URL Configuration → Redirect URLs, et `https://qa.pokebadle.fun` dans Google Cloud → Identifiants → Origines JavaScript autorisées.
+- Les sections ci-dessous décrivent la création du projet Cloudflare Pages (branche de production = `dev`, donc QA ; la prod reste sur GitHub Pages).
+
+---
+
 # Hébergement (Cloudflare Pages)
 
 1. https://dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git → dépôt `pokedle`.

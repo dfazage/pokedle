@@ -233,6 +233,16 @@ export const fr = {
   'lb.you': 'Toi ({name})',
   'lb.winToAppear': 'Gagne le combat du jour pour apparaître ici.',
   'lb.unranked': 'Pas encore classé.',
+  'lb.streakShort': '{n}j',
+  'lb.myPos': 'Ta position',
+  'lb.toPass': 'Plus que {gap} pour passer #{n}',
+  'lb.leader': 'Tu es en tête de l’arène',
+  'lb.top': 'Top 4–10',
+  'lb.elite': 'Zone élite',
+  'lb.rest': 'Le reste',
+  'lb.restRange': '#11 et +',
+  'lb.gapUp': '−{gap} du #{n}',
+  'lb.meBadge': 'Toi',
 
   // ── Paramètres ──
   'set.title': 'Paramètres',

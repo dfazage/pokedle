@@ -234,6 +234,16 @@ export const en: Record<keyof typeof fr, string> = {
   'lb.you': 'You ({name})',
   'lb.winToAppear': 'Win today’s battle to appear here.',
   'lb.unranked': 'Not ranked yet.',
+  'lb.streakShort': '{n}d',
+  'lb.myPos': 'Your rank',
+  'lb.toPass': 'Only {gap} to pass #{n}',
+  'lb.leader': 'You lead the arena',
+  'lb.top': 'Top 4–10',
+  'lb.elite': 'Elite zone',
+  'lb.rest': 'The rest',
+  'lb.restRange': '#11 and below',
+  'lb.gapUp': '−{gap} from #{n}',
+  'lb.meBadge': 'You',
 
   // ── Settings ──
   'set.title': 'Settings',

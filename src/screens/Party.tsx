@@ -9,9 +9,10 @@ import { GEN_INFO } from '../game/fr'
 
 const STAT_KEYS: (keyof PreviewMon['stats'])[] = ['hp', 'atk', 'def', 'spa', 'spd', 'spe']
 
-export function MonSprite({ m, back = false, size = 64 }: { m: PreviewMon; back?: boolean; size?: number }) {
-  const art = size >= 100 && !back // grandes cartes : artwork officiel ; petites : sprite pixel de la génération
-  return <MonImg spec={m} back={back} artwork={art} alt={spName(m.species)} width={size} height={size} draggable={false} style={{ imageRendering: art ? 'auto' : 'pixelated', width: size, height: size, objectFit: 'contain' }} />
+export function MonSprite({ m, back = false, size = 64, animated = false }: { m: PreviewMon; back?: boolean; size?: number; animated?: boolean }) {
+  // `animated` : GIF animé BW/BW2 (repli sur le sprite Platine) ; sinon grandes cartes : artwork officiel, petites : sprite pixel.
+  const art = size >= 100 && !back && !animated
+  return <MonImg spec={m} back={back} artwork={art} animated={animated} alt={spName(m.species)} width={size} height={size} draggable={false} style={{ imageRendering: art ? 'auto' : 'pixelated', width: size, height: size, objectFit: 'contain' }} />
 }
 
 function statColor(v: number) {
@@ -31,7 +32,7 @@ export function MonSheet({ m, gen, onClose }: { m: PreviewMon; gen: number; onCl
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <button className="iconbtn sheet-x" onClick={onClose} aria-label={t('party.close')}><X size={20} /></button>
         <div className="sheet-hero" style={monCardStyle(m.types)}>
-          <MonSprite m={m} size={164} />
+          <MonSprite m={m} size={164} animated />
         </div>
         <div className="row between" style={{ marginTop: 12 }}>
           <h2 className="h2" style={{ margin: 0 }}>{spName(m.species)}</h2>

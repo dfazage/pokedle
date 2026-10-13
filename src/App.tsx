@@ -29,6 +29,7 @@ import { Guide } from './screens/Guide'
 import { Reminders } from './screens/Reminders'
 import { BattleIntro } from './screens/BattleIntro'
 import type { Ctx } from './screens/types'
+import { syncLocalOwner } from './game/localOwner'
 
 const progressKey = (day: string) => `pokedle:progress:${day}`
 function loadChoices(day: string): string[] {
@@ -137,6 +138,19 @@ function AppScreens() {
     const load = async (user: { id: string; email?: string } | null) => {
       signedIn.current = !!user
       setEmail(user?.email ?? null)
+      if (syncLocalOwner(user?.id ?? null)) {
+        // Autre compte (ou déconnexion) : on oublie le combat, l'ordre, les essais et l'avatar de l'ancien compte.
+        session.current = null
+        choices.current = []
+        setOrder(null)
+        setAttemptNo(0)
+        setView(null)
+        setQueue([])
+        setPending(null)
+        setAvatar(null)
+        setHistory(loadHistory())
+        setScreen((s) => (s === 'battle' || s === 'intro' || s === 'result' || s === 'team' || s === 'opponent' ? 'home' : s))
+      }
       if (!user) {
         setUsername(null)
         setIsAdmin(false)

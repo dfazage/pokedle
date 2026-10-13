@@ -5,7 +5,7 @@ import { calendarWeek, weekCells, type CalState } from '../game/week'
 import { enablePush, pushConfigured, pushState } from '../game/push'
 import { displayDay } from '../game/rng'
 import { loadSnooze, saveSnooze, shouldAskPush } from '../game/pushAsk'
-import { locale, t, tn, useLang } from '../i18n'
+import { locale, t, useLang } from '../i18n'
 
 const dayLetter = (key: string) => new Date(displayDay(key) + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
 
@@ -53,7 +53,6 @@ function BallIcon() {
 export function WeekCard({ history, today }: { history: DayRecord[]; today: string }) {
   useLang()
   const w = calendarWeek(history, today)
-  const sub = w.todayDone ? t('home.weekSub.done') : w.run > 0 ? t('home.weekSub.keep') : t('home.weekSub.start')
   return (
     <>
       <div className="row between" style={{ alignItems: 'flex-end' }}>
@@ -74,14 +73,6 @@ export function WeekCard({ history, today }: { history: DayRecord[]; today: stri
               <span className="cw-n">{new Date(c.label + 'T00:00:00Z').getUTCDate()}</span>
             </div>
           ))}
-        </div>
-        <hr className="cw-sep" />
-        <div className="row between">
-          <div className="cw-foot">
-            <b>{w.run > 0 ? tn('home.weekRun', w.run) : t('home.weekRun0')}</b>
-            <span className="muted small">{sub}</span>
-          </div>
-          <span className="pill yellow" aria-label={tn('home.weekWins', w.wins)}>{w.wins}/7</span>
         </div>
       </section>
     </>

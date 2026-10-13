@@ -479,10 +479,6 @@ h1, h2, h3, p { margin: 0; }
 .cw-dot.today i { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
 @keyframes cw-pulse { 50% { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .cw-dot.today { animation: none; } }
-.cw-sep { border: 0; height: 1px; margin: 0; background: var(--line); }
-.cw-foot { display: grid; gap: 2px; min-width: 0; }
-.cw-foot b { font-size: 16px; font-weight: 700; line-height: 1.15; }
-.cw-foot .small { font-size: 12px; }
 .tiles.lg .tile { border-radius: 24px; padding: 18px 14px 16px; gap: 6px; min-height: 130px; }
 .tiles.lg .tile .l { font-size: 12px; letter-spacing: 0.07em; opacity: 1; }
 .tiles.lg .tile .n { font-size: 46px; line-height: 1; }

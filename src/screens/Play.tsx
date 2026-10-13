@@ -2,7 +2,7 @@ import { PartyList, MonSprite } from './Party'
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, HeartCrack, BarChart3, ArrowRight, Star } from 'lucide-react'
 import type { Ctx } from './types'
-import { classLabel, GEN_INFO, mvName, spName } from '../game/fr'
+import { classLabel, GEN_INFO, mvName, spName, trainerName } from '../game/fr'
 import { locale, t, tn, useLang } from '../i18n'
 import { BATTLE_GEN } from '../game/daily'
 import { dayNumber, difficulty } from '../game/info'
@@ -66,12 +66,12 @@ export function Home(c: Ctx) {
             <TrainerImg
               id={ch.trainer.sprite ?? ch.trainer.id}
               gen={ch.gen}
-              className="trainer-sprite xl"
+              className="trainer-sprite xl idle"
               fallback={<MonOrb types={ch.opponentPreview[0]?.types ?? ['Normal']} size={120} />}
             />
           </div>
           <div className="hero-trainer-txt">
-            <h2>{ch.trainer.name}</h2>
+            <h2>{trainerName(ch.trainer.name)}</h2>
             <p>{t('home.blurb', { class: classLabel(ch.trainer), game: gi.game })}</p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function Home(c: Ctx) {
         <h2 className="h2">{t('home.team')}</h2>
         <span className="pill">{t('home.teamPill')}</span>
       </div>
-      <PartyList team={ch.playerPreview} gen={BATTLE_GEN} locked={c.orderLocked} onMove={c.moveMon} />
+      <PartyList team={ch.playerPreview} gen={BATTLE_GEN} locked={c.orderLocked} onMove={c.moveMon} animated />
 
       <button className="card row" onClick={() => (c.email ? undefined : c.go('auth'))} style={{ textAlign: 'left' }}>
         <span className="orb" style={{ width: 48, height: 48, ['--c1' as string]: '#8b6cd9', ['--c2' as string]: '#5ba8f0' }}><BarChart3 size={22} /></span>
@@ -145,7 +145,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
           className="trainer-sprite lg"
           fallback={<MonOrb types={trainerTypes} size={120} />}
         />
-        <h1 className="title">{ch.trainer.name}</h1>
+        <h1 className="title">{trainerName(ch.trainer.name)}</h1>
         <p className="muted">{t('opp.sub', { game: gi.game, region: gi.region, gen: ch.gen })}</p>
       </section>
       <section className="card stack">
@@ -294,7 +294,7 @@ export function Result(c: Ctx) {
           {win ? <Trophy size={56} /> : <HeartCrack size={56} />}
         </span>
         <div className="big-result" style={{ color: win ? 'var(--yellow)' : 'var(--secondary)' }}>{win ? t('res.win') : t('res.loss')}</div>
-        <p className="muted">{win ? t('res.winMsg', { name: c.challenge.trainer.name }) : t('res.lossMsg')}</p>
+        <p className="muted">{win ? t('res.winMsg', { name: trainerName(c.challenge.trainer.name) }) : t('res.lossMsg')}</p>
       </div>
       <section className="card stack">
         <div className="row between">

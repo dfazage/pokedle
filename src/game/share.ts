@@ -6,7 +6,7 @@
 //   adversaire ⬛ K.O. · 🟦 encore debout
 // Le détail par Pokémon n'est connu qu'au moment du combat : on le garde en local (clé par jour). Pour un résultat venu du serveur
 // (autre appareil), on retombe sur une grille déduite des compteurs `survivors` / `kos`, qui est juste en nombre mais pas en ordre.
-import { GEN_INFO } from './fr'
+import { GEN_INFO, trainerName } from './fr'
 import type { DayRecord } from './history'
 import { t, tn } from '../i18n'
 
@@ -98,7 +98,7 @@ export function buildShareText({ rec, dayNo, grid, streak, points, url }: ShareI
   const game = GEN_INFO[rec.gen]?.game
   const lines = [
     `Pokédle Battle #${dayNo} ⚔️`,
-    [rec.trainer, game, `${win ? t('share.win') : t('share.loss')} ${win ? '🏆' : '💀'}`].filter(Boolean).join(' · '),
+    [trainerName(rec.trainer), game, `${win ? t('share.win') : t('share.loss')} ${win ? '🏆' : '💀'}`].filter(Boolean).join(' · '),
     `${toEmoji(grid.you)} ➜ ${toEmoji(grid.foe)}`,
     [
       `⏱ ${tn('share.turns', rec.turns)}`,

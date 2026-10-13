@@ -8,7 +8,7 @@ import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { pushConfigured } from '../game/push'
 import { RemindersEntry } from './Reminders'
-import { GEN_INFO } from '../game/fr'
+import { GEN_INFO, trainerName } from '../game/fr'
 import { displayDay, keyForDisplayDay } from '../game/rng'
 import { Avatar, TopBar } from '../ui/kit'
 import { locale, pick, t, tn, useLang } from '../i18n'
@@ -18,7 +18,7 @@ function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreak
   const alive = r.survivors ?? (win ? 1 : 0)
   const kos = r.kos ?? (win ? 6 : 0)
   return (
-    <div className="sheet-bg" onClick={onClose} role="dialog" aria-modal="true" aria-label={r.trainer}>
+    <div className="sheet-bg" onClick={onClose} role="dialog" aria-modal="true" aria-label={trainerName(r.trainer)}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <button className="iconbtn sheet-x" onClick={onClose} aria-label={t('party.close')}><X size={20} /></button>
         <div className="stack">
@@ -28,7 +28,7 @@ function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreak
             {(r.attempts ?? 1) > 1 && <span className="pill">{t('hist.attempt', { n: r.attempts })}</span>}
           </div>
           <div>
-            <h2 className="h2" style={{ margin: 0, fontSize: 26 }}>{r.trainer}</h2>
+            <h2 className="h2" style={{ margin: 0, fontSize: 26 }}>{trainerName(r.trainer)}</h2>
             <div className="muted small">{t('hist.gen', { n: r.gen, game: GEN_INFO[r.gen]?.game })}</div>
           </div>
           <div className="tiles" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
@@ -130,14 +130,14 @@ export function History(c: Ctx) {
       <h2 className="h2">{t('hist.recent')}</h2>
       {recent.length === 0 && <p className="muted">{t('hist.empty')}</p>}
       {recent.map((r) => (
-        <button key={r.dayKey} type="button" className="card stack hist-card" onClick={() => setOpen(r.dayKey)} aria-label={`${r.trainer} — ${t('hist.detail')}`}>
+        <button key={r.dayKey} type="button" className="card stack hist-card" onClick={() => setOpen(r.dayKey)} aria-label={`${trainerName(r.trainer)} — ${t('hist.detail')}`}>
           <div className="row between">
             <span className="small" style={{ fontWeight: 700 }}>{label(r.dayKey, c.today)}</span>
             <span className={r.result === 'win' ? 'pill green' : 'pill red'}>{r.result === 'win' ? t('hist.win') : t('hist.loss')}</span>
           </div>
           <div className="row between" style={{ padding: 12, borderRadius: 16, background: 'var(--surface2)' }}>
             <div>
-              <b style={{ fontSize: 18 }}>{r.trainer}</b>
+              <b style={{ fontSize: 18 }}>{trainerName(r.trainer)}</b>
               <div className="muted small">{t('hist.gen', { n: r.gen, game: GEN_INFO[r.gen]?.game })}</div>
             </div>
             <div className="row" style={{ gap: 8 }}>

@@ -272,6 +272,7 @@ h1, h2, h3, p { margin: 0; }
 .slot-main:focus-visible { outline: 2px solid var(--primary); border-radius: 14px; }
 .slot-top { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .slot-sprite { flex: none; width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: color-mix(in srgb, var(--c1) 35%, var(--surface2)); }
+.party.anim .slot-sprite { width: 60px; height: 60px; }
 .slot-id { min-width: 0; display: grid; gap: 3px; }
 .slot-name { font-family: var(--font); font-size: 15px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .slot-lv { font-size: 11px; font-weight: 800; opacity: .7; }
@@ -341,6 +342,10 @@ h1, h2, h3, p { margin: 0; }
 
 /* Accueil : adversaire du jour en grand, dans une aura enflammée quand il est redoutable */
 .trainer-sprite.xl { width: 190px; height: 190px; position: relative; z-index: 2; }
+/* Les sprites de dresseurs n'existent qu'en image fixe : petite respiration pour les animer, ancrée aux pieds. */
+.trainer-sprite.idle { transform-origin: 50% 100%; animation: trainer-idle 2.6s ease-in-out infinite; }
+@keyframes trainer-idle { 0%, 100% { transform: translateY(0) scale(1, 1); } 50% { transform: translateY(-3px) scale(1.015, 1.03); } }
+@media (prefers-reduced-motion: reduce) { .trainer-sprite.idle { animation: none; } }
 .trainer-stage { position: relative; width: 230px; height: 200px; display: grid; place-items: center; margin-top: 4px; }
 .trainer-stage .orb { position: relative; z-index: 2; }
 .aura { position: absolute; inset: 0; z-index: 1; pointer-events: none; }

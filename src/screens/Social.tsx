@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AVATARS } from '../game/avatars'
-import { Check, ChevronLeft, ChevronRight, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { Check, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
 import type { DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
@@ -184,54 +184,106 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
     )
   const hasPoints = c.rows.some((r) => r.points !== undefined)
   const fmt = (n: number) => t('pts', { n: n.toLocaleString(locale()) })
-  const metric = (r: LeaderRow) =>
-    tab === 'streak' ? t('lb.streakMetric', { n: r.current_streak }) : hasPoints ? fmt((tab === 'today' ? r.points_today : r.points) ?? 0) : tn('lb.winsMetric', r.wins)
-  const top = sorted.slice(0, 3)
+  // Valeur classante selon l'onglet, et sa version affichable (points, jours de série ou victoires).
+  const val = (r: LeaderRow) => (tab === 'streak' ? r.current_streak : hasPoints ? ((tab === 'today' ? r.points_today : r.points) ?? 0) : r.wins)
+  const show = (n: number) => (tab === 'streak' ? t('lb.streakShort', { n }) : hasPoints ? fmt(n) : t('lb.winsShort', { n }))
+  const av = (r: LeaderRow) => (r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar)
   const myIdx = sorted.findIndex((r) => r.username === c.username)
-  const podium = top.length >= 3 ? [top[1], top[0], top[2]] : top
+  const me = myIdx >= 0 ? sorted[myIdx] : null
+  const podium = sorted.length >= 3 ? [sorted[1], sorted[0], sorted[2]] : sorted.slice(0, 3)
+  const sub = (r: LeaderRow) => `${tn('lb.winsMetric', r.wins)} · ${t('lb.best', { n: r.best_streak })}`
+  // Progression vers le rang du dessus : barre entre le joueur du dessous (ou 0) et celui du dessus.
+  const above = myIdx > 0 ? sorted[myIdx - 1] : null
+  const below = myIdx >= 0 && myIdx < sorted.length - 1 ? sorted[myIdx + 1] : null
+  const pct = !me ? 0 : !above ? 100 : (() => {
+    const lo = below ? val(below) : 0
+    const span = val(above) - lo
+    return span > 0 ? Math.max(4, Math.min(100, Math.round(((val(me) - lo) / span) * 100))) : 100
+  })()
+  const gapRow = (r: LeaderRow, i: number) => {
+    const g = i > 0 ? val(sorted[i - 1]) - val(r) : 0
+    return g > 0 ? <span className="ld-gap">{t('lb.gapUp', { gap: show(g), n: i })}</span> : null
+  }
   return (
-    <>
-      <div className="row between">
-        <div>
-          <h1 className="title">{t('lb.title')}</h1>
-          <p className="eyebrow muted">{t('lb.arena')}</p>
-        </div>
+    <div className="ld">
+      <div className="ld-glow" aria-hidden="true"><i /><i /><i /><i /></div>
+      <div>
+        <h1 className="title">{t('lb.title')}</h1>
+        <p className="eyebrow muted">{t('lb.arena')}</p>
       </div>
       <div className="tabs">
         {([['today', t('lb.tab.today')], ['streak', t('lb.tab.streak')], ['total', t('lb.tab.total')]] as [Tab, string][]).map(([k, l]) => (
           <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
+      {c.username && (
+        <section className="ld-glass ld-me">
+          {me ? (
+            <>
+              <div className="ld-me-head">
+                <div className="ld-me-rank"><span className="eyebrow">{t('lb.myPos')}</span><b>#{myIdx + 1}</b></div>
+                <b>{show(val(me))}</b>
+              </div>
+              <div className="ld-bar"><i style={{ width: `${pct}%` }} /></div>
+              <span className="small muted">{above ? t('lb.toPass', { gap: show(val(above) - val(me)), n: myIdx }) : t('lb.leader')}</span>
+            </>
+          ) : (
+            <div className="ld-me-head"><div className="ld-me-rank"><span className="eyebrow">{t('lb.you', { name: c.username })}</span><span className="small muted">{tab === 'today' ? t('lb.winToAppear') : t('lb.unranked')}</span></div></div>
+          )}
+        </section>
+      )}
       {sorted.length === 0 && <p className="muted" style={{ textAlign: 'center' }}>{tab === 'today' ? t('lb.emptyToday') : t('lb.empty')}</p>}
-      {top.length > 0 && (
-        <div className="podium" style={top.length < 3 ? { gridTemplateColumns: `repeat(${top.length}, 1fr)` } : undefined}>
+      {podium.length > 0 && (
+        <div className="ld-pod">
           {podium.map((r) => {
             const rank = sorted.indexOf(r) + 1
             return (
-              <div key={r.username} className={`p ${rank === 1 ? 'first' : ''}`}>
-                <Avatar id={r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar} name={r.username} size={rank === 1 ? 64 : 52} ring={rank === 1 ? 'var(--yellow)' : rank === 2 ? '#aeb8c8' : '#d08a4a'} style={{ margin: '0 auto 8px' }} />
-                <b>{rank}. {r.username}</b>
-                <div className="small" style={{ color: 'var(--primary)', fontWeight: 700 }}>{metric(r)}</div>
+              <div key={r.username} className={`ld-pc r${rank}`}>
+                {rank === 1 && <Crown size={26} className="ld-crown" fill="currentColor" aria-hidden="true" />}
+                <Avatar id={av(r)} name={r.username} size={rank === 1 ? 84 : 64} ring="var(--m)" />
+                <b className="ld-name">{r.username}</b>
+                <span className="ld-pts">{show(val(r))}</span>
+                <div className="ld-base">
+                  <span className="ld-rk">{rank}</span>
+                  <span className="ld-st"><Flame size={13} fill="currentColor" aria-hidden="true" /> {r.current_streak}</span>
+                </div>
               </div>
             )
           })}
         </div>
       )}
-      <div className="stack" style={{ gap: 8 }}>
-        {sorted.slice(3).map((r, i) => (
-          <div key={r.username} className={`lb ${r.username === c.username ? 'me' : ''}`}>
-            <span className="rank">#{i + 4}</span>
-            <Avatar id={r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar} name={r.username} size={36} style={{ fontSize: 15, borderWidth: 2 }} />
-            <div className="grow"><b>{r.username}</b><div className="muted small">{t('lb.best', { n: r.best_streak })}{hasPoints ? ` · ${t('lb.winsShort', { n: r.wins })}` : ''}</div></div>
-            <span className="pill"><Flame size={13} /> {r.current_streak}</span>
-            <b className="small">{hasPoints ? fmt((tab === 'today' ? r.points_today : r.points) ?? 0) : t('lb.winsShort', { n: r.wins })}</b>
+      {sorted.length > 3 && (
+        <>
+          <div className="ld-sh"><h2 className="h2">{t('lb.top')}</h2><span className="eyebrow muted">{t('lb.elite')}</span></div>
+          <section className="ld-glass ld-card">
+            {sorted.slice(3, 10).map((r, k) => (
+              <div key={r.username} className={`ld-row ${r.username === c.username ? 'me' : ''}`}>
+                <span className="ld-n">{k + 4}</span>
+                <Avatar id={av(r)} name={r.username} size={42} />
+                <div className="grow"><b>{r.username}</b><div className="muted small">{sub(r)}</div></div>
+                <div className="ld-end"><b>{show(val(r))}</b>{gapRow(r, k + 3)}</div>
+              </div>
+            ))}
+          </section>
+        </>
+      )}
+      {sorted.length > 10 && (
+        <>
+          <div className="ld-sh"><h2 className="h2">{t('lb.rest')}</h2><span className="eyebrow muted">{t('lb.restRange')}</span></div>
+          <div className="ld-rest">
+            {sorted.slice(10).map((r, k) => (
+              <div key={r.username} className={`ld-mini ${r.username === c.username ? 'me' : ''}`}>
+                <span className="ld-n">{k + 11}</span>
+                <Avatar id={av(r)} name={r.username} size={30} />
+                <b className="grow">{r.username}</b>
+                {r.username === c.username && <span className="ld-you">{t('lb.meBadge')}</span>}
+                <b>{show(val(r))}</b>
+              </div>
+            ))}
           </div>
-        ))}
-        {myIdx >= 3 ? null : myIdx === -1 && c.username ? (
-          <div className="lb me"><span className="rank">—</span><div className="grow"><b>{t('lb.you', { name: c.username })}</b><div className="muted small">{tab === 'today' ? t('lb.winToAppear') : t('lb.unranked')}</div></div></div>
-        ) : null}
-      </div>
-    </>
+        </>
+      )}
+    </div>
   )
 }
 

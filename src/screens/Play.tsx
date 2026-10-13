@@ -14,6 +14,7 @@ import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
 import { Avatar, MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 import { MoveSheet } from '../ui/MoveInfo'
+import { PushAsk, WeekStrip } from './Retention'
 import { PixelHearts, type HeartAnim } from '../ui/PixelHeart'
 import type { MoveFacts } from '../game/moves'
 
@@ -297,6 +298,8 @@ export function Result(c: Ctx) {
           <span className="pill" style={win ? undefined : { color: 'var(--secondary)' }}>{win ? <><Flame size={14} /> {t('res.streakOn')}</> : <><HeartCrack size={14} /> {t('res.streakBroken')}</>}</span>
           <b style={{ fontSize: 28 }}>{c.stats.currentStreak} <small className="muted" style={{ fontSize: 12 }}>{tn('res.daysUpper', c.stats.currentStreak)}</small></b>
         </div>
+        <WeekStrip history={c.history} today={c.today} />
+        {win && <p className="small" style={{ margin: 0 }}>{t('res.week.next', { n: c.stats.currentStreak + 1 })}</p>}
         {!win && prev > 0 && <p className="muted small">{t('res.prevStreak')} <b>{tn('days', prev)}</b> {t('res.reset')}</p>}
         {win && c.stats.currentStreak >= c.stats.bestStreak && c.stats.currentStreak > 1 && <p className="small" style={{ color: 'var(--tertiary)' }}>{t('res.newRecord')}</p>}
       </section>
@@ -364,6 +367,7 @@ export function Result(c: Ctx) {
         <p className="muted small">{t('res.nextText')}</p>
       </section>
       <button className="btn ghost" onClick={() => c.go('leaderboard')}>{t('res.board')}</button>
+      <PushAsk win={win} signedIn={!!c.email} />
     </>
   )
 }

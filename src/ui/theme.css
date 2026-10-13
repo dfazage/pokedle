@@ -451,3 +451,16 @@ h1, h2, h3, p { margin: 0; }
 [data-theme='dark'] .heart-plus { color: #72d9bb; }
 @keyframes heart-plus { from { opacity: 0; transform: translateY(6px); } }
 @media (prefers-reduced-motion: reduce) { .heart-plus { animation: none; } }
+
+/* Rétention : bande de la semaine (écran Résultat) et feuille d'abonnement push */
+.wk { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.wk-d { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wk-l { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+.wk-d.today .wk-l { color: var(--text); font-weight: 800; }
+.wk-dot { box-sizing: border-box; width: 36px; height: 36px; border-radius: 50%; display: grid; place-content: center; border: 2px solid var(--line); color: #08213a; }
+.wk-dot.win { background: var(--yellow); border-color: var(--yellow); }
+.wk-dot.loss { background: color-mix(in srgb, var(--secondary) 30%, transparent); border-color: var(--secondary); }
+.wk-dot.tomorrow { border: 2px dashed var(--violet); }
+.push-ask { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.push-ask-ico { width: 64px; height: 64px; border-radius: 50%; }
+.btn.violet:disabled, .btn.ghost:disabled { opacity: .6; }

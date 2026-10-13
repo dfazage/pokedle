@@ -160,6 +160,17 @@ export const en: Record<keyof typeof fr, string> = {
   'res.next': 'Next challenge',
   'res.nextText': 'A new trainer and a new fixed team every day at 12:00 noon (Paris time).',
   'res.board': 'View the world ranking',
+  'res.week': 'Your week',
+  'res.week.win': 'win',
+  'res.week.loss': 'loss',
+  'res.week.none': 'not played',
+  'res.week.tomorrow': 'tomorrow',
+  'res.week.next': 'Come back tomorrow to reach a {n}-day streak.',
+  'push.ask.title': 'A new trainer every day',
+  'push.ask.body': 'Get a reminder at 12:00 (Paris time) when the challenge is ready, to keep your streak.',
+  'push.ask.yes': 'Turn on the daily reminder',
+  'push.ask.later': 'Not now',
+  'push.ask.foot': 'You can change this anytime in Profile › Reminders.',
 
   // ── History ──
   'hist.title': 'History',

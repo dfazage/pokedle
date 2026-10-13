@@ -159,6 +159,17 @@ export const fr = {
   'res.next': 'Prochain défi',
   'res.nextText': 'Un nouveau dresseur et une nouvelle équipe imposée chaque jour à 12h (heure de Paris).',
   'res.board': 'Voir le classement mondial',
+  'res.week': 'Ta semaine',
+  'res.week.win': 'victoire',
+  'res.week.loss': 'défaite',
+  'res.week.none': 'pas joué',
+  'res.week.tomorrow': 'demain',
+  'res.week.next': 'Reviens demain pour atteindre {n} jours de série.',
+  'push.ask.title': 'Un nouveau dresseur chaque jour',
+  'push.ask.body': 'Reçois un rappel à 12h (heure de Paris) quand le défi est prêt, pour garder ta série.',
+  'push.ask.yes': 'Activer le rappel quotidien',
+  'push.ask.later': 'Pas maintenant',
+  'push.ask.foot': 'Modifiable à tout moment dans Profil › Rappels.',
 
   // ── Historique ──
   'hist.title': 'Historique',

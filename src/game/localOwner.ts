@@ -19,17 +19,17 @@ export function syncLocalOwner(userId: string | null): boolean {
   try {
     const owner = localStorage.getItem(OWNER_KEY)
     if (userId === null) {
-      if (!owner) return false // invité qui n'a jamais été connecté : on garde son état
+      if (!owner) return false // aucun compte n'a été vu sur cet appareil
       clearLocalGameState()
       localStorage.removeItem(OWNER_KEY)
       return true
     }
     if (owner === userId) return false
-    // Premier compte connecté sur cet appareil (owner absent) : l'état local d'un invité est conservé.
-    const switched = !!owner
-    if (switched) clearLocalGameState()
+    // Propriétaire inconnu (état d'avant ce correctif) ou différent : on ne sait pas à qui appartient l'état local, on le vide.
+    // L'app impose d'être connecté pour jouer : l'historique, les cœurs et l'avatar reviennent du serveur.
+    clearLocalGameState()
     localStorage.setItem(OWNER_KEY, userId)
-    return switched
+    return true
   } catch {
     return false
   }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react'
 import type { DailyChallenge } from '../game/daily'
-import { classLabel, GEN_INFO } from '../game/fr'
+import { classLabel, GEN_INFO, trainerName } from '../game/fr'
 import { TrainerImg } from '../game/trainerSprites'
 import { MonOrb } from '../ui/kit'
 import { t, useLang } from '../i18n'
@@ -15,7 +15,7 @@ const Balls = () => <div className="bi-balls">{BALLS.map((k) => <i key={k} style
 export function BattleIntro({ challenge, boosted, onDone }: { challenge: DailyChallenge; boosted: boolean; onDone: () => void }) {
   useLang()
   const tr = challenge.trainer
-  const text = t('bi.wants', { name: tr.name })
+  const text = t('bi.wants', { name: trainerName(tr.name) })
   const done = useRef(onDone)
   useEffect(() => { done.current = onDone }) // le minuteur ne repart pas quand le parent se redessine
   useEffect(() => {
@@ -44,7 +44,7 @@ export function BattleIntro({ challenge, boosted, onDone }: { challenge: DailyCh
               fallback={<MonOrb types={challenge.opponentPreview[0]?.types ?? ['Normal']} size={110} />}
             />
           </div>
-          <div className="bi-name">{tr.name}</div>
+          <div className="bi-name">{trainerName(tr.name)}</div>
           <div className="bi-cls">{t('bi.cls', { class: classLabel(tr), game: GEN_INFO[challenge.gen].game })}</div>
           <Balls />
         </div>

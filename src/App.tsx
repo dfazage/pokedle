@@ -538,7 +538,7 @@ function AppScreens() {
       {screen === 'result' && <Result {...ctx} />}
       {screen === 'history' && <History {...ctx} />}
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
-      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.3.2 · ${__BUILD__}`} />}
+      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.3.3 · ${__BUILD__}`} />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}

@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react'
 import { Bell, Flame, X } from 'lucide-react'
 import type { DayRecord } from '../game/history'
-import { calendarWeek, weekCells, type CalState } from '../game/week'
+import { calendarWeek, type CalState } from '../game/week'
 import { enablePush, pushConfigured, pushState } from '../game/push'
-import { displayDay } from '../game/rng'
 import { loadSnooze, saveSnooze, shouldAskPush } from '../game/pushAsk'
 import { locale, t, useLang } from '../i18n'
 
-const dayLetter = (key: string) => new Date(displayDay(key) + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
+/** Initiale du jour pour une DATE affichée (YYYY-MM-DD) — pas une clé de jeu. */
+const dayLetter = (label: string) => new Date(label + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
 
-/** Ta semaine en sept points : victoires, défaites, jours manqués, et demain en pointillés. */
+/** Ta semaine en sept points (lundi → dimanche) : victoires, défaites, jours manqués, et demain en pointillés. */
 export function WeekStrip({ history, today }: { history: DayRecord[]; today: string }) {
   useLang()
+  const cells = calendarWeek(history, today).cells
+  const tomorrow = cells.findIndex((c) => c.state === 'future')
   return (
     <div className="wk" role="list" aria-label={t('res.week')}>
-      {weekCells(history, today).map((c) => (
-        <div key={c.dayKey} className={c.isToday ? 'wk-d today' : 'wk-d'} role="listitem" aria-label={`${dayLetter(c.dayKey)} · ${t(`res.week.${c.state}`)}`}>
-          <span className="wk-l">{dayLetter(c.dayKey)}</span>
-          <i className={`wk-dot ${c.state}`} aria-hidden>{c.state === 'win' ? <Flame size={16} /> : null}</i>
-        </div>
-      ))}
+      {cells.map((c, i) => {
+        const state = c.state === 'future' ? (i === tomorrow ? 'tomorrow' : 'none') : c.state === 'today' ? 'none' : c.state
+        return (
+          <div key={c.label} className={c.isToday ? 'wk-d today' : 'wk-d'} role="listitem" aria-label={`${dayLetter(c.label)} · ${t(`res.week.${state}`)}`}>
+            <span className="wk-l">{dayLetter(c.label)}</span>
+            <i className={`wk-dot ${state}`} aria-hidden>{state === 'win' ? <Flame size={16} /> : null}</i>
+          </div>
+        )
+      })}
     </div>
   )
 }

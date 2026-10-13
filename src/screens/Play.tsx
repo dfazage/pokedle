@@ -14,7 +14,7 @@ import { TrainerImg } from '../game/trainerSprites'
 import { MonImg } from '../game/officialSprites'
 import { Avatar, MonOrb, SlideToConfirm, TopBar, TypeBadge, monCardStyle, useCountdown } from '../ui/kit'
 import { MoveSheet } from '../ui/MoveInfo'
-import { PushAsk, WeekStrip } from './Retention'
+import { PushAsk, WeekCard, WeekStrip } from './Retention'
 import { PixelHearts, type HeartAnim } from '../ui/PixelHeart'
 import type { MoveFacts } from '../game/moves'
 
@@ -88,7 +88,10 @@ export function Home(c: Ctx) {
         <p className="muted" style={{ fontSize: 11, lineHeight: 1.35, margin: 0 }}>{t('hearts.rule')}</p>
       </section>
 
-      <div className="tiles">
+      <WeekCard history={c.history} today={c.today} />
+
+      <h2 className="h2">{t('home.stats')}</h2>
+      <div className="tiles lg">
         <div className="tile blue"><span className="l">{t('home.wins')}</span><span className="n">{stats.totalWins}</span><span className="s">{tn('home.games', stats.played)}{stats.played ? ` · ${rate}%` : ''}</span></div>
         <div className="tile yellow"><span className="l">{t('home.streak')}</span><span className="n">{stats.currentStreak}<small style={{ fontSize: 16 }}> {t('unit.day')}</small></span><span className="s">{stats.currentStreak ? t('home.streakOn') : t('home.streakOff')}</span></div>
         <div className="tile green"><span className="l">{t('home.record')}</span><span className="n">{stats.bestStreak}<small style={{ fontSize: 16 }}> {t('unit.day')}</small></span><span className="s">{t('home.bestStreak')}</span></div>

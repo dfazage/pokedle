@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Bell, Flame } from 'lucide-react'
+import { Bell, Flame, X } from 'lucide-react'
 import type { DayRecord } from '../game/history'
-import { weekCells } from '../game/week'
+import { calendarWeek, weekCells, type CalState } from '../game/week'
 import { enablePush, pushConfigured, pushState } from '../game/push'
+import { displayDay } from '../game/rng'
 import { loadSnooze, saveSnooze, shouldAskPush } from '../game/pushAsk'
-import { locale, t, useLang } from '../i18n'
+import { locale, t, tn, useLang } from '../i18n'
 
-const dayLetter = (key: string) => new Date(key + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
+const dayLetter = (key: string) => new Date(displayDay(key) + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'narrow', timeZone: 'UTC' })
 
 /** Ta semaine en sept points : victoires, défaites, jours manqués, et demain en pointillés. */
 export function WeekStrip({ history, today }: { history: DayRecord[]; today: string }) {
@@ -20,6 +21,70 @@ export function WeekStrip({ history, today }: { history: DayRecord[]; today: str
         </div>
       ))}
     </div>
+  )
+}
+
+const dayName = (key: string) => {
+  const s = new Date(key + 'T00:00:00Z').toLocaleDateString(locale(), { weekday: 'short', timeZone: 'UTC' }).replace('.', '')
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+const dayShort = (key: string) => new Date(key + 'T00:00:00Z').toLocaleDateString(locale(), { day: 'numeric', month: 'short', timeZone: 'UTC' })
+const STATE_LABEL: Record<CalState, 'res.week.win' | 'res.week.loss' | 'res.week.none' | 'home.weekToday' | 'home.weekFuture'> = {
+  win: 'res.week.win',
+  loss: 'res.week.loss',
+  none: 'res.week.none',
+  today: 'home.weekToday',
+  future: 'home.weekFuture',
+}
+
+/** Victoire : une Poké Ball à plat (le liseré prend la couleur de la carte). */
+function BallIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 36 36" aria-hidden>
+      <path d="M2 18a16 16 0 0 1 32 0z" fill="#ef4444" />
+      <path d="M2 18a16 16 0 0 0 32 0z" fill="#f4f4f8" />
+      <rect x="2" y="16" width="32" height="4" className="cw-band" />
+      <circle cx="18" cy="18" r="5.5" fill="#f4f4f8" className="cw-btn" strokeWidth="3" />
+    </svg>
+  )
+}
+
+/** Accueil : la semaine en cours (lundi → dimanche) — une case par jour, puis la série de la semaine. */
+export function WeekCard({ history, today }: { history: DayRecord[]; today: string }) {
+  useLang()
+  const w = calendarWeek(history, today)
+  const sub = w.todayDone ? t('home.weekSub.done') : w.run > 0 ? t('home.weekSub.keep') : t('home.weekSub.start')
+  return (
+    <>
+      <div className="row between" style={{ alignItems: 'flex-end' }}>
+        <div>
+          <div className="eyebrow">{t('home.weekKicker', { n: w.number })}</div>
+          <h2 className="title">{t('res.week')}</h2>
+        </div>
+        <span className="pill">{dayShort(w.from)} → {dayShort(w.to)}</span>
+      </div>
+      <section className="card cw">
+        <div className="cw-days" role="list" aria-label={t('res.week')}>
+          {w.cells.map((c) => (
+            <div key={c.label} className={c.isToday ? 'cw-d today' : 'cw-d'} role="listitem" aria-label={`${dayName(c.label)} ${new Date(c.label + 'T00:00:00Z').getUTCDate()} · ${t(STATE_LABEL[c.state])}`}>
+              <span className={`cw-dot ${c.state}`} aria-hidden>
+                {c.state === 'win' ? <BallIcon /> : c.state === 'loss' ? <X size={16} strokeWidth={3.2} /> : c.state === 'today' ? <i /> : null}
+              </span>
+              <span className="cw-l">{dayName(c.label)}</span>
+              <span className="cw-n">{new Date(c.label + 'T00:00:00Z').getUTCDate()}</span>
+            </div>
+          ))}
+        </div>
+        <hr className="cw-sep" />
+        <div className="row between">
+          <div className="cw-foot">
+            <b>{w.run > 0 ? tn('home.weekRun', w.run) : t('home.weekRun0')}</b>
+            <span className="muted small">{sub}</span>
+          </div>
+          <span className="pill yellow" aria-label={tn('home.weekWins', w.wins)}>{w.wins}/7</span>
+        </div>
+      </section>
+    </>
   )
 }
 

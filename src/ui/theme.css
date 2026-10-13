@@ -461,6 +461,34 @@ h1, h2, h3, p { margin: 0; }
 .wk-dot.win { background: var(--yellow); border-color: var(--yellow); }
 .wk-dot.loss { background: color-mix(in srgb, var(--secondary) 30%, transparent); border-color: var(--secondary); }
 .wk-dot.tomorrow { border: 2px dashed var(--violet); }
+/* Accueil : carte « Ta semaine » (lundi → dimanche) et tuiles de stats */
+.cw { padding: 20px 12px 16px; display: grid; gap: 16px; }
+.cw-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.cw-d { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; }
+.cw-l { font-size: 13px; font-weight: 700; color: var(--text); }
+.cw-n { font-size: 11px; font-weight: 600; color: var(--muted); }
+.cw-d.today .cw-l, .cw-d.today .cw-n { color: var(--yellow); }
+.cw-dot { box-sizing: border-box; width: 40px; height: 40px; border-radius: 50%; display: grid; place-content: center; border: 2px solid var(--line); background: var(--surface2); }
+.cw-dot.win { border: 0; background: none; }
+.cw-band { fill: var(--surface); }
+.cw-btn { stroke: var(--surface); }
+.cw-dot.loss { background: color-mix(in srgb, var(--secondary) 18%, transparent); border-color: color-mix(in srgb, var(--secondary) 55%, transparent); color: var(--secondary); }
+.cw-dot.none { background: transparent; opacity: 0.7; }
+.cw-dot.future { background: var(--surface2); }
+.cw-dot.today { border-color: var(--yellow); background: rgba(247, 201, 72, 0.12); animation: cw-pulse 1.6s ease-in-out infinite; }
+.cw-dot.today i { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
+@keyframes cw-pulse { 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) { .cw-dot.today { animation: none; } }
+.cw-sep { border: 0; height: 1px; margin: 0; background: var(--line); }
+.cw-foot { display: grid; gap: 2px; min-width: 0; }
+.cw-foot b { font-size: 16px; font-weight: 700; line-height: 1.15; }
+.cw-foot .small { font-size: 12px; }
+.tiles.lg .tile { border-radius: 24px; padding: 18px 14px 16px; gap: 6px; min-height: 130px; }
+.tiles.lg .tile .l { font-size: 12px; letter-spacing: 0.07em; opacity: 1; }
+.tiles.lg .tile .n { font-size: 46px; line-height: 1; }
+.tiles.lg .tile .s { font-size: 12px; font-weight: 600; opacity: 1; line-height: 1.3; }
+.tiles.lg .tile.blue { background: linear-gradient(145deg, #6aa3ee, #4a7fd0); }
+.tiles.lg .tile.green { background: linear-gradient(145deg, #58b893, #3f9c78); }
 .push-ask { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .push-ask-ico { width: 64px; height: 64px; border-radius: 50%; }
 .btn.violet:disabled, .btn.ghost:disabled { opacity: .6; }

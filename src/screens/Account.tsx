@@ -45,10 +45,18 @@ export function Auth(c: Ctx & { onBack: () => void }) {
     } else if (mode === 'up') {
       const { data, error } = await supabase.auth.signUp({ email: mail, password: pass, options: { data: { username: pseudo.trim() }, emailRedirectTo: siteUrl() } })
       if (error) setMsg(error.message)
+      // Supabase ne renvoie pas d'erreur (ni d'e-mail) quand l'adresse existe déjà : identities est alors vide.
+      else if (data.user && (data.user.identities?.length ?? 0) === 0) setMsg(t('auth.msgExists'))
       else if (!data.session) setMsg(t('auth.msgCreated'))
       else c.go('home')
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email: mail, password: pass })
+      // Connexion par pseudo OU e-mail : un pseudo (sans « @ ») est d'abord converti en e-mail côté serveur.
+      let email = mail.trim()
+      if (!email.includes('@')) {
+        const { data: found } = await supabase.rpc('email_for_username', { uname: email })
+        email = typeof found === 'string' ? found : ''
+      }
+      const { error } = email ? await supabase.auth.signInWithPassword({ email, password: pass }) : { error: { message: t('auth.msgBadLogin') } }
       if (error) setMsg(error.message)
       else c.go('home')
     }
@@ -88,7 +96,7 @@ export function Auth(c: Ctx & { onBack: () => void }) {
           {mode === 'up' && (
             <div><div className="lab">{t('auth.pseudo')}</div><label className="field"><User size={18} className="muted" /><input placeholder={t('auth.pseudoPh')} minLength={3} maxLength={20} required value={pseudo} onChange={(e) => setPseudo(e.target.value)} /></label></div>
           )}
-          <div><div className="lab">{t('auth.email')}</div><label className="field"><Mail size={18} className="muted" /><input type="email" placeholder={t('auth.emailPh')} autoComplete="email" required value={mail} onChange={(e) => setMail(e.target.value)} /></label></div>
+          <div><div className="lab">{mode === 'in' ? t('auth.login') : t('auth.email')}</div><label className="field"><Mail size={18} className="muted" /><input type={mode === 'in' ? 'text' : 'email'} placeholder={mode === 'in' ? t('auth.loginPh') : t('auth.emailPh')} autoComplete={mode === 'in' ? 'username' : 'email'} autoCapitalize="none" required value={mail} onChange={(e) => setMail(e.target.value)} /></label></div>
           {mode !== 'forgot' && <div><div className="lab">{t('auth.pass')}</div><label className="field"><Lock size={18} className="muted" /><input type={show ? 'text' : 'password'} placeholder={t('auth.passPh')} minLength={6} autoComplete={mode === 'in' ? 'current-password' : 'new-password'} required value={pass} onChange={(e) => setPass(e.target.value)} /><button type="button" onClick={() => setShow(!show)} aria-label={t('auth.showPass')}>{show ? <EyeOff size={18} className="muted" /> : <Eye size={18} className="muted" />}</button></label></div>}
           {mode === 'in' && <button type="button" className="link" style={{ alignSelf: 'flex-end' }} onClick={() => { setMode('forgot'); setMsg('') }}>{t('auth.forgot')}</button>}
           <button className="btn violet" disabled={busy || !supabase}><LogIn size={18} /> {mode === 'in' ? t('auth.submitIn') : mode === 'up' ? t('auth.submitUp') : t('auth.submitForgot')}</button>

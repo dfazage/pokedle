@@ -540,3 +540,18 @@ h1, h2, h3, p { margin: 0; }
 .push-ask { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
 .push-ask-ico { width: 64px; height: 64px; border-radius: 50%; }
 .btn.violet:disabled, .btn.ghost:disabled { opacity: .6; }
+
+/* Bandeau « nouvelle version disponible » (src/ui/UpdateBanner.tsx). */
+.updatebar { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+.updatebar-head { display: flex; align-items: flex-start; gap: 12px; }
+.updatebar-ico { width: 40px; height: 40px; flex: none; border-radius: 50%; background: rgba(91, 168, 240, 0.18); color: #2f7fc9; display: flex; align-items: center; justify-content: center; }
+[data-theme='dark'] .updatebar-ico { color: #7bbcf5; }
+.updatebar-title { font-size: 16px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; }
+.updatebar-body { font-size: 13px; line-height: 1.4; margin-top: 2px; }
+.updatebar-actions { display: flex; align-items: center; gap: 8px; }
+.updatebar .btn { width: auto; flex: 1; min-height: 44px; padding: 0 18px; font-size: 14px; box-shadow: none; }
+.updatebar .btn.ghost { flex: 0 0 auto; border: 0; color: #475569; }
+[data-theme='dark'] .updatebar .btn.ghost { color: #b4bccd; }
+@keyframes updatebar-spin { to { transform: rotate(360deg); } }
+.updatebar-ico svg.spin { animation: updatebar-spin 0.9s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .updatebar-ico svg.spin { animation: none; } }

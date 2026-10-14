@@ -20,8 +20,15 @@ function readMuted(): boolean {
   try { return localStorage.getItem(KEY) === 'off' } catch { return false }
 }
 export const isMuted = (): boolean => muted
+const muteListeners = new Set<() => void>()
+/** Appelle `fn` à chaque changement du bouton son (pour les sources hors Web Audio, ex. le lecteur YouTube) ; renvoie la désinscription. */
+export function onMutedChange(fn: () => void): () => void {
+  muteListeners.add(fn)
+  return () => { muteListeners.delete(fn) }
+}
 export function setMuted(m: boolean) {
   muted = m
+  muteListeners.forEach((f) => f())
   try { localStorage.setItem(KEY, m ? 'off' : 'on') } catch { /* stockage indisponible */ }
   if (master) master.gain.value = m ? 0 : 1
 }

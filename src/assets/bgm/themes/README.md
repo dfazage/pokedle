@@ -1,5 +1,7 @@
 # Thèmes de combat par dresseur
 
+> **Ordre de lecture** : mp3 local de ce dossier → vidéo YouTube cachée (`src/data/ytThemes.json`, mêmes clés : `g{gen}-{id}` > `{type}-g{gen}` > `{type}`) → morceaux historiques → chiptune. Pour changer une musique sans fichier, il suffit de modifier l'ID de vidéo dans `ytThemes.json`.
+
 Dépose ici des `.mp3` : ils sont repérés automatiquement (aucun code à toucher). Sans fichier, le jeu garde le comportement actuel (morceaux de `../` puis chiptune).
 
 ## Nommage

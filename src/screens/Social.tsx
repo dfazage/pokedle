@@ -155,19 +155,17 @@ export function History(c: Ctx) {
   )
 }
 
-type Tab = 'today' | 'streak' | 'total'
+type Tab = 'today' | 'week' | 'season'
+/** Points classants d'un joueur selon la période affichée. */
+const pointsFor = (x: LeaderRow, tab: Tab) => (tab === 'today' ? x.points_today : tab === 'week' ? x.points_week : x.points_season) ?? 0
 export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
   useLang()
-  const [tab, setTab] = useState<Tab>('total')
+  const [tab, setTab] = useState<Tab>('today')
   const sorted = useMemo(() => {
     let r = [...c.rows]
     if (tab === 'today') r = r.filter((x) => x.won_today)
-    const pts = (x: LeaderRow) => (tab === 'today' ? x.points_today : x.points) ?? 0
-    r.sort((a, b) =>
-      tab === 'streak'
-        ? b.current_streak - a.current_streak || b.wins - a.wins
-        : pts(b) - pts(a) || b.wins - a.wins || b.best_streak - a.best_streak,
-    )
+    else if (r.some((x) => x.points !== undefined)) r = r.filter((x) => pointsFor(x, tab) > 0)
+    r.sort((a, b) => pointsFor(b, tab) - pointsFor(a, tab) || b.wins - a.wins || b.best_streak - a.best_streak)
     return r
   }, [c.rows, tab])
   if (!c.email)
@@ -185,8 +183,8 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
   const hasPoints = c.rows.some((r) => r.points !== undefined)
   const fmt = (n: number) => t('pts', { n: n.toLocaleString(locale()) })
   // Valeur classante selon l'onglet, et sa version affichable (points, jours de série ou victoires).
-  const val = (r: LeaderRow) => (tab === 'streak' ? r.current_streak : hasPoints ? ((tab === 'today' ? r.points_today : r.points) ?? 0) : r.wins)
-  const show = (n: number) => (tab === 'streak' ? t('lb.streakShort', { n }) : hasPoints ? fmt(n) : t('lb.winsShort', { n }))
+  const val = (r: LeaderRow) => (hasPoints ? pointsFor(r, tab) : r.wins)
+  const show = (n: number) => (hasPoints ? fmt(n) : t('lb.winsShort', { n }))
   const av = (r: LeaderRow) => (r.username === c.username ? (c.avatar ?? r.avatar) : r.avatar)
   const myIdx = sorted.findIndex((r) => r.username === c.username)
   const me = myIdx >= 0 ? sorted[myIdx] : null
@@ -212,7 +210,7 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
         <p className="eyebrow muted">{t('lb.arena')}</p>
       </div>
       <div className="tabs">
-        {([['today', t('lb.tab.today')], ['streak', t('lb.tab.streak')], ['total', t('lb.tab.total')]] as [Tab, string][]).map(([k, l]) => (
+        {([['today', t('lb.tab.today')], ['week', t('lb.tab.week')], ['season', t('lb.tab.season')]] as [Tab, string][]).map(([k, l]) => (
           <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
@@ -228,11 +226,11 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
               <span className="small muted">{above ? t('lb.toPass', { gap: show(val(above) - val(me)), n: myIdx }) : t('lb.leader')}</span>
             </>
           ) : (
-            <div className="ld-me-head"><div className="ld-me-rank"><span className="eyebrow">{t('lb.you', { name: c.username })}</span><span className="small muted">{tab === 'today' ? t('lb.winToAppear') : t('lb.unranked')}</span></div></div>
+            <div className="ld-me-head"><div className="ld-me-rank"><span className="eyebrow">{t('lb.you', { name: c.username })}</span><span className="small muted">{t(tab === 'today' ? 'lb.winToAppear' : 'lb.winPeriod')}</span></div></div>
           )}
         </section>
       )}
-      {sorted.length === 0 && <p className="muted" style={{ textAlign: 'center' }}>{tab === 'today' ? t('lb.emptyToday') : t('lb.empty')}</p>}
+      {sorted.length === 0 && <p className="muted" style={{ textAlign: 'center' }}>{tab === 'today' ? t('lb.emptyToday') : t(tab === 'week' ? 'lb.emptyWeek' : 'lb.emptySeason')}</p>}
       {podium.length > 0 && (
         <div className="ld-pod">
           {podium.map((r) => {

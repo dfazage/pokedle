@@ -4,6 +4,7 @@
 // La boucle fait 16 mesures. Les mélodies sont tirées de gabarits rythmiques écrits à la main + un contour pseudo-aléatoire à graine fixe : le
 // résultat est identique à chaque lancement, et les phrases reviennent (A A' B C | A A'' B D) comme dans un vrai thème.
 import { musicOutput } from './audio'
+import { startYoutube, stopYoutube, ytVideoFor } from './ytMusic'
 import { noise, tone } from './sfx'
 
 type Ctx = BaseAudioContext
@@ -292,6 +293,7 @@ export function stopMusic(fade = 0.8) {
   const s = stopCur
   stopCur = null
   s?.(fade)
+  stopYoutube(fade)
 }
 
 // ——— Morceaux fournis (src/assets/bgm/*.mp3) ———
@@ -393,6 +395,9 @@ export function startMusic(choice: MusicChoice) {
   }
   const th = resolveTheme(choice, 'battle')
   if (th && startTrack(th.url, { loop: true, gain: 0.5, lowUrl: th.low, onError: () => { stopMusic(0.05); legacy() } })) return
+  // Pas de fichier local : thème YouTube (lecteur caché) ; s'il est indisponible, morceaux fournis puis chiptune.
+  const yt = ytVideoFor(themeKeys(choice))
+  if (yt) { startYoutube(yt, legacy); return }
   legacy()
 }
 

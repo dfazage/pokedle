@@ -1,0 +1,41 @@
+{
+  "_doc": "Thèmes de combat lus via un lecteur YouTube caché. Clés : g{gen}-{id dresseur} > {type}-g{gen} > {type}. Valeur : { id: ID de vidéo YouTube, title: titre (pour mémoire) }.",
+  "gym-g1": { "id": "RJKIrqO1Zas", "title": "Pokémon Red, Blue & Yellow - Gym Leader Battle Music (HQ)" },
+  "elite-g1": { "id": "EWERenbDaps", "title": "Pokemon Red & Blue: Gym Leader/Elite Four Battle Theme" },
+  "champion-g1": { "id": "MEhQgmkuMuw", "title": "Pokémon Red/Blue - Final Rival Battle" },
+  "rival-g1": { "id": "MEhQgmkuMuw", "title": "Pokémon Red/Blue - Final Rival Battle" },
+  "team-g1": { "id": "RJKIrqO1Zas", "title": "Pokémon Red, Blue & Yellow - Gym Leader Battle Music (HQ)" },
+
+  "gym-g2": { "id": "1pBl5sWchJY", "title": "Pokémon Gold, Silver & Crystal - Johto Gym Leader Battle Music (HQ)" },
+  "elite-g2": { "id": "1pBl5sWchJY", "title": "Pokémon Gold, Silver & Crystal - Johto Gym Leader Battle Music (HQ)" },
+  "champion-g2": { "id": "mbffVF79imM", "title": "Champion/Red Battle - Pokémon Gold/Silver/Crystal Soundtrack" },
+  "rival-g2": { "id": "mWebEzDvHNQ", "title": "Pokémon Gold/Silver/Crystal - Music - Rival Battle" },
+  "team-g2": { "id": "Ks85L7y4tVk", "title": "Pokémon Gold/Silver/Crystal - Team Rocket Battle Theme [EPIC VERSION]" },
+  "g2-brock": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-misty": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-ltsurge": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-erika": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-janine": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-sabrina": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-blaine": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+  "g2-blue": { "id": "9ts_foHlT_w", "title": "Pokemon Silver/Gold/Crystal - Gym Leader Battle (Kanto)" },
+
+  "gym-g3": { "id": "YRjphkDCRk4", "title": "Pokemon Ruby/Sapphire/Emerald- Gym Leader Battle" },
+  "elite-g3": { "id": "rJucwiJ4iQM", "title": "Pokemon Ruby/Sapphire/Emerald- Elite Four Battle" },
+  "champion-g3": { "id": "k7bcf9X_Whg", "title": "88 - Champion Steven & Wallace's Theme (Pokémon Ruby/Sapphire/Emerald)" },
+  "special-g3": { "id": "k7bcf9X_Whg", "title": "88 - Champion Steven & Wallace's Theme (Pokémon Ruby/Sapphire/Emerald)" },
+  "team-g3": { "id": "Bd-1aXffkfA", "title": "Pokémon Ruby, Sapphire & Emerald - Team Aqua/Magma Leader Music (HQ)" },
+  "rival-g3": { "id": "YRjphkDCRk4", "title": "Pokemon Ruby/Sapphire/Emerald- Gym Leader Battle" },
+
+  "gym-g4": { "id": "qiCpFkybzeI", "title": "Pokémon Diamond, Pearl & Platinum - Gym Leader Battle Music (HQ)" },
+  "elite-g4": { "id": "c_MavjffFRA", "title": "Pokémon Diamond, Pearl & Platinum - Elite Four Battle Music (HQ)" },
+  "champion-g4": { "id": "QMuknWqtrwg", "title": "Pokemon Platinum: Champion Cynthia Battle Music" },
+  "rival-g4": { "id": "hv8g5u55QFA", "title": "Pokémon Diamond, Pearl & Platinum - Rival Battle Music (HQ)" },
+  "team-g4": { "id": "aEotCJe1gVM", "title": "Battle! Team Galactic Boss Cyrus" },
+
+  "gym-g5": { "id": "06xfilsKkR4", "title": "Pokémon B2/W2 - Unova Gym Leader Battle Music (HQ)" },
+  "elite-g5": { "id": "qO67skHb49Q", "title": "Battle! (Elite Four) - Pokémon Black & White 2" },
+  "champion-g5": { "id": "dCQ36uB3m4k", "title": "Battle! Champion Iris (OST Version) - Pokémon Black & White 2" },
+  "rival-g5": { "id": "bI2WzOONl7w", "title": "Pokémon B2/W2 - Rival Battle Music (HQ)" },
+  "team-g5": { "id": "oosOZnqf58w", "title": "Versus Ghetsis Team Plasma Leader Battle Theme Music (MP3)" }
+}

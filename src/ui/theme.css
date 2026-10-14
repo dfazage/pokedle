@@ -231,6 +231,11 @@ h1, h2, h3, p { margin: 0; }
 .ld-row.me { margin: 0 -14px; padding-inline: 14px; background: color-mix(in srgb, var(--yellow) 14%, transparent); }
 .ld-n { width: 26px; text-align: center; font-size: 20px; font-weight: 800; color: var(--muted); flex: none; }
 .ld-end { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.ld-season { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-size: 13px; font-weight: 600; color: var(--text); }
+.ld-season svg { color: var(--yellow); flex: none; }
+[data-theme='light'] .ld-season svg { color: #9a6b00; }
+.ld-chip { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: color-mix(in srgb, var(--yellow) 16%, transparent); color: var(--yellow); }
+[data-theme='light'] .ld-chip { color: #9a6b00; }
 .ld-gap { font-size: 11px; font-weight: 700; color: var(--yellow); white-space: nowrap; }
 [data-theme='light'] .ld-gap { color: #9a6b00; }
 .ld-rest { display: flex; flex-direction: column; gap: 6px; }

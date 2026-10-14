@@ -407,7 +407,7 @@ export function Settings(c: Ctx & { theme: 'auto' | 'light' | 'dark'; setTheme: 
           </button>
         </>
       )}
-      <p className="muted small" style={{ textAlign: 'center' }}>Pokédle Battle · v{c.version}</p>
+      <p className="muted small" style={{ textAlign: 'center' }}>Pokébadle Battle · v{c.version}</p>
     </>
   )
 }

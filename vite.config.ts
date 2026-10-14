@@ -32,10 +32,10 @@ export default defineConfig({
     versionJson(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png', 'favicon-32.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Pokédle Battle',
-        short_name: 'Pokédle',
+        name: 'Pokébadle Battle',
+        short_name: 'Pokébadle',
         description: 'Un combat Pokémon par jour, le même pour tout le monde.',
         theme_color: '#1a1c2c',
         background_color: '#1a1c2c',
@@ -46,7 +46,7 @@ export default defineConfig({
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

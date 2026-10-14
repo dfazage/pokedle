@@ -55,7 +55,7 @@ GitHub Pages (`https://pokebadle.fun/`) : dans Supabase, **Site URL** = `https:/
 
 ## Notifications push (combat du jour disponible)
 
-Une notification est envoyée à 12h00 (heure de Paris), au reset du jeu, aux appareils qui l'ont activée dans Paramètres → Notifications. Android et ordinateur : directement dans le navigateur. iPhone/iPad : uniquement si Pokédle est ajouté à l'écran d'accueil (l'app l'indique dans la carte).
+Une notification est envoyée à 12h00 (heure de Paris), au reset du jeu, aux appareils qui l'ont activée dans Paramètres → Notifications. Android et ordinateur : directement dans le navigateur. iPhone/iPad : uniquement si Pokébadle est ajouté à l'écran d'accueil (l'app l'indique dans la carte).
 
 1. **Clés VAPID** (une seule fois) : `npx web-push generate-vapid-keys`. La clé publique est publique ; la privée ne doit jamais être committée.
 2. **Front** : GitHub → Settings → Secrets and variables → Actions → *Variables* : `VITE_VAPID_PUBLIC_KEY` = clé publique, puis relancer le déploiement. Tant que la variable est vide, la carte Notifications reste cachée.

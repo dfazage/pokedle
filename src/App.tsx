@@ -22,7 +22,7 @@ import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
 import { supabase, ensureProfile, fetchHistory, submitResult, fetchLeaderboard, fetchWorldStats, fetchAvatar, updateAvatar, fetchIsAdmin, adminResetToday, fetchDailySalt, adminRerollToday, updateUsername, adminResetTodayAll, fetchDailyResetN, serverSupportsReplay, type LeaderRow } from './game/cloud'
 import { syncPush } from './game/push'
 import BattleScreen from './BattleScreen'
-import { musicFor, playVictory, startMusic, stopMusic } from './game/music'
+import { musicFor, playVictory, setMusicLowHp, startMusic, stopMusic } from './game/music'
 import { BottomNav, LangNotch, MonOrb, ScoreBadge, TopBar, useLocalState, type Screen } from './ui/kit'
 import { Home, Opponent, Team, Result } from './screens/Play'
 import { History, Leaderboard, Settings } from './screens/Social'
@@ -302,7 +302,7 @@ function AppScreens() {
       setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
     }
     setScreen(saved.length ? 'battle' : 'intro') // nouveau combat : petite intro avant l'arène
-    startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name))) // lancé par le clic sur « Lancer le combat »
+    startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name), challenge.trainer.id)) // lancé par le clic sur « Lancer le combat »
     finish(s)
   }, [challenge, today, finish])
 
@@ -312,9 +312,19 @@ function AppScreens() {
   useEffect(() => { if (screen !== 'intro' && screen !== 'battle' && screen !== 'result') stopMusic(0.6) }, [screen])
   useEffect(() => {
     if (!battleOver || !challenge) return
-    if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name)))
+    if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name), challenge.trainer.id))
     else stopMusic(1.5)
   }, [battleOver]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Thème « K.O. imminent » : dernier Pokémon en vie, ou moins d'un quart des PV de l'équipe (sans effet si le thème n'a pas de variante).
+  const lowHp = useMemo(() => {
+    if (!view || view.ended) return false
+    const team = view.player.team
+    const hp = team.reduce((a, m) => a + Math.max(0, m.hp), 0)
+    const max = team.reduce((a, m) => a + m.maxhp, 0)
+    return team.filter((m) => m.hp > 0).length <= 1 || hp / Math.max(1, max) <= 0.25
+  }, [view])
+  useEffect(() => { if (queue.length === 0 && !pending) setMusicLowHp(lowHp) }, [lowHp, queue.length, pending])
 
   const act = (choice: string) => {
     const s = session.current

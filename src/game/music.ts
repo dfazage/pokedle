@@ -9,7 +9,7 @@ import { noise, tone } from './sfx'
 type Ctx = BaseAudioContext
 export type ThemeKind = 'gym' | 'elite' | 'champion' | 'team' | 'rival' | 'special'
 /** `boosted` : adversaire redoutable (aura enflammée), qui a son propre morceau de combat. */
-export interface MusicChoice { kind: ThemeKind; gen: number; boosted?: boolean }
+export interface MusicChoice { kind: ThemeKind; gen: number; boosted?: boolean; /** id du dresseur (ex. « cynthia ») : permet un morceau dédié. */ trainerId?: string }
 
 const SCALES = {
   minor: [0, 2, 3, 5, 7, 8, 10],
@@ -64,7 +64,7 @@ const CLASS_KIND: Record<string, ThemeKind> = {
   'Gym Leader': 'gym', 'Kanto Gym Leader': 'gym', 'Elite Four': 'elite', Champion: 'champion',
   'Team Boss': 'team', 'Team Executive': 'team', Rival: 'rival', 'Former Champion': 'special',
 }
-export const musicFor = (trainerClass: string, gen: number, boosted = false): MusicChoice => ({ kind: CLASS_KIND[trainerClass] ?? 'gym', gen, boosted })
+export const musicFor = (trainerClass: string, gen: number, boosted = false, trainerId?: string): MusicChoice => ({ kind: CLASS_KIND[trainerClass] ?? 'gym', gen, boosted, trainerId })
 
 // ——— Composition ———
 const BARS = 16 // 2 sections de 8 mesures : A (thème) puis B (variation)
@@ -305,29 +305,80 @@ const trackUrl = (kind: ThemeKind, part: 'battle' | 'win', boosted = false) => {
   return Object.entries(FILES).find(([path]) => (path.split('/').pop() ?? '').startsWith(n))?.[1]
 }
 
-function startTrack(url: string, o: { loop: boolean; gain: number; onError?: () => void }): boolean {
+// ——— Thèmes par dresseur (src/assets/bgm/themes/*.mp3) ———
+// Nommage (voir themes/README.md) : « g{gen}-{id} » (un dresseur précis), « {type}-g{gen} » (type de dresseur d'une
+// génération), « {type} » (type de dresseur) ; suffixe « .low » = version « K.O. imminent », « .win » = victoire.
+// Ordre de repli : dresseur → type + génération → type → morceaux fournis ci-dessus → chiptune. Dossier vide = comportement historique.
+const THEME_FILES = Object.fromEntries(
+  Object.entries(import.meta.glob('../assets/bgm/themes/*.mp3', { query: '?url', import: 'default', eager: true }) as Record<string, string>)
+    .map(([path, url]) => [(path.split('/').pop() ?? '').replace(/\.mp3$/i, ''), url]),
+) as Record<string, string>
+
+export function themeKeys(choice: MusicChoice): string[] {
+  return [choice.trainerId ? `g${choice.gen}-${choice.trainerId}` : '', `${choice.kind}-g${choice.gen}`, choice.kind].filter(Boolean)
+}
+/** Morceau dédié (et sa variante « low ») pour ce dresseur, s'il existe. */
+export function resolveTheme(choice: MusicChoice, part: 'battle' | 'win' = 'battle', files: Record<string, string> = THEME_FILES): { url: string; low?: string; key: string } | null {
+  const sfx = part === 'win' ? '.win' : ''
+  for (const k of themeKeys(choice)) {
+    const url = files[k + sfx]
+    if (url) return { url, low: part === 'battle' ? files[`${k}.low`] : undefined, key: k }
+  }
+  return null
+}
+
+let setIntensity: ((low: boolean) => void) | null = null
+/** Bascule sur la variante « K.O. imminent » du thème (si elle existe) en fondu enchaîné, calée sur la même position. */
+export function setMusicLowHp(low: boolean) { setIntensity?.(low) }
+
+function startTrack(url: string, o: { loop: boolean; gain: number; lowUrl?: string; onError?: () => void }): boolean {
   const a = musicOutput()
   if (!a) return false
   const { ctx: c, out } = a
-  const el = new Audio(url)
-  el.loop = o.loop
-  el.preload = 'auto'
-  const src = c.createMediaElementSource(el)
-  const g = c.createGain()
-  g.gain.setValueAtTime(0.0001, c.currentTime)
-  g.gain.linearRampToValueAtTime(o.gain, c.currentTime + 0.5)
-  src.connect(g).connect(out)
+  const mk = (u: string) => {
+    const el = new Audio(u)
+    el.loop = o.loop
+    el.preload = 'auto'
+    const src = c.createMediaElementSource(el)
+    const g = c.createGain()
+    src.connect(g).connect(out)
+    return { el, src, g }
+  }
+  const main = mk(url)
+  const low = o.lowUrl ? mk(o.lowUrl) : null
+  main.g.gain.setValueAtTime(0.0001, c.currentTime)
+  main.g.gain.linearRampToValueAtTime(o.gain, c.currentTime + 0.5)
+  low?.g.gain.setValueAtTime(0.0001, c.currentTime)
   let dead = false
   const failed = () => { if (!dead && o.onError) { dead = true; o.onError() } }
-  el.addEventListener('error', failed)
-  void el.play().catch(failed)
+  main.el.addEventListener('error', failed)
+  void main.el.play().catch(failed)
+  if (low) void low.el.play().catch(() => { /* variante illisible : on garde le thème principal */ })
+  let isLow = false
+  setIntensity = (want) => {
+    if (!low || dead || want === isLow) return
+    isLow = want
+    const [from, to] = want ? [main, low] : [low, main]
+    // Même position dans le morceau (modulo la durée) pour que le fondu enchaîné reste dans le tempo.
+    const d = to.el.duration
+    if (Number.isFinite(d) && d > 0) { try { to.el.currentTime = from.el.currentTime % d } catch { /* pas encore prêt */ } }
+    const now = c.currentTime
+    for (const [n, v] of [[from, 0.0001], [to, o.gain]] as const) {
+      n.g.gain.cancelScheduledValues(now)
+      n.g.gain.setValueAtTime(Math.max(0.0001, n.g.gain.value), now)
+      n.g.gain.linearRampToValueAtTime(v, now + 0.8)
+    }
+  }
   stopCur = (fade) => {
     dead = true
+    setIntensity = null
     const now = c.currentTime
-    g.gain.cancelScheduledValues(now)
-    g.gain.setValueAtTime(g.gain.value, now)
-    g.gain.linearRampToValueAtTime(0.0001, now + Math.max(0.02, fade))
-    window.setTimeout(() => { el.pause(); el.removeAttribute('src'); el.load(); src.disconnect(); g.disconnect() }, fade * 1000 + 150)
+    for (const n of low ? [main, low] : [main]) {
+      n.g.gain.cancelScheduledValues(now)
+      n.g.gain.setValueAtTime(n.g.gain.value, now)
+      n.g.gain.linearRampToValueAtTime(0.0001, now + Math.max(0.02, fade))
+    }
+    window.setTimeout(() => { for (const n of low ? [main, low] : [main]) { n.el.pause(); n.el.removeAttribute('src'); n.el.load(); n.src.disconnect(); n.g.disconnect() } }, fade * 1000 + 150)
   }
   return true
 }
@@ -335,14 +386,19 @@ function startTrack(url: string, o: { loop: boolean; gain: number; onError?: () 
 /** Lance la musique du combat : morceau fourni si présent (Champion pour les adversaires redoutables, sinon Team Magma/Aqua pour les méchants, Conseil des 4 pour le reste), sinon chiptune. À appeler depuis un geste utilisateur. */
 export function startMusic(choice: MusicChoice) {
   stopMusic(0.05)
-  const url = trackUrl(choice.kind, 'battle', choice.boosted)
-  if (url && startTrack(url, { loop: true, gain: 0.5, onError: () => { stopMusic(0.05); startChip(choice) } })) return
-  startChip(choice)
+  const legacy = () => {
+    const url = trackUrl(choice.kind, 'battle', choice.boosted)
+    if (url && startTrack(url, { loop: true, gain: 0.5, onError: () => { stopMusic(0.05); startChip(choice) } })) return
+    startChip(choice)
+  }
+  const th = resolveTheme(choice, 'battle')
+  if (th && startTrack(th.url, { loop: true, gain: 0.5, lowUrl: th.low, onError: () => { stopMusic(0.05); legacy() } })) return
+  legacy()
 }
 
 /** Musique de victoire (une fois) ; sans morceau fourni, on se contente du jingle de victoire des effets. */
 export function playVictory(choice: MusicChoice) {
   stopMusic(0.6)
-  const url = trackUrl(choice.kind, 'win')
+  const url = resolveTheme(choice, 'win')?.url ?? trackUrl(choice.kind, 'win')
   if (url) startTrack(url, { loop: false, gain: 0.6 })
 }

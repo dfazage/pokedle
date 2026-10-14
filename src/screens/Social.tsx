@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AVATARS } from '../game/avatars'
-import { Check, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
 import type { DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
@@ -156,6 +156,15 @@ export function History(c: Ctx) {
 }
 
 type Tab = 'today' | 'week' | 'season'
+/** Saison = mois de la clé du jour de jeu (comme `date_trunc('month', game_day())` côté serveur) : nom du mois et jours restants avant la remise à zéro. */
+function seasonInfo(today: string) {
+  const [y, m] = today.split('-').map(Number)
+  const month = new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(locale(), { month: 'long', timeZone: 'UTC' })
+  const last = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10)
+  const left = Math.round((Date.parse(last) - Date.parse(today)) / 86400000)
+  const of = /^[aeiouyhéè]/i.test(month) ? 'd’' : 'de '
+  return { title: t('lb.season.title', { month, of }), left: left > 0 ? tn('lb.season.left', left) : t('lb.season.last') }
+}
 /** Points classants d'un joueur selon la période affichée. */
 const pointsFor = (x: LeaderRow, tab: Tab) => (tab === 'today' ? x.points_today : tab === 'week' ? x.points_week : x.points_season) ?? 0
 export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
@@ -214,6 +223,10 @@ export function Leaderboard(c: Ctx & { rows: LeaderRow[] }) {
           <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
+      {tab === 'season' && (() => {
+        const si = seasonInfo(c.today)
+        return <p className="ld-season"><CalendarDays size={16} aria-hidden="true" /> {si.title} <span className="ld-chip">{si.left}</span></p>
+      })()}
       {c.username && (
         <section className="ld-glass ld-me">
           {me ? (

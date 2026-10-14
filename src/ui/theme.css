@@ -560,3 +560,19 @@ h1, h2, h3, p { margin: 0; }
 @keyframes updatebar-spin { to { transform: rotate(360deg); } }
 .updatebar-ico svg.spin { animation: updatebar-spin 0.9s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .updatebar-ico svg.spin { animation: none; } }
+
+/* Verre du classement étendu à toutes les pages : cartes translucides sur halos de couleur (halos : <div className="app-glow"> dans App.tsx ; le classement garde les siens). */
+:root, [data-theme='dark'] { --gl-bg: color-mix(in srgb, var(--text) 6%, transparent); --gl-bd: color-mix(in srgb, var(--text) 12%, transparent); --gl-in: color-mix(in srgb, var(--text) 6%, transparent); }
+[data-theme='light'] { --gl-bg: rgba(255, 255, 255, 0.55); --gl-bd: rgba(15, 23, 42, 0.08); --gl-in: rgba(15, 23, 42, 0.05); }
+.app { position: relative; isolation: isolate; }
+.app-glow { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; }
+.app-glow i { position: absolute; width: 340px; height: 340px; border-radius: 50%; background: radial-gradient(circle, var(--g) 0%, transparent 68%); opacity: 0.38; }
+.app-glow i:nth-child(1) { top: -20px; left: 50%; margin-left: -170px; --g: var(--yellow); }
+.app-glow i:nth-child(2) { top: 28%; left: -150px; --g: #6aa3ee; }
+.app-glow i:nth-child(3) { top: 58%; right: -150px; --g: #58b893; opacity: 0.3; }
+.app-glow i:nth-child(4) { bottom: -120px; left: -130px; --g: #ff5d62; opacity: 0.22; }
+[data-theme='light'] .app-glow i { opacity: 0.26; }
+.app .card, .app .hist-card, .app .stat3, .app .tabs { background: var(--gl-bg); border-color: var(--gl-bd); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); box-shadow: none; }
+.app .stat3 { border: 1px solid var(--gl-bd); }
+.app .card .stat3, .app .card .share-grid, .app .card .rem-how li, .app .card .cal .d:not(.w):not(.l):not(.empty), .app .card .field { background: var(--gl-in); }
+.sheet .card, .sheet-bg .card { background: var(--surface); border-color: var(--line); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: var(--shadow); }

@@ -562,6 +562,7 @@ function AppScreens() {
   const showUpdate = updateAvailable && !updateLater && (showNav || screen === 'opponent' || screen === 'team')
   return (
     <main className={showNav ? 'app' : 'app nonav'}>
+      {screen !== 'leaderboard' && <div className="app-glow" aria-hidden="true"><i /><i /><i /><i /></div>}
       {showUpdate && <UpdateBanner onLater={() => setUpdateLater(true)} />}
       {showNav && <div className="scorebar"><ScoreBadge points={score.total} /></div>}
       {screen === 'home' && <Home {...ctx} />}

@@ -2,8 +2,8 @@ import { buildDaily } from '../src/game/daily'
 import { BattleSession } from '../src/game/session'
 const seen = new Map<number, number>(); let stalls = 0, wins = 0, total = 0
 const t0 = Date.now()
-for (let d = 0; d < 24; d++) {
-  const day = new Date(Date.UTC(2026, 9, 12 + d)).toISOString().slice(0, 10)
+for (let d = 0; d < Number(process.env.N ?? 24); d++) {
+  const day = new Date(Date.UTC(2026, 9, Number(process.env.START ?? 12) + d)).toISOString().slice(0, 10)
   const c = buildDaily(day, { candidates: 4, simsPerCandidate: 3 })
   seen.set(c.gen, (seen.get(c.gen) ?? 0) + 1)
   if (c.playerTeam.length !== 6 || c.opponentTeam.length !== 6) console.log('ÉQUIPE INCOMPLÈTE', day, c.playerTeam.length, c.opponentTeam.length)

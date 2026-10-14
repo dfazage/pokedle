@@ -144,35 +144,72 @@ export function ResetPassword(c: { onDone: () => void }) {
 const SLIDES = [
   { n: 1, c1: '#6ad7b4', c2: '#3fb48e' },
   { n: 2, c1: '#8fb8f6', c2: '#5ba8f0' },
-  { n: 3, c1: '#f7c948', c2: '#f0716b' },
+  { n: 3, c1: '#f7c948', c2: '#f0a64b' },
+  { n: 4, c1: '#f0716b', c2: '#f7c948' },
 ] as const
+const LAST = SLIDES.length - 1
 export function Onboarding(c: { done: () => void; login: () => void }) {
   useLang()
   const [i, setI] = useState(0)
-  const s = SLIDES[i]
-  const tx = (k: 'tag' | 'a' | 'b' | 'text') => t(`ob.${s.n}.${k}` as const)
-  const shot = (n: number) => `${import.meta.env.BASE_URL}onboarding/${n}.webp`
+  const [dx, setDx] = useState(0)
+  const [drag, setDrag] = useState(false)
+  const x0 = useRef<number | null>(null)
+  const shot = (n: number) => `${import.meta.env.BASE_URL}onboarding/s${n}.webp`
+  const go = (n: number) => { setI(Math.max(0, Math.min(LAST, n))); setDx(0); setDrag(false) }
+  const end = (e: React.PointerEvent) => {
+    if (x0.current === null) return
+    const d = e.clientX - x0.current
+    x0.current = null
+    if (d < -50) go(i + 1)
+    else if (d > 50) go(i - 1)
+    else go(i)
+  }
   useEffect(() => {
     SLIDES.forEach((x) => { new Image().src = shot(x.n) }) // précharge : pas de flash au changement de page
   }, [])
   return (
-    <>
+    <div className="ob">
+      <div className="ob-halos" aria-hidden>
+        {SLIDES.map((x, k) => <i key={k} className={k === i ? 'on' : ''} style={{ ['--g' as string]: x.c1 }} />)}
+      </div>
       <div className="row between">
-        <div className="row"><span className="orb" style={{ width: 44, height: 44, ['--c1' as string]: '#8b6cd9', ['--c2' as string]: '#5a3fb0' }}><User size={22} /></span><div><div className="eyebrow" style={{ color: 'var(--violet)' }}>{t('ob.eyebrow')}</div><b style={{ fontSize: 18 }}>Pokédle Battle</b></div></div>
-        <button className="pill" onClick={c.done}>{t('ob.skip')}</button>
+        <div className="row"><span className="orb ob-orb"><User size={18} /></span><div><div className="eyebrow">{t('ob.eyebrow')}</div><b style={{ fontSize: 17 }}>Pokédle Battle</b></div></div>
+        <button className="pill ob-skip" onClick={c.done}>{t('ob.skip')}</button>
       </div>
-      <div className="ob-art" style={{ background: `linear-gradient(150deg, ${s.c1}, ${s.c2})` }}>
-        <span className="pill" style={{ position: 'absolute', top: 16, left: 16, background: 'rgba(255,255,255,.28)', border: 0, color: '#fff' }}>{tx('tag')}</span>
-        <img className="ob-shot" src={shot(s.n)} alt={`${tx('a')} ${tx('b')}`} width={720} height={960} decoding="async" />
+      <div
+        className="ob-vp"
+        onPointerDown={(e) => { x0.current = e.clientX; setDrag(true); setDx(0) }}
+        onPointerMove={(e) => {
+          if (x0.current === null) return
+          let d = e.clientX - x0.current
+          if ((i === 0 && d > 0) || (i === LAST && d < 0)) d *= 0.3 // résistance aux extrémités
+          setDx(d)
+        }}
+        onPointerUp={end}
+        onPointerCancel={() => go(i)}
+      >
+        <div className={`ob-track${drag ? ' drag' : ''}`} style={{ transform: `translateX(calc(${-100 * i}% + ${dx}px))` }}>
+          {SLIDES.map((s) => (
+            <section key={s.n} className="ob-slide" aria-hidden={s.n - 1 !== i} style={{ ['--c1' as string]: s.c1, ['--c2' as string]: s.c2 }}>
+              <div className="ob-art">
+                <div className="ob-glow" />
+                <div className="ob-frame"><img src={shot(s.n)} alt={`${t(`ob.${s.n}.a` as const)} ${t(`ob.${s.n}.b` as const)}`} width={330} height={429} decoding="async" draggable={false} /></div>
+                <span className="ob-chip a"><i />{t(`ob.${s.n}.c1` as const)}</span>
+                <span className="ob-chip b"><i />{t(`ob.${s.n}.c2` as const)}</span>
+              </div>
+              <div className="ob-copy">
+                <span className="ob-tag">{t(`ob.${s.n}.tag` as const)}</span>
+                <h1 className="title">{t(`ob.${s.n}.a` as const)}<br /><span>{t(`ob.${s.n}.b` as const)}</span></h1>
+                <p>{t(`ob.${s.n}.text` as const)}</p>
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
-      <div>
-        <h1 className="title" style={{ fontSize: 34 }}>{tx('a')}<br /><span style={{ color: s.c2 }}>{tx('b')}</span></h1>
-        <p className="muted" style={{ marginTop: 12, lineHeight: 1.5 }}>{tx('text')}</p>
-      </div>
-      <div className="dots">{SLIDES.map((_, k) => <i key={k} className={k === i ? 'on' : ''} style={k === i ? { background: 'var(--violet)' } : undefined} />)}</div>
-      <button className="btn violet" onClick={() => (i < SLIDES.length - 1 ? setI(i + 1) : c.done())}>{i < SLIDES.length - 1 ? t('ob.continue') : t('ob.start')} <ArrowRight size={18} /></button>
+      <div className="dots" role="tablist">{SLIDES.map((_, k) => <i key={k} className={k === i ? 'on' : ''} />)}</div>
+      <button className="btn ob-cta" onClick={() => (i < LAST ? go(i + 1) : c.done())}>{i < LAST ? t('ob.continue') : t('ob.start')} <ArrowRight size={18} /></button>
       <button className="link" style={{ alignSelf: 'center' }} onClick={c.login}>{t('ob.haveAccount')}</button>
-    </>
+    </div>
   )
 }
 

@@ -501,7 +501,7 @@ function AppScreens() {
 
   if (screen === 'onboarding')
     return (
-      <main className="app">
+      <main className="app nonav">
         <Onboarding done={() => setScreen('auth')} login={() => setScreen('auth')} />
       </main>
     )

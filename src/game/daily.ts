@@ -48,6 +48,11 @@ export const LEGACY_BATTLE_GEN = 4
  */
 export const GEN5_FROM = '2026-10-15'
 /**
+ * Premier jour où les dresseurs de gen 5 (Noir 2/Blanc 2) entrent dans le tirage. Le moteur gen 5 démarre dès GEN5_FROM, mais le
+ * dresseur du 15/10 (Steven) reste celui du tirage d'origine à 4 générations : ajouter la gen 5 au pool aurait changé ce tirage.
+ */
+export const GEN5_TRAINERS_FROM = '2026-10-16'
+/**
  * Format Showdown du combat. Les gens 4 et 5 partagent les mêmes règles : « Custom Game » en 6v6, sans aperçu des équipes
  * (la gen 5 l'active par défaut ; l'ordre des Pokémon est choisi avant le combat dans l'app, le premier mène).
  */
@@ -82,7 +87,7 @@ export { GAME_NAMES } from './names'
 export const TRAINER_COUNTS: Record<number, number> = Object.fromEntries(Object.entries(TRAINERS_BY_GEN).map(([g, t]) => [g, t.length + EXTRA_BY_GEN[Number(g)].length]))
 export const AVAILABLE_GENS = Object.keys(TRAINERS_BY_GEN).map(Number)
 /** Générations d'origine tirables pour une clé de jour : la gen 5 n'entre dans le tirage qu'à partir de GEN5_FROM. */
-const gensFor = (dayKey: string): number[] => (dayKey >= GEN5_FROM ? AVAILABLE_GENS : AVAILABLE_GENS.filter((g) => g <= LEGACY_BATTLE_GEN))
+const gensFor = (dayKey: string): number[] => (dayKey >= GEN5_TRAINERS_FROM ? AVAILABLE_GENS : AVAILABLE_GENS.filter((g) => g <= LEGACY_BATTLE_GEN))
 
 export interface PreviewMon {
   species: string

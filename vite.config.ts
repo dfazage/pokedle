@@ -2,6 +2,10 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+
+// Numéro de version affiché dans Réglages (package.json).
+const appVersion: string = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version
 
 // Identifiant de build (commit court), affiché dans le profil pour savoir quelle version de la PWA tourne.
 const build = (() => {
@@ -22,7 +26,7 @@ const base = process.env.VITE_BASE ?? '/'
 
 export default defineConfig({
   base,
-  define: { __BUILD__: JSON.stringify(build) },
+  define: { __BUILD__: JSON.stringify(build), __APP_VERSION__: JSON.stringify(appVersion) },
   plugins: [
     react(),
     versionJson(),

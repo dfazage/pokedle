@@ -559,4 +559,12 @@ export const en: Record<keyof typeof fr, string> = {
   'b.boost.down1': 'fell', 'b.boost.down2': 'harshly fell', 'b.boost.down3': 'severely fell',
   'b.boostReset': '{who}’s stat changes were eliminated!',
   'b.boostResetAll': 'All stat changes were eliminated!',
+  // ── App update ──
+  'update.title': 'New version available',
+  'update.body': 'Update to play the right battle of the day.',
+  'update.cta': 'Update',
+  'update.later': 'Later',
+  'update.busy': 'Updating…',
+  'update.busy.title': 'Updating…',
+  'update.busy.body': 'Keep the app open, it will reload.',
 }

@@ -558,4 +558,12 @@ export const fr = {
   'b.boost.down1': 'diminue', 'b.boost.down2': 'diminue beaucoup', 'b.boost.down3': 'diminue énormément',
   'b.boostReset': 'Les stats de {who} sont réinitialisées !',
   'b.boostResetAll': 'Tous les changements de stats sont annulés !',
+  // ── Mise à jour de l'app ──
+  'update.title': 'Nouvelle version disponible',
+  'update.body': 'Mets à jour pour jouer le bon combat du jour.',
+  'update.cta': 'Mettre à jour',
+  'update.later': 'Plus tard',
+  'update.busy': 'Mise à jour…',
+  'update.busy.title': 'Mise à jour en cours…',
+  'update.busy.body': 'Ne ferme pas l’app, elle va se recharger.',
 } as const

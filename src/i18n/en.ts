@@ -16,6 +16,8 @@ export const en: Record<keyof typeof fr, string> = {
   'game.crystal': 'Crystal',
   'game.emerald': 'Emerald',
   'game.platinum': 'Platinum',
+  'game.black2': 'Black 2',
+  'region.unova': 'Unova',
 
   // ── Navigation ──
   'nav.label': 'Navigation',
@@ -392,7 +394,7 @@ export const en: Record<keyof typeof fr, string> = {
   'guide.2.title': 'Where does the daily challenge come from?',
   'guide.2.lead': 'It is drawn from today’s date: every player faces exactly the same one.',
   'guide.2.i1.t': 'A random league',
-  'guide.2.i1.x': 'Each day, one of the four games below sets the tone.',
+  'guide.2.i1.x': 'Each day, one of the five games below sets the tone.',
   'guide.2.i2.t': 'A real trainer from the series',
   'guide.2.i2.x': 'Gym Leaders, Elite Four, Champions, and a few less expected faces.',
   'guide.2.i3.t': 'A team for you',

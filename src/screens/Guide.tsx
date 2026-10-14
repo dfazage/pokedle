@@ -45,7 +45,7 @@ function slides(): Slide[] {
     }
   })
 }
-const GEN_COLORS: Record<number, string> = { 1: '#f0716b', 2: '#f7c948', 3: '#4ec9a0', 4: '#8fa8f0' }
+const GEN_COLORS: Record<number, string> = { 1: '#f0716b', 2: '#f7c948', 3: '#4ec9a0', 4: '#8fa8f0', 5: '#b58cf0' }
 
 export function Guide(c: Ctx & { onBack: () => void }) {
   useLang()
@@ -96,7 +96,7 @@ export function Guide(c: Ctx & { onBack: () => void }) {
                   </div>
                   {n === 1 && (
                     <div className="g-gens">
-                      {[1, 2, 3, 4].map((g) => (
+                      {[1, 2, 3, 4, 5].map((g) => (
                         <div key={g} className="g-gen" style={{ ['--g' as string]: GEN_COLORS[g] }}>
                           <i />
                           <div>

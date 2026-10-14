@@ -10,7 +10,9 @@ import type { ImgHTMLAttributes, ReactNode } from 'react'
 
 const ROOT = (((import.meta.env?.VITE_TRAINER_SPRITES_URL as string | undefined) ?? 'https://play.pokemonshowdown.com/sprites/trainers')).replace(/\/$/, '')
 
-export const trainerSpriteUrls = (id: string, gen: number): string[] => [`${ROOT}/${id}.png`, `${ROOT}/${id}-gen${gen}.png`]
+// Gen 5 : Showdown nomme les sprites propres à Noir 2 / Blanc 2 `<id>-gen5bw2` (ex. cheren-gen5bw2.png), en repli du sprite générique.
+export const trainerSpriteUrls = (id: string, gen: number): string[] =>
+  gen === 5 ? [`${ROOT}/${id}.png`, `${ROOT}/${id}-gen5bw2.png`, `${ROOT}/${id}-gen5.png`] : [`${ROOT}/${id}.png`, `${ROOT}/${id}-gen${gen}.png`]
 
 type Props = { id: string; gen: number; fallback: ReactNode } & Omit<ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'>
 

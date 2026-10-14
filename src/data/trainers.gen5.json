@@ -1,0 +1,612 @@
+[
+ {
+  "id": "cheren",
+  "name": "Cheren",
+  "class": "Gym Leader",
+  "order": 1,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "patrat",
+    "origLevel": 11,
+    "item": null,
+    "moves": [
+     "tackle",
+     "workup",
+     "bite"
+    ]
+   },
+   {
+    "species": "lillipup",
+    "origLevel": 13,
+    "item": null,
+    "moves": [
+     "tackle",
+     "workup",
+     "bite",
+     "helpinghand"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "roxie",
+  "name": "Roxie",
+  "class": "Gym Leader",
+  "order": 2,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "koffing",
+    "origLevel": 16,
+    "item": null,
+    "moves": [
+     "assurance",
+     "tackle",
+     "smog"
+    ]
+   },
+   {
+    "species": "whirlipede",
+    "origLevel": 18,
+    "item": null,
+    "moves": [
+     "venoshock",
+     "protect",
+     "poisonsting",
+     "pursuit"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "burgh",
+  "name": "Burgh",
+  "class": "Gym Leader",
+  "order": 3,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "swadloon",
+    "origLevel": 22,
+    "item": null,
+    "moves": [
+     "stringshot",
+     "razorleaf",
+     "strugglebug",
+     "protect"
+    ]
+   },
+   {
+    "species": "dwebble",
+    "origLevel": 22,
+    "item": null,
+    "moves": [
+     "smackdown",
+     "faintattack",
+     "rockpolish",
+     "strugglebug"
+    ]
+   },
+   {
+    "species": "leavanny",
+    "origLevel": 24,
+    "item": "sitrusberry",
+    "moves": [
+     "razorleaf",
+     "cut",
+     "stringshot",
+     "strugglebug"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "elesa",
+  "name": "Elesa",
+  "class": "Gym Leader",
+  "order": 4,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "emolga",
+    "origLevel": 28,
+    "item": null,
+    "moves": [
+     "quickattack",
+     "pursuit",
+     "voltswitch"
+    ]
+   },
+   {
+    "species": "flaaffy",
+    "origLevel": 28,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "voltswitch",
+     "takedown"
+    ]
+   },
+   {
+    "species": "zebstrika",
+    "origLevel": 30,
+    "item": "sitrusberry",
+    "moves": [
+     "flamecharge",
+     "pursuit",
+     "voltswitch",
+     "quickattack"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "clay",
+  "name": "Clay",
+  "class": "Gym Leader",
+  "order": 5,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "krokorok",
+    "origLevel": 31,
+    "item": null,
+    "moves": [
+     "crunch",
+     "sandtomb",
+     "bulldoze",
+     "torment"
+    ]
+   },
+   {
+    "species": "sandslash",
+    "origLevel": 31,
+    "item": null,
+    "moves": [
+     "crushclaw",
+     "bulldoze",
+     "furycutter",
+     "rollout"
+    ]
+   },
+   {
+    "species": "excadrill",
+    "origLevel": 33,
+    "item": "sitrusberry",
+    "moves": [
+     "slash",
+     "bulldoze",
+     "metalclaw",
+     "rockslide"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "skyla",
+  "name": "Skyla",
+  "class": "Gym Leader",
+  "order": 6,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "swoobat",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "heartstamp",
+     "acrobatics",
+     "assurance",
+     "attract"
+    ]
+   },
+   {
+    "species": "skarmory",
+    "origLevel": 37,
+    "item": null,
+    "moves": [
+     "aircutter",
+     "agility",
+     "steelwing",
+     "furyattack"
+    ]
+   },
+   {
+    "species": "swanna",
+    "origLevel": 39,
+    "item": "sitrusberry",
+    "moves": [
+     "featherdance",
+     "roost",
+     "bubblebeam",
+     "airslash"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "drayden",
+  "name": "Drayden",
+  "class": "Gym Leader",
+  "order": 7,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "druddigon",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "revenge",
+     "crunch",
+     "slash",
+     "dragontail"
+    ]
+   },
+   {
+    "species": "flygon",
+    "origLevel": 46,
+    "item": null,
+    "moves": [
+     "rockslide",
+     "earthpower",
+     "crunch",
+     "dragontail"
+    ]
+   },
+   {
+    "species": "haxorus",
+    "origLevel": 48,
+    "item": "sitrusberry",
+    "moves": [
+     "dragondance",
+     "dragontail",
+     "slash",
+     "assurance"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "marlon",
+  "name": "Marlon",
+  "class": "Gym Leader",
+  "order": 8,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "carracosta",
+    "origLevel": 49,
+    "item": null,
+    "moves": [
+     "smackdown",
+     "shellsmash",
+     "scald",
+     "crunch"
+    ]
+   },
+   {
+    "species": "wailord",
+    "origLevel": 49,
+    "item": null,
+    "moves": [
+     "amnesia",
+     "scald",
+     "rollout",
+     "bounce"
+    ]
+   },
+   {
+    "species": "jellicent",
+    "origLevel": 51,
+    "item": "sitrusberry",
+    "moves": [
+     "brine",
+     "recover",
+     "scald",
+     "ominouswind"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "shauntal",
+  "name": "Shauntal",
+  "class": "Elite Four",
+  "order": 9,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "cofagrigus",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "psychic",
+     "shadowball",
+     "willowisp",
+     "grassknot"
+    ]
+   },
+   {
+    "species": "drifblim",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "acrobatics",
+     "thunderbolt",
+     "shadowball",
+     "psychic"
+    ]
+   },
+   {
+    "species": "golurk",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "shadowpunch",
+     "heavyslam",
+     "brickbreak"
+    ]
+   },
+   {
+    "species": "chandelure",
+    "origLevel": 58,
+    "item": "sitrusberry",
+    "moves": [
+     "fireblast",
+     "energyball",
+     "shadowball",
+     "psychic"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "marshal",
+  "name": "Marshal",
+  "class": "Elite Four",
+  "order": 10,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "throh",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "rocktomb",
+     "bulldoze",
+     "stormthrow",
+     "payback"
+    ]
+   },
+   {
+    "species": "sawk",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "payback",
+     "rockslide",
+     "retaliate",
+     "brickbreak"
+    ]
+   },
+   {
+    "species": "mienshao",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "hijumpkick",
+     "uturn",
+     "bounce",
+     "retaliate"
+    ]
+   },
+   {
+    "species": "conkeldurr",
+    "origLevel": 58,
+    "item": "sitrusberry",
+    "moves": [
+     "stoneedge",
+     "hammerarm",
+     "retaliate",
+     "bulkup"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "grimsley",
+  "name": "Grimsley",
+  "class": "Elite Four",
+  "order": 11,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "liepard",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "fakeout",
+     "nightslash",
+     "aerialace",
+     "attract"
+    ]
+   },
+   {
+    "species": "scrafty",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "rocktomb",
+     "brickbreak",
+     "crunch",
+     "poisonjab"
+    ]
+   },
+   {
+    "species": "krookodile",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "crunch",
+     "earthquake",
+     "dragonclaw",
+     "rocktomb"
+    ]
+   },
+   {
+    "species": "bisharp",
+    "origLevel": 58,
+    "item": "sitrusberry",
+    "moves": [
+     "aerialace",
+     "nightslash",
+     "xscissor",
+     "metalclaw"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "caitlin",
+  "name": "Caitlin",
+  "class": "Elite Four",
+  "order": 12,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "musharna",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "reflect",
+     "yawn",
+     "dreameater",
+     "chargebeam"
+    ]
+   },
+   {
+    "species": "sigilyph",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "psychic",
+     "shadowball",
+     "icebeam",
+     "airslash"
+    ]
+   },
+   {
+    "species": "reuniclus",
+    "origLevel": 56,
+    "item": null,
+    "moves": [
+     "focusblast",
+     "psychic",
+     "energyball",
+     "recover"
+    ]
+   },
+   {
+    "species": "gothitelle",
+    "origLevel": 58,
+    "item": "sitrusberry",
+    "moves": [
+     "calmmind",
+     "psychic",
+     "shadowball",
+     "thunderbolt"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "iris",
+  "name": "Iris",
+  "class": "Champion",
+  "order": 13,
+  "gen": 5,
+  "game": "black2",
+  "team": [
+   {
+    "species": "hydreigon",
+    "origLevel": 57,
+    "item": null,
+    "moves": [
+     "flamethrower",
+     "chargebeam",
+     "dragonpulse",
+     "surf"
+    ]
+   },
+   {
+    "species": "druddigon",
+    "origLevel": 57,
+    "item": "lifeorb",
+    "moves": [
+     "rockslide",
+     "flamethrower",
+     "dragontail",
+     "focusblast"
+    ]
+   },
+   {
+    "species": "archeops",
+    "origLevel": 57,
+    "item": null,
+    "moves": [
+     "acrobatics",
+     "rockslide",
+     "dragonclaw",
+     "endeavor"
+    ]
+   },
+   {
+    "species": "aggron",
+    "origLevel": 57,
+    "item": null,
+    "moves": [
+     "earthquake",
+     "doubleedge",
+     "rockslide",
+     "autotomize"
+    ]
+   },
+   {
+    "species": "lapras",
+    "origLevel": 57,
+    "item": null,
+    "moves": [
+     "surf",
+     "icebeam",
+     "thunderbolt",
+     "sing"
+    ]
+   },
+   {
+    "species": "haxorus",
+    "origLevel": 59,
+    "item": "focussash",
+    "moves": [
+     "earthquake",
+     "xscissor",
+     "dualchop",
+     "dragondance"
+    ]
+   }
+  ]
+ }
+]

@@ -1,4 +1,4 @@
-// Table des types (génération 4 : le moteur de combat est toujours en gen 4, voir session.ts).
+// Table des types (gens 4 et 5, identiques : les types Fée arrivent en gen 6 ; le moteur est en gen 4 ou 5 selon le jour, voir daily.ts).
 // Pour chaque type attaquant : ses cibles « super efficace » (×2), « peu efficace » (×½) et « immunisées » (×0).
 const CHART: Record<string, { x2?: string[]; half?: string[]; zero?: string[] }> = {
   Normal: { half: ['Rock', 'Steel'], zero: ['Ghost'] },

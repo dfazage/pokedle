@@ -1,0 +1,304 @@
+[
+ {
+  "id": "ghetsis-chasm",
+  "name": "Ghetsis",
+  "class": "Team Boss",
+  "order": 20,
+  "gen": 5,
+  "game": "black2",
+  "stage": "Grotte Géante",
+  "sprite": "ghetsis",
+  "team": [
+   {
+    "species": "cofagrigus",
+    "origLevel": 50,
+    "item": "leftovers",
+    "moves": [
+     "shadowball",
+     "psychic",
+     "protect",
+     "toxic"
+    ]
+   },
+   {
+    "species": "seismitoad",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "muddywater",
+     "earthquake",
+     "drainpunch",
+     "sludgewave"
+    ]
+   },
+   {
+    "species": "eelektross",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "thunderbolt",
+     "flamethrower",
+     "acrobatics",
+     "crunch"
+    ]
+   },
+   {
+    "species": "drapion",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "nightslash",
+     "earthquake",
+     "poisonfang",
+     "xscissor"
+    ]
+   },
+   {
+    "species": "toxicroak",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "brickbreak",
+     "shadowball",
+     "suckerpunch",
+     "poisonjab"
+    ]
+   },
+   {
+    "species": "hydreigon",
+    "origLevel": 52,
+    "item": "lifeorb",
+    "moves": [
+     "dragonrush",
+     "crunch",
+     "rockslide",
+     "frustration"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "colress-route4",
+  "name": "Colress",
+  "class": "Team Executive",
+  "order": 21,
+  "gen": 5,
+  "game": "black2",
+  "stage": "Route 4",
+  "sprite": "colress",
+  "team": [
+   {
+    "species": "magnemite",
+    "origLevel": 21,
+    "item": null,
+    "moves": [
+     "sonicboom",
+     "thunderwave",
+     "magnetbomb",
+     "spark"
+    ]
+   },
+   {
+    "species": "klink",
+    "origLevel": 23,
+    "item": null,
+    "moves": [
+     "charge",
+     "thundershock",
+     "geargrind",
+     "bind"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "colress-pwt",
+  "name": "Colress",
+  "class": "Team Executive",
+  "order": 22,
+  "gen": 5,
+  "game": "black2",
+  "stage": "Tournoi Mondial Pokémon",
+  "sprite": "colress",
+  "team": [
+   {
+    "species": "magneton",
+    "origLevel": 25,
+    "item": null,
+    "moves": [
+     "thunderwave",
+     "supersonic",
+     "thundershock",
+     "mirrorshot"
+    ]
+   },
+   {
+    "species": "elgyem",
+    "origLevel": 25,
+    "item": null,
+    "moves": [
+     "growl",
+     "headbutt",
+     "psybeam",
+     "healblock"
+    ]
+   },
+   {
+    "species": "klink",
+    "origLevel": 25,
+    "item": null,
+    "moves": [
+     "charge",
+     "thundershock",
+     "geargrind",
+     "bind"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "colress-frigate",
+  "name": "Colress",
+  "class": "Team Executive",
+  "order": 23,
+  "gen": 5,
+  "game": "black2",
+  "stage": "Frégate Plasma",
+  "sprite": "colress",
+  "team": [
+   {
+    "species": "magneton",
+    "origLevel": 50,
+    "item": "eviolite",
+    "moves": [
+     "voltswitch",
+     "flashcannon",
+     "triattack",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "metang",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "meteormash",
+     "zenheadbutt",
+     "rockslide",
+     "agility"
+    ]
+   },
+   {
+    "species": "beheeyem",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "psychic",
+     "energyball",
+     "calmmind",
+     "recover"
+    ]
+   },
+   {
+    "species": "magnezone",
+    "origLevel": 50,
+    "item": null,
+    "moves": [
+     "discharge",
+     "flashcannon",
+     "explosion",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "klinklang",
+    "origLevel": 52,
+    "item": "airballoon",
+    "moves": [
+     "geargrind",
+     "thunderbolt",
+     "gigaimpact",
+     "shiftgear"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "colress-p2",
+  "name": "Colress",
+  "class": "Team Executive",
+  "order": 24,
+  "gen": 5,
+  "game": "black2",
+  "stage": "Laboratoire P2",
+  "sprite": "colress",
+  "team": [
+   {
+    "species": "magneton",
+    "origLevel": 72,
+    "item": "eviolite",
+    "moves": [
+     "voltswitch",
+     "flashcannon",
+     "triattack",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "rotomwash",
+    "origLevel": 72,
+    "item": "lifeorb",
+    "moves": [
+     "discharge",
+     "hydropump",
+     "willowisp",
+     "substitute"
+    ]
+   },
+   {
+    "species": "metagross",
+    "origLevel": 72,
+    "item": "muscleband",
+    "moves": [
+     "meteormash",
+     "zenheadbutt",
+     "rockslide",
+     "agility"
+    ]
+   },
+   {
+    "species": "beheeyem",
+    "origLevel": 72,
+    "item": "leftovers",
+    "moves": [
+     "psychic",
+     "energyball",
+     "calmmind",
+     "recover"
+    ]
+   },
+   {
+    "species": "magnezone",
+    "origLevel": 72,
+    "item": "wiseglasses",
+    "moves": [
+     "thunderbolt",
+     "flashcannon",
+     "hyperbeam",
+     "thunderwave"
+    ]
+   },
+   {
+    "species": "klinklang",
+    "origLevel": 74,
+    "item": "airballoon",
+    "moves": [
+     "geargrind",
+     "wildcharge",
+     "gigaimpact",
+     "shiftgear"
+    ]
+   }
+  ]
+ }
+]

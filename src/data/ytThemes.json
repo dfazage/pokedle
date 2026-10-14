@@ -1,0 +1,127 @@
+{
+  "_doc": "Thèmes de combat lus via un lecteur YouTube caché. Clés : g{gen}-{id dresseur} > {type}-g{gen} > {type}. Valeur : { id: ID de vidéo YouTube, title: titre (pour mémoire) }.",
+  "gym-g1": {
+    "id": "RJKIrqO1Zas",
+    "title": "Pokémon Red, Blue & Yellow - Gym Leader Battle Music (HQ)"
+  },
+  "elite-g1": {
+    "id": "EWERenbDaps",
+    "title": "Pokemon Red & Blue: Gym Leader/Elite Four Battle Theme"
+  },
+  "champion-g1": {
+    "id": "SYTS2sJWcIs",
+    "title": "Pokémon HeartGold & SoulSilver - Champion & Red Battle Music (HQ)"
+  },
+  "rival-g1": {
+    "id": "SYTS2sJWcIs",
+    "title": "Pokémon HeartGold & SoulSilver - Champion & Red Battle Music (HQ)"
+  },
+  "team-g1": {
+    "id": "RJKIrqO1Zas",
+    "title": "Pokémon Red, Blue & Yellow - Gym Leader Battle Music (HQ)"
+  },
+  "gym-g2": {
+    "id": "ufYIjzq_QwA",
+    "title": "Pokémon HeartGold & SoulSilver - Gym Leader & Elite Four Battle Music (HQ)"
+  },
+  "elite-g2": {
+    "id": "ufYIjzq_QwA",
+    "title": "Pokémon HeartGold & SoulSilver - Gym Leader & Elite Four Battle Music (HQ)"
+  },
+  "champion-g2": {
+    "id": "SYTS2sJWcIs",
+    "title": "Pokémon HeartGold & SoulSilver - Champion & Red Battle Music (HQ)"
+  },
+  "rival-g2": {
+    "id": "LKOG5UM202Y",
+    "title": "Pokémon HeartGold & SoulSilver - Rival Battle Music (HQ)"
+  },
+  "team-g2": {
+    "id": "KoDGPVgYuRQ",
+    "title": "Pokémon HeartGold & SoulSilver - Team Rocket Battle Music (HQ)"
+  },
+  "gym-g3": {
+    "id": "91tODLXipK4",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Gym Leader Battle Music (HQ)"
+  },
+  "elite-g3": {
+    "id": "GjltP8GISJE",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Elite Four Battle Music (HQ)"
+  },
+  "champion-g3": {
+    "id": "UDFWznA_L2k",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Battle! Champion Music (HQ)"
+  },
+  "special-g3": {
+    "id": "UDFWznA_L2k",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Battle! Champion Music (HQ)"
+  },
+  "team-g3": {
+    "id": "dA3mccI1DjY",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Team Aqua & Magma Leader Battle Music (HQ)"
+  },
+  "rival-g3": {
+    "id": "JPbl6o9mGEs",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Rival Battle Music (HQ)"
+  },
+  "gym-g4": {
+    "id": "qiCpFkybzeI",
+    "title": "Pokémon Diamond, Pearl & Platinum - Gym Leader Battle Music (HQ)"
+  },
+  "elite-g4": {
+    "id": "c_MavjffFRA",
+    "title": "Pokémon Diamond, Pearl & Platinum - Elite Four Battle Music (HQ)"
+  },
+  "champion-g4": {
+    "id": "QMuknWqtrwg",
+    "title": "Pokemon Platinum: Champion Cynthia Battle Music"
+  },
+  "rival-g4": {
+    "id": "hv8g5u55QFA",
+    "title": "Pokémon Diamond, Pearl & Platinum - Rival Battle Music (HQ)"
+  },
+  "team-g4": {
+    "id": "NqXq3_2SI1w",
+    "title": "Pokémon Diamond, Pearl & Platinum - Team Galactic Commander Battle Music (HQ)"
+  },
+  "gym-g5": {
+    "id": "06xfilsKkR4",
+    "title": "Pokémon B2/W2 - Unova Gym Leader Battle Music (HQ)"
+  },
+  "elite-g5": {
+    "id": "qO67skHb49Q",
+    "title": "Battle! (Elite Four) - Pokémon Black & White 2"
+  },
+  "champion-g5": {
+    "id": "dCQ36uB3m4k",
+    "title": "Battle! Champion Iris (OST Version) - Pokémon Black & White 2"
+  },
+  "rival-g5": {
+    "id": "bI2WzOONl7w",
+    "title": "Pokémon B2/W2 - Rival Battle Music (HQ)"
+  },
+  "team-g5": {
+    "id": "oosOZnqf58w",
+    "title": "Versus Ghetsis Team Plasma Leader Battle Theme Music (MP3)"
+  },
+  "g3-tabitha-mossdeep": {
+    "id": "mJf4WpuWGVY",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Vs Team Aqua/Magma (Highest Quality)"
+  },
+  "g3-shelly-seafloor": {
+    "id": "mJf4WpuWGVY",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Vs Team Aqua/Magma (Highest Quality)"
+  },
+  "g3-matt-chimney": {
+    "id": "mJf4WpuWGVY",
+    "title": "Pokémon Omega Ruby & Alpha Sapphire - Vs Team Aqua/Magma (Highest Quality)"
+  },
+  "g4-cyrus-distortion": {
+    "id": "SE5dBmWml34",
+    "title": "Pokémon Diamond, Pearl & Platinum - Team Galactic Boss Battle Music (HQ)"
+  },
+  "g4-cyrus-hq": {
+    "id": "SE5dBmWml34",
+    "title": "Pokémon Diamond, Pearl & Platinum - Team Galactic Boss Battle Music (HQ)"
+  }
+}

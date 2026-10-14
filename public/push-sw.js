@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data ? event.data.text() : '' }
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Pokédle', {
+    self.registration.showNotification(data.title || 'Pokébadle', {
       body: data.body || '',
       icon: 'pwa-192.png',
       // Même tag = la notification du jour remplace la précédente au lieu de s'empiler.

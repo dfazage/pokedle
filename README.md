@@ -1,4 +1,4 @@
-# Pokédle Battle
+# Pokébadle Battle
 
 Un combat Pokémon par jour, identique pour tout le monde (PWA, Vite + React + TS, moteur `@pkmn/sim`).
 

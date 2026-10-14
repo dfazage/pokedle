@@ -14,7 +14,7 @@ import extraGen4 from '../data/trainers.extra.gen4.json'
 import extraGen5 from '../data/trainers.extra.gen5.json'
 import { aiChoose } from './ai'
 import { applyProfile } from './profiles'
-import { gameDayKey, hashString, mulberry32, pick, seedArray } from './rng'
+import { addDays, gameDayKey, hashString, mulberry32, pick, seedArray } from './rng'
 
 Teams.setGeneratorFactory(TeamGenerators)
 
@@ -238,14 +238,43 @@ export interface BalanceOptions {
   max?: number
 }
 
+/** Premier jour où la règle « jamais deux fois le même dresseur à la suite » s'applique (les jours avant gardent leur tirage). */
+export const NO_REPEAT_FROM = '2026-10-16'
+
+/** Nom du dresseur tiré pour `dayKey` (sans équipes ni simulations : léger). Mémoïsé, la règle de non-répétition dépend de la veille. */
+const nameMemo = new Map<string, string>()
+export function dailyTrainerName(dayKey: string): string {
+  const hit = nameMemo.get(dayKey)
+  if (hit) return hit
+  const rand = mulberry32(hashString(`pokedle:${dayKey}`))
+  const prev = dayKey >= NO_REPEAT_FROM ? dailyTrainerName(addDays(dayKey, -1)) : null
+  let name: string
+  let guard = 0
+  do {
+    const gen = pick(rand, gensFor(dayKey))
+    name = pick(rand, poolFor(gen, dayKey)).name
+  } while (prev !== null && name === prev && guard++ < 50)
+  nameMemo.set(dayKey, name)
+  return name
+}
+
 /** Construit le défi du jour : même résultat pour tout le monde pour une clé de jour donnée. */
 export function buildDaily(dayKey = gameDayKey(), opts: BalanceOptions = {}): DailyChallenge {
   const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65, salt = 0 } = opts
   const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
   const rand = mulberry32(baseSeed)
   const battleGen = battleGenFor(dayKey)
-  const gen = pick(rand, gensFor(dayKey)) // génération d'origine du dresseur
-  const trainer = pick(rand, poolFor(gen, dayKey, salt))
+  // Génération d'origine + dresseur. À partir de NO_REPEAT_FROM, jamais deux fois le même dresseur (même nom, toutes versions
+  // confondues) deux jours de suite : on re-tire (suite du même PRNG) tant que c'est celui de la veille. Un jour sans doublon garde
+  // donc exactement son tirage d'origine ; un re-tirage admin (salt > 0) remplace le défi et ignore la règle.
+  const prev = salt === 0 && dayKey >= NO_REPEAT_FROM ? dailyTrainerName(addDays(dayKey, -1)) : null
+  let gen: number
+  let trainer: TrainerData
+  let guard = 0
+  do {
+    gen = pick(rand, gensFor(dayKey)) // génération d'origine du dresseur
+    trainer = pick(rand, poolFor(gen, dayKey, salt))
+  } while (prev !== null && trainer.name === prev && guard++ < 50)
   const opponentTeam = buildOpponent(trainer, battleGen, seedArray(baseSeed ^ 0xa5a5))
 
   const taken = new Set(opponentTeam.map((s) => Dex.forGen(battleGen).species.get(s.species).baseSpecies))

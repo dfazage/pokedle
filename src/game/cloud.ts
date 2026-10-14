@@ -23,6 +23,9 @@ export interface LeaderRow {
   /** Points cumulés et points du jour : absents tant que supabase/leaderboard_points.sql n'est pas appliqué. */
   points?: number
   points_today?: number
+  /** Points de la semaine (lundi → dimanche) et de la saison (mois) : absents tant que supabase/leaderboard_periods.sql n'est pas appliqué. */
+  points_week?: number
+  points_season?: number
   /** Icône de profil (id de src/game/avatars.ts) ; absente tant que supabase/profile_avatar.sql n'est pas appliqué. */
   avatar?: string | null
 }
@@ -218,9 +221,14 @@ export async function fetchLeaderboard(): Promise<LeaderRow[]> {
 
 async function fetchLeaderRows(): Promise<LeaderRow[]> {
   if (!supabase) return []
-  // v3 = avec les points (supabase/leaderboard_points.sql) ; repli sur v2 (victoires et séries seulement) si absent.
+  // v4 = avec les points de la semaine et de la saison (supabase/leaderboard_periods.sql) ; repli sur v3 (points du jour et totaux),
+  // puis sur v2 (victoires et séries seulement) si absents.
+  const v4 = await supabase.rpc('leaderboard_v4', { limit_n: 50 })
+  if (!v4.error && v4.data)
+    return (v4.data as LeaderRow[]).map((r) => ({ ...r, points: Number(r.points ?? 0), points_today: Number(r.points_today ?? 0), points_week: Number(r.points_week ?? 0), points_season: Number(r.points_season ?? 0) }))
   const v3 = await supabase.rpc('leaderboard_v3', { limit_n: 50 })
-  if (!v3.error && v3.data) return (v3.data as LeaderRow[]).map((r) => ({ ...r, points: Number(r.points ?? 0), points_today: Number(r.points_today ?? 0) }))
+  if (!v3.error && v3.data)
+    return (v3.data as LeaderRow[]).map((r) => ({ ...r, points: Number(r.points ?? 0), points_today: Number(r.points_today ?? 0), points_week: Number(r.points ?? 0), points_season: Number(r.points ?? 0) }))
   const { data, error } = await supabase.rpc('leaderboard_v2', { limit_n: 50 })
   return error || !data ? [] : (data as LeaderRow[])
 }

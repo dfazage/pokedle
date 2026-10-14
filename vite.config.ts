@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { execSync } from 'node:child_process'
 
@@ -7,6 +7,15 @@ import { execSync } from 'node:child_process'
 const build = (() => {
   try { return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() } catch { return 'dev' }
 })()
+
+// Émet dist/version.json ({ build }) : l'app le compare à __BUILD__ pour détecter qu'elle tourne sur un bundle périmé (voir src/game/update.ts).
+const versionJson = (): Plugin => ({
+  name: 'pokedle-version-json',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ build }) })
+  },
+})
 
 // VITE_BASE : sous-chemin d'hébergement (ex. /pokedle/ pour GitHub Pages), '/' par défaut.
 const base = process.env.VITE_BASE ?? '/'
@@ -16,6 +25,7 @@ export default defineConfig({
   define: { __BUILD__: JSON.stringify(build) },
   plugins: [
     react(),
+    versionJson(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
@@ -38,6 +48,7 @@ export default defineConfig({
       workbox: {
         importScripts: ['push-sw.js'], // gestion des notifications push (public/push-sw.js)
         globPatterns: ['**/*.{js,css,html,svg,png,json}'],
+        globIgnores: ['version.json'], // jamais précaché : il sert justement à détecter un précache périmé
         maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         runtimeCaching: [{
           urlPattern: ({ url }: { url: URL }) => url.hostname === 'raw.githubusercontent.com' && url.pathname.startsWith('/PokeAPI/sprites/'),

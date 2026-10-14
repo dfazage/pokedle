@@ -14,6 +14,8 @@ import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/heart
 import { gameDayKey } from './game/rng'
 import { classLabel, GEN_INFO, spName, trainerName } from './game/fr'
 import { t, useLang } from './i18n'
+import { autoUpdate, staleBuild, useUpdateAvailable } from './game/update'
+import { UpdateBanner } from './ui/UpdateBanner'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
 import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
@@ -99,6 +101,8 @@ function AppScreens() {
   const session = useRef<BattleSession | null>(null)
   const choices = useRef<string[]>([])
   const engine = useRef<Engine | null>(null)
+  const { available: updateAvailable } = useUpdateAvailable() // le serveur publie une autre version que celle qui tourne
+  const [updateLater, setUpdateLater] = useState(false)
 
   // Équipe dans l'ordre choisi par le joueur (permutation valide, sinon ordre d'origine).
   const challenge = useMemo(() => {
@@ -217,7 +221,9 @@ function AppScreens() {
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const [daily, sess] = await Promise.all([import('./game/daily'), import('./game/session')])
+      const [daily, sess, stale] = await Promise.all([import('./game/daily'), import('./game/session'), staleBuild()])
+      // Bundle périmé : on recharge AVANT de tirer le dresseur, sinon ce client pourrait en tirer un autre que les autres joueurs.
+      if (!cancelled && stale && !session.current && autoUpdate(stale)) return
       engine.current = { BattleSession: sess.BattleSession, formatLog: sess.formatLog, formatSteps: sess.formatSteps }
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
@@ -543,8 +549,10 @@ function AppScreens() {
   if (screen === 'guide') return <Guide {...ctx} onBack={() => setScreen('settings')} />
 
   const showNav = NAV_SCREENS.includes(screen)
+  const showUpdate = updateAvailable && !updateLater && (showNav || screen === 'opponent' || screen === 'team')
   return (
     <main className={showNav ? 'app' : 'app nonav'}>
+      {showUpdate && <UpdateBanner onLater={() => setUpdateLater(true)} />}
       {showNav && <div className="scorebar"><ScoreBadge points={score.total} /></div>}
       {screen === 'home' && <Home {...ctx} />}
       {screen === 'opponent' && <Opponent {...ctx} onBack={back} />}

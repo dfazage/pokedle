@@ -75,12 +75,22 @@ export default function App() {
 
 function AppScreens() {
   useLang() // re-rendu complet de l'app au changement de langue
-  const today = useMemo(() => gameDayKey(), [])
+  const today = useMemo(() => gameDayKey(), []) // jour de jeu au chargement ; le passage à 12h (Paris) recharge l'app (voir plus bas)
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
   // Accès à l'app : il faut être connecté.
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [authReady, setAuthReady] = useState(!supabase) // session Supabase restaurée ?
   const [screen, setScreen] = useState<Screen>('onboarding')
+  // Changement de jour de jeu (12h Paris) app ouverte : on recharge pour repartir proprement sur le nouveau jour (défi, essais, historique),
+  // sauf pendant un combat ou son résultat (la progression est sauvegardée par jour, rien n'est perdu). Contrôle au retour au premier plan et chaque minute.
+  useEffect(() => {
+    if (['intro', 'battle', 'result', 'reset'].includes(screen)) return
+    const check = () => { if (gameDayKey() !== today) location.reload() }
+    check()
+    const id = window.setInterval(check, 60_000)
+    document.addEventListener('visibilitychange', check)
+    return () => { window.clearInterval(id); document.removeEventListener('visibilitychange', check) }
+  }, [screen, today])
   const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
   const [rerollTick, setRerollTick] = useState(0)
   const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
@@ -560,7 +570,7 @@ function AppScreens() {
       {screen === 'result' && <Result {...ctx} />}
       {screen === 'history' && <History {...ctx} />}
       {screen === 'leaderboard' && <Leaderboard {...ctx} rows={rows} />}
-      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`1.4.0 · ${__BUILD__}`} />}
+      {screen === 'settings' && <Settings {...ctx} theme={theme} setTheme={setTheme} version={`${__APP_VERSION__} · ${__BUILD__}`} />}
       {screen === 'auth' && <Auth {...ctx} onBack={back} />}
       {screen === 'reset' && <ResetPassword {...ctx} onDone={() => setScreen('home')} />}
       {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}

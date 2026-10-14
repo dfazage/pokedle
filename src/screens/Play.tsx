@@ -128,7 +128,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
   const worldRate = c.world && c.world.players ? ((c.world.wins / c.world.players) * 100).toFixed(1) : null
   return (
     <>
-      <TopBar title="Pokédle Battle" onBack={c.onBack} />
+      <TopBar title="Pokébadle Battle" onBack={c.onBack} />
       <div className="row between">
         <span className="pill"><span style={{ width: 8, height: 8, borderRadius: 9, background: 'var(--primary)' }} /> {t('opp.daily', { n: dayNumber(c.today) })}</span>
         <span className="pill"><Clock size={14} /> {left}</span>
@@ -187,7 +187,7 @@ export function Team(c: Ctx & { onBack: () => void; onStart: () => void }) {
   const attack = m.stats.spa > m.stats.atk ? [t('stat.spatk'), m.stats.spa] : [t('stat.atk'), m.stats.atk]
   return (
     <>
-      <TopBar title={<><div className="eyebrow" style={{ color: 'var(--primary)' }}>Pokédle Arena</div>{t('team.title')}</>} onBack={c.onBack} />
+      <TopBar title={<><div className="eyebrow" style={{ color: 'var(--primary)' }}>Pokébadle Arena</div>{t('team.title')}</>} onBack={c.onBack} />
       <div className="row between">
         <span className="pill">{t('team.fighter', { i: i + 1, n: team.length })}</span>
         <span className="pill green">{t('team.fixed')}</span>

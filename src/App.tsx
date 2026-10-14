@@ -510,7 +510,7 @@ function AppScreens() {
     return (
       <main className="app center">
         <div className="splash-orb" />
-        <h1 className="title">Pokédle Battle</h1>
+        <h1 className="title">Pokébadle Battle</h1>
         <p className="muted">{t('app.preparing')}</p>
       </main>
     )

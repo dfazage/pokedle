@@ -76,7 +76,7 @@ export function Auth(c: Ctx & { onBack: () => void }) {
     <>
       <div className="purple-head">
         <div className="row between"><button className="iconbtn" style={{ background: 'rgba(255,255,255,.18)', color: '#fff', border: 0 }} onClick={c.onBack} aria-label={t('back')}><ArrowRight size={20} style={{ transform: 'rotate(180deg)' }} /></button><span className="pill" style={{ background: 'rgba(0,0,0,.2)', color: '#ffd76a', border: 0 }}>{t('auth.streak', { n: c.stats.currentStreak })}</span><span style={{ width: 40 }} /></div>
-        <div className="eyebrow" style={{ color: "#fff", opacity: 0.85, marginTop: 20 }}>Pokédle Battle #{dayNumber(c.today)}</div>
+        <div className="eyebrow" style={{ color: "#fff", opacity: 0.85, marginTop: 20 }}>Pokébadle Battle #{dayNumber(c.today)}</div>
         <h1 className="title" style={{ marginTop: 6 }}>{t('auth.title')}</h1>
         <p style={{ opacity: 0.9, marginTop: 8, lineHeight: 1.4 }}>{t('auth.sub')}</p>
       </div>
@@ -173,7 +173,7 @@ export function Onboarding(c: { done: () => void; login: () => void }) {
         {SLIDES.map((x, k) => <i key={k} className={k === i ? 'on' : ''} style={{ ['--g' as string]: x.c1 }} />)}
       </div>
       <div className="row between">
-        <div className="row"><span className="orb ob-orb"><User size={18} /></span><div><div className="eyebrow">{t('ob.eyebrow')}</div><b style={{ fontSize: 17 }}>Pokédle Battle</b></div></div>
+        <div className="row"><span className="orb ob-orb"><User size={18} /></span><div><div className="eyebrow">{t('ob.eyebrow')}</div><b style={{ fontSize: 17 }}>Pokébadle Battle</b></div></div>
         <button className="pill ob-skip" onClick={c.done}>{t('ob.skip')}</button>
       </div>
       <div

@@ -97,7 +97,7 @@ export function buildShareText({ rec, dayNo, grid, streak, points, url }: ShareI
   const win = rec.result === 'win'
   const game = GEN_INFO[rec.gen]?.game
   const lines = [
-    `Pokédle Battle #${dayNo} ⚔️`,
+    `Pokébadle Battle #${dayNo} ⚔️`,
     [trainerName(rec.trainer), game, `${win ? t('share.win') : t('share.loss')} ${win ? '🏆' : '💀'}`].filter(Boolean).join(' · '),
     `${toEmoji(grid.you)} ➜ ${toEmoji(grid.foe)}`,
     [

@@ -35,13 +35,13 @@ const win = buildShareText({ rec: rec({ attempts: 2 }), dayNo: 142, grid: stored
 eq(
   'texte FR victoire',
   win,
-  ['Pokédle Battle #142 ⚔️', 'Cynthia · Platine · Victoire 🏆', '🟩🟨🟩🟥🟥🟥 ➜ ⬛⬛⬛⬛⬛⬛', '⏱ 14 tours · 💚 62 % PV · 🔥 série de 7', '+312 pts · 💔 essai 2', '', 'Fais mieux que moi 👉 https://pokebadle.fun'].join('\n'),
+  ['Pokébadle Battle #142 ⚔️', 'Cynthia · Platine · Victoire 🏆', '🟩🟨🟩🟥🟥🟥 ➜ ⬛⬛⬛⬛⬛⬛', '⏱ 14 tours · 💚 62 % PV · 🔥 série de 7', '+312 pts · 💔 essai 2', '', 'Fais mieux que moi 👉 https://pokebadle.fun'].join('\n'),
 )
 const loss = buildShareText({ rec: rec({ result: 'loss', survivors: 0, kos: 2, turns: 1, hpLeft: 0 }), dayNo: 3, grid: fallbackGrid({ result: 'loss', survivors: 0, kos: 2 }), streak: 4, points: 99, url: URL })
 eq(
   'texte FR défaite : ni points ni série, « 1 tour »',
   loss,
-  ['Pokédle Battle #3 ⚔️', 'Cynthia · Platine · Défaite 💀', '🟥🟥🟥🟥🟥🟥 ➜ ⬛⬛🟦🟦🟦🟦', '⏱ 1 tour · 💚 0 % PV', '', 'Fais mieux que moi 👉 https://pokebadle.fun'].join('\n'),
+  ['Pokébadle Battle #3 ⚔️', 'Cynthia · Platine · Défaite 💀', '🟥🟥🟥🟥🟥🟥 ➜ ⬛⬛🟦🟦🟦🟦', '⏱ 1 tour · 💚 0 % PV', '', 'Fais mieux que moi 👉 https://pokebadle.fun'].join('\n'),
 )
 eq('série de 1 non affichée', buildShareText({ rec: rec(), dayNo: 1, grid: stored, streak: 1, points: 10, url: URL }).includes('🔥'), false)
 const old = buildShareText({ rec: rec({ hpLeft: undefined }), dayNo: 1, grid: stored, streak: 1, url: URL })
@@ -53,7 +53,7 @@ setLang('en')
 eq(
   'texte EN victoire',
   buildShareText({ rec: rec(), dayNo: 142, grid: stored, streak: 7, points: 312, url: URL }),
-  ['Pokédle Battle #142 ⚔️', 'Cynthia · Platinum · Win 🏆', '🟩🟨🟩🟥🟥🟥 ➜ ⬛⬛⬛⬛⬛⬛', '⏱ 14 turns · 💚 62% HP · 🔥 7-day streak', '+312 pts', '', 'Think you can beat me? 👉 https://pokebadle.fun'].join('\n'),
+  ['Pokébadle Battle #142 ⚔️', 'Cynthia · Platinum · Win 🏆', '🟩🟨🟩🟥🟥🟥 ➜ ⬛⬛⬛⬛⬛⬛', '⏱ 14 turns · 💚 62% HP · 🔥 7-day streak', '+312 pts', '', 'Think you can beat me? 👉 https://pokebadle.fun'].join('\n'),
 )
 eq('EN : singulier « 1 turn »', buildShareText({ rec: rec({ turns: 1 }), dayNo: 1, grid: stored, streak: 1, url: URL }).includes('⏱ 1 turn ·'), true)
 process.exit(fail ? 1 : 0)

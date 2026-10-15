@@ -16,6 +16,7 @@ import { classLabel, GEN_INFO, spName, trainerName } from './game/fr'
 import { t, useLang } from './i18n'
 import { autoUpdate, staleBuild, useUpdateAvailable } from './game/update'
 import { UpdateBanner } from './ui/UpdateBanner'
+import { PrefPoll } from './ui/PrefPoll'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
 import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
@@ -97,6 +98,7 @@ function AppScreens() {
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
   const [attemptNo, setAttemptNo] = useState(() => loadAttempt(today)) // essais commencés aujourd'hui (1 = essai offert)
   const [email, setEmail] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
   const [avatar, setAvatar] = useState<string | null>(loadLocalAvatar)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -152,6 +154,7 @@ function AppScreens() {
     const load = async (user: { id: string; email?: string } | null) => {
       signedIn.current = !!user
       setEmail(user?.email ?? null)
+      setUserId(user?.id ?? null)
       if (syncLocalOwner(user?.id ?? null)) {
         // Autre compte (ou déconnexion) : on oublie le combat, l'ordre, les essais et l'avatar de l'ancien compte.
         session.current = null
@@ -587,6 +590,7 @@ function AppScreens() {
       {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
+      <PrefPoll userId={userId} hold={screen !== 'home' || showUpdate} />
       <span hidden>{dayNumber(today)}</span>
     </main>
   )

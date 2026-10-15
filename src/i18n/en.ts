@@ -583,4 +583,13 @@ export const en: Record<keyof typeof fr, string> = {
   'update.busy': 'Updating…',
   'update.busy.title': 'Updating…',
   'update.busy.body': 'Keep the app open, it will reload.',
+  // ── One-off poll: 1 or 2 battles a day ──
+  'prefs.poll.eyebrow': 'Quick question',
+  'prefs.poll.title': 'How many battles a day would you like?',
+  'prefs.poll.body': 'Right now there is one battle of the day. Your answer helps us decide.',
+  'prefs.poll.one': 'battle / day',
+  'prefs.poll.two': 'battles / day',
+  'prefs.poll.thanks.title': 'Thanks, noted!',
+  'prefs.poll.thanks.one': 'You picked 1 battle a day.',
+  'prefs.poll.thanks.two': 'You picked 2 battles a day.',
 }

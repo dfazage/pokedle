@@ -582,4 +582,13 @@ export const fr = {
   'update.busy': 'Mise à jour…',
   'update.busy.title': 'Mise à jour en cours…',
   'update.busy.body': 'Ne ferme pas l’app, elle va se recharger.',
+  // ── Sondage ponctuel : 1 ou 2 combats par jour ──
+  'prefs.poll.eyebrow': 'Une petite question',
+  'prefs.poll.title': 'Tu préfères combien de combats par jour ?',
+  'prefs.poll.body': 'Aujourd’hui il y a un seul combat du jour. Ton avis nous aide à choisir.',
+  'prefs.poll.one': 'combat / jour',
+  'prefs.poll.two': 'combats / jour',
+  'prefs.poll.thanks.title': 'Merci, c’est noté !',
+  'prefs.poll.thanks.one': 'Tu as choisi 1 combat par jour.',
+  'prefs.poll.thanks.two': 'Tu as choisi 2 combats par jour.',
 } as const

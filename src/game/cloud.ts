@@ -1,5 +1,6 @@
 import { createClient, type User } from '@supabase/supabase-js'
 import type { DayRecord } from './history'
+import type { PrefChoice } from './prefPoll'
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const key = import.meta.env.VITE_SUPABASE_KEY as string | undefined
@@ -238,4 +239,20 @@ export async function fetchWorldStats(day: string): Promise<{ players: number; w
   const { data, error } = await supabase.rpc('daily_stats', { p_day: day })
   const row = Array.isArray(data) ? data[0] : null
   return error || !row ? null : { players: Number(row.players), wins: Number(row.wins) }
+}
+
+/** Sondage « 1 ou 2 combats par jour » (supabase/battle_pref_votes.sql) : mon vote, null si je n'ai pas encore répondu,
+ *  undefined si le serveur ne sait pas répondre (hors ligne, non connecté, script SQL non appliqué) : on ne pose alors pas la question. */
+export async function fetchMyBattlePref(): Promise<PrefChoice | null | undefined> {
+  if (!supabase) return undefined
+  const { data, error } = await supabase.rpc('my_battle_pref')
+  if (error) return undefined
+  return data === 1 || data === 2 ? data : null
+}
+
+/** Enregistre mon vote (un seul par compte : un second appel est ignoré côté serveur). */
+export async function submitBattlePref(choice: PrefChoice): Promise<boolean> {
+  if (!supabase) return false
+  const { error } = await supabase.rpc('submit_battle_pref', { p_choice: choice })
+  return !error
 }

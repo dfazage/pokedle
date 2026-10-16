@@ -12,9 +12,9 @@ import extraGen2 from '../data/trainers.extra.gen2.json'
 import extraGen3 from '../data/trainers.extra.gen3.json'
 import extraGen4 from '../data/trainers.extra.gen4.json'
 import extraGen5 from '../data/trainers.extra.gen5.json'
-import { aiChoose } from './ai'
+import { aiChoose, type AiLevel } from './ai'
 import { applyProfile } from './profiles'
-import { addDays, gameDayKey, hashString, mulberry32, pick, seedArray } from './rng'
+import { addDays, DOUBLE_FROM_KEY, gameDayKey, hashString, mulberry32, pick, seedArray, slotsPerDay } from './rng'
 
 Teams.setGeneratorFactory(TeamGenerators)
 
@@ -52,6 +52,13 @@ export const GEN5_FROM = '2026-10-15'
  * dresseur du 15/10 (Steven) reste celui du tirage d'origine à 4 générations : ajouter la gen 5 au pool aurait changé ce tirage.
  */
 export const GEN5_TRAINERS_FROM = '2026-10-16'
+/**
+ * Première clé de jour jouée avec l'adversaire « niveau 2 » (aiSmart.ts : change de Pokémon, cherche le KO, utilise statuts et boosts)
+ * et l'équilibrage recalibré dessus. Les jours précédents gardent l'IA d'origine : leurs combats doivent se rejouer à l'identique.
+ * Même instant que le passage à 2 combats par jour (DOUBLE_FROM_KEY).
+ */
+export const HARD_FROM = DOUBLE_FROM_KEY
+export const aiLevelFor = (dayKey: string): AiLevel => (dayKey >= HARD_FROM ? 2 : 1)
 /**
  * Format Showdown du combat. Les gens 4 et 5 partagent les mêmes règles : « Custom Game » en 6v6, sans aperçu des équipes
  * (la gen 5 l'active par défaut ; l'ordre des Pokémon est choisi avant le combat dans l'app, le premier mène).
@@ -140,6 +147,8 @@ export interface DailyChallenge {
   trainer: TrainerData
   playerTeam: PokemonSet[]
   opponentTeam: PokemonSet[]
+  /** N° du combat dans le jour (1 ou 2). */
+  slot: number
   battleSeed: [number, number, number, number]
   estimatedWinRate: number
   playerPreview: PreviewMon[]
@@ -212,7 +221,7 @@ function buildOpponent(trainer: TrainerData, gen: number, seed: [number, number,
   return team
 }
 
-function simulateOnce(gen: number, a: PokemonSet[], b: PokemonSet[], seed: number): 0 | 1 | null {
+function simulateOnce(gen: number, a: PokemonSet[], b: PokemonSet[], seed: number, level: AiLevel = 1): 0 | 1 | null {
   const battle = new Battle({
     formatid: battleFormat(gen) as any,
     seed: seedArray(seed) as any,
@@ -221,16 +230,17 @@ function simulateOnce(gen: number, a: PokemonSet[], b: PokemonSet[], seed: numbe
   } as any)
   let guard = 0
   while (!battle.ended && guard++ < 400) {
-    battle.makeChoices(aiChoose(battle, 0, gen), aiChoose(battle, 1, gen))
+    battle.makeChoices(aiChoose(battle, 0, gen, level), aiChoose(battle, 1, gen, level))
   }
   if (battle.winner === 'A') return 0
   if (battle.winner === 'B') return 1
   return null
 }
 
-export function winRate(gen: number, player: PokemonSet[], opp: PokemonSet[], n: number, seed: number) {
+/** Taux de victoire simulé de `player` contre `opp` ; les deux camps jouent avec l'IA `level` (le joueur de référence a le niveau de l'adversaire). */
+export function winRate(gen: number, player: PokemonSet[], opp: PokemonSet[], n: number, seed: number, level: AiLevel = 1) {
   let wins = 0
-  for (let i = 0; i < n; i++) if (simulateOnce(gen, player, opp, seed + i * 7919) === 0) wins++
+  for (let i = 0; i < n; i++) if (simulateOnce(gen, player, opp, seed + i * 7919, level) === 0) wins++
   return wins / n
 }
 
@@ -239,6 +249,12 @@ export interface BalanceOptions {
   simsPerCandidate?: number
   /** Sel de re-roll (admin) : 0 = tirage d'origine, n > 0 = n-ième re-tirage du jour. */
   salt?: number
+  /** N° du combat dans le jour (1 par défaut ; 2 à partir de DOUBLE_FROM_KEY). */
+  slot?: number
+  /** Parties de confirmation supplémentaires pour une équipe qui passe la première mesure (0 = aucune). */
+  confirmSims?: number
+  /** Taux de victoire visé par la simulation (l'équipe candidate la plus proche est retenue). */
+  target?: number
   min?: number
   max?: number
 }
@@ -246,33 +262,53 @@ export interface BalanceOptions {
 /** Premier jour où la règle « jamais deux fois le même dresseur à la suite » s'applique (les jours avant gardent leur tirage). */
 export const NO_REPEAT_FROM = '2026-10-16'
 
-/** Nom du dresseur tiré pour `dayKey` (sans équipes ni simulations : léger). Mémoïsé, la règle de non-répétition dépend de la veille. */
+/** Graine de texte d'un combat : le n°1 garde celle d'avant les 2 combats par jour (mêmes tirages pour les jours passés). */
+const seedText = (dayKey: string, slot: number, salt = 0) => `pokedle:${dayKey}${slot > 1 ? `:s${slot}` : ''}${salt ? `:${salt}` : ''}`
+
+/** Dresseur du combat précédent : le n°1 du jour dépend du dernier combat de la veille, le n°2 du n°1 du même jour. */
+const previousTrainer = (dayKey: string, slot: number): string | null =>
+  slot > 1 ? dailyTrainerName(dayKey, slot - 1) : dayKey >= NO_REPEAT_FROM ? dailyTrainerName(addDays(dayKey, -1), slotsPerDay(addDays(dayKey, -1))) : null
+
+/** Nom du dresseur tiré pour le combat `slot` de `dayKey` (sans équipes ni simulations : léger). Mémoïsé, la règle de non-répétition dépend du combat précédent. */
 const nameMemo = new Map<string, string>()
-export function dailyTrainerName(dayKey: string): string {
-  const hit = nameMemo.get(dayKey)
+export function dailyTrainerName(dayKey: string, slot = 1): string {
+  const memoKey = `${dayKey}~${slot}`
+  const hit = nameMemo.get(memoKey)
   if (hit) return hit
-  const rand = mulberry32(hashString(`pokedle:${dayKey}`))
-  const prev = dayKey >= NO_REPEAT_FROM ? dailyTrainerName(addDays(dayKey, -1)) : null
+  const rand = mulberry32(hashString(seedText(dayKey, slot)))
+  const prev = previousTrainer(dayKey, slot)
   let name: string
   let guard = 0
   do {
     const gen = pick(rand, gensFor(dayKey))
     name = pick(rand, poolFor(gen, dayKey)).name
   } while (prev !== null && name === prev && guard++ < 50)
-  nameMemo.set(dayKey, name)
+  nameMemo.set(memoKey, name)
   return name
 }
 
-/** Construit le défi du jour : même résultat pour tout le monde pour une clé de jour donnée. */
+/**
+ * Cibles d'équilibrage. Jusqu'à HARD_FROM : deux IA simples, équipes retenues à 35-65 % (centre 50 %) ; en pratique les joueurs, qui
+ * jouent bien mieux que cette IA (changements, choix des attaques), gagnaient près de 90 % du temps. Ensuite : les deux camps jouent
+ * avec l'IA de niveau 2, qui sert de joueur de référence, et on vise ~65 % en simulation (≈ 70-75 % réels, voir scripts/calib_ai.ts).
+ */
+const BALANCE = {
+  legacy: { candidates: 14, simsPerCandidate: 8, confirmSims: 0, min: 0.35, max: 0.65, target: 0.5 },
+  hard: { candidates: 10, simsPerCandidate: 6, confirmSims: 14, min: 0.55, max: 0.8, target: 0.67 },
+}
+
+/** Construit le défi du combat `opts.slot` de la journée : même résultat pour tout le monde pour une clé de jour donnée. */
 export function buildDaily(dayKey = gameDayKey(), opts: BalanceOptions = {}): DailyChallenge {
-  const { candidates = 14, simsPerCandidate = 8, min = 0.35, max = 0.65, salt = 0 } = opts
-  const baseSeed = hashString(salt ? `pokedle:${dayKey}:${salt}` : `pokedle:${dayKey}`)
+  const level = aiLevelFor(dayKey)
+  const bal = level === 2 ? BALANCE.hard : BALANCE.legacy
+  const { candidates = bal.candidates, simsPerCandidate = bal.simsPerCandidate, confirmSims = bal.confirmSims, min = bal.min, max = bal.max, target = bal.target, salt = 0, slot = 1 } = opts
+  const baseSeed = hashString(seedText(dayKey, slot, salt))
   const rand = mulberry32(baseSeed)
   const battleGen = battleGenFor(dayKey)
   // Génération d'origine + dresseur. À partir de NO_REPEAT_FROM, jamais deux fois le même dresseur (même nom, toutes versions
   // confondues) deux jours de suite : on re-tire (suite du même PRNG) tant que c'est celui de la veille. Un jour sans doublon garde
   // donc exactement son tirage d'origine ; un re-tirage admin (salt > 0) remplace le défi et ignore la règle.
-  const prev = salt === 0 && dayKey >= NO_REPEAT_FROM ? dailyTrainerName(addDays(dayKey, -1)) : null
+  const prev = salt === 0 && dayKey >= NO_REPEAT_FROM ? previousTrainer(dayKey, slot) : null
   let gen: number
   let trainer: TrainerData
   let guard = 0
@@ -288,17 +324,24 @@ export function buildDaily(dayKey = gameDayKey(), opts: BalanceOptions = {}): Da
     const team = randomTeam(battleGen, seedArray(baseSeed + 1000 * (c + 1)), new Set(), 6)
     // une équipe candidate peut partager des espèces avec l'adversaire, c'est autorisé
     void taken
-    const rate = winRate(battleGen, team, opponentTeam, simsPerCandidate, baseSeed + c)
+    let rate = winRate(battleGen, team, opponentTeam, simsPerCandidate, baseSeed + c, level)
+    // Équilibrage recalibré : une équipe qui passe la 1re mesure est confirmée sur plus de parties (une mesure à 6 parties laissait passer
+    // des défis simulés à 12 % ou 100 % réels) ; la mesure combinée remplace la première.
+    if (confirmSims && rate >= min && rate <= max) {
+      const more = winRate(battleGen, team, opponentTeam, confirmSims, baseSeed + c + 500, level)
+      rate = (rate * simsPerCandidate + more * confirmSims) / (simsPerCandidate + confirmSims)
+    }
     if (rate >= min && rate <= max) {
       best = { team, rate }
       break
     }
-    if (!best || Math.abs(rate - 0.5) < Math.abs(best.rate - 0.5)) best = { team, rate }
+    if (!best || Math.abs(rate - target) < Math.abs(best.rate - target)) best = { team, rate }
   }
   return {
     dayKey,
     gen,
     battleGen,
+    slot,
     trainer,
     playerTeam: best!.team,
     opponentTeam,

@@ -3,7 +3,7 @@ import { Battle, Teams } from '@pkmn/sim'
 import { aiChoose } from './ai'
 import { mvName, spName } from './fr'
 import { hasKey, t, type Key } from '../i18n'
-import { battleFormat, type DailyChallenge } from './daily'
+import { aiLevelFor, battleFormat, type DailyChallenge } from './daily'
 import type { Cue, Side, SfxId } from './battleCues'
 import { HIT_MARK } from './battleCues'
 
@@ -76,7 +76,7 @@ export class BattleSession {
   private settle() {
     let guard = 0
     while (!this.battle.ended && !this.needsAction(0) && guard++ < 50) {
-      const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen) : ''
+      const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen, aiLevelFor(this.challenge.dayKey)) : ''
       this.battle.makeChoices('', c1)
     }
   }
@@ -84,7 +84,7 @@ export class BattleSession {
   /** choice : "move N" ou "switch N" (N démarre à 1). Retourne les nouvelles lignes brutes du log. */
   choose(choice: string): string[] {
     if (this.battle.ended || !this.needsAction(0)) return []
-    const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen) : ''
+    const c1 = this.needsAction(1) ? aiChoose(this.battle, 1, this.challenge.battleGen, aiLevelFor(this.challenge.dayKey)) : ''
     const before = this.battle.log.length
     this.battle.makeChoices(choice, c1)
     this.settle()

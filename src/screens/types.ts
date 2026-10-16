@@ -7,6 +7,13 @@ import type { Screen } from '../ui/kit'
 
 export interface Ctx {
   today: string
+  /** Combat affiché (1 ou 2) et nombre de combats du jour. */
+  slot: number
+  slots: number
+  /** Le combat affiché n'est pas encore publié (n°2 avant 18h KL). */
+  locked: boolean
+  /** Ouvre le résultat du combat n°`n` du jour. */
+  onViewResult: (n: number) => void
   challenge: DailyChallenge
   history: DayRecord[]
   stats: Stats

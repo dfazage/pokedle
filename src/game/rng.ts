@@ -65,12 +65,42 @@ const parisWall = (ms: number): { wall: number; y: number; m: number; d: number;
 }
 
 /**
+ * Deux combats par jour, à partir du 17/10/2026 à 12h Kuala Lumpur (04:00 UTC) : le combat n°1 est publié à 12h KL, le n°2 à 18h KL
+ * (10:00 UTC), et le jour de jeu suivant commence à 12h KL le lendemain. Heure fixe UTC+8 (plus de suivi de l'heure de Paris).
+ * Avant cet instant : un seul combat par jour, reset à 12h Paris (inchangé). Miroir SQL : `public.game_day()` et `public.game_slots_open()`
+ * (supabase/double_battles.sql). Un jour de jeu = deux combats (« slots ») ; la série se compte en jours, les points et les cœurs par combat.
+ */
+export const DOUBLE_FROM_MS = Date.UTC(2026, 9, 17, 4, 0)
+/** Première clé de jour à deux combats (celle qui commence à DOUBLE_FROM_MS). */
+export const DOUBLE_FROM_KEY = '2026-10-18'
+/** Heure UTC de début du jour de jeu (12h KL) et délai du combat n°2 après le début (18h KL). */
+const DAY_START_UTC_H = 4
+const SLOT2_DELAY_H = 6
+const HOUR_MS = 3600_000
+
+/** Nombre de combats d'un jour de jeu. */
+export const slotsPerDay = (dayKey: string): number => (dayKey >= DOUBLE_FROM_KEY ? 2 : 1)
+
+/** Combats déjà publiés à l'instant `now` pour le jour de jeu en cours (1 ou 2). */
+export function openSlots(now = new Date()): number {
+  const t = now.getTime()
+  if (t < DOUBLE_FROM_MS) return 1
+  const since = (((t - DAY_START_UTC_H * HOUR_MS) % (24 * HOUR_MS)) + 24 * HOUR_MS) % (24 * HOUR_MS)
+  return since >= SLOT2_DELAY_H * HOUR_MS ? 2 : 1
+}
+
+/** Identifiant d'un combat (jour + n°) : sert de suffixe aux clés de stockage local. Le combat n°1 garde la clé du jour (compatibilité). */
+export const battleId = (dayKey: string, slot: number): string => (slot > 1 ? `${dayKey}~${slot}` : dayKey)
+
+/**
  * Clé du jour de jeu (YYYY-MM-DD, non affichée telle quelle : voir displayDay) : un jour va de 12h00 (heure de Paris) à 12h00 le lendemain et porte la date de Paris de sa
  * FIN (date de maintenant + 12h). Le 12/10 avant 12h Paris = jour n°1 (clé 12/10) ; dès 12h00 le 12/10 = jour n°2 (clé 13/10).
  * Identique côté serveur : fonction SQL `public.game_day()` (supabase/reset_noon_paris.sql). Les clés restent consécutives :
  * aucune statistique ni série n'est touchée.
  */
 export function gameDayKey(d = new Date()): string {
+  // Depuis DOUBLE_FROM_MS : le jour de jeu commence à 12h Kuala Lumpur (04:00 UTC, heure fixe) et sa clé porte toujours la date de sa FIN.
+  if (d.getTime() >= DOUBLE_FROM_MS) return new Date(d.getTime() + (24 - DAY_START_UTC_H) * HOUR_MS).toISOString().slice(0, 10)
   const { y, m, d: day, h } = parisWall(d.getTime())
   // Le jour de jeu N va de 12h Paris (N-1) à 12h Paris (N) : la clé est la date de Paris à (maintenant + 12h).
   // Jour n°1 (clé 12/10) = avant le premier reset, aujourd'hui 12/10 à 12h Paris le jeu passe au 13/10 (n°2).
@@ -100,9 +130,8 @@ export function keyForDisplayDay(date: string, has: (k: string) => boolean): str
   return date === LAUNCH_DAY && !has(next) ? LAUNCH_DAY : next
 }
 
-/** Millisecondes jusqu'au prochain reset (12h00 heure de Paris). */
-export function msToNextReset(now = new Date()): number {
-  const t = now.getTime()
+/** Ancien régime (un combat par jour, reset à 12h heure de Paris) : millisecondes jusqu'au prochain 12h Paris à partir de `t`. */
+function msToNextParisNoon(t: number): number {
   if (t < FIRST_RESET_MS) return FIRST_RESET_MS - t
   const { y, m, d, h } = parisWall(t)
   const noon = Date.UTC(y, m - 1, d + (h < RESET_HOUR_PARIS ? 0 : 1), RESET_HOUR_PARIS)
@@ -110,4 +139,12 @@ export function msToNextReset(now = new Date()): number {
   let utc = noon - (parisWall(noon).wall - noon)
   utc = noon - (parisWall(utc).wall - utc)
   return utc - t
+}
+
+/** Millisecondes jusqu'à la prochaine publication d'un combat (n°1 à 12h KL, n°2 à 18h KL) ; avant la bascule : jusqu'à la bascule. */
+export function msToNextReset(now = new Date()): number {
+  const t = now.getTime()
+  if (t < DOUBLE_FROM_MS) return Math.min(DOUBLE_FROM_MS - t, msToNextParisNoon(t)) // ancien régime : prochain 12h Paris, au plus tard la bascule
+  const since = (((t - DAY_START_UTC_H * HOUR_MS) % (24 * HOUR_MS)) + 24 * HOUR_MS) % (24 * HOUR_MS)
+  return (since < SLOT2_DELAY_H * HOUR_MS ? SLOT2_DELAY_H * HOUR_MS : 24 * HOUR_MS) - since
 }

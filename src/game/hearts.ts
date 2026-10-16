@@ -5,10 +5,11 @@
 // Tout est dérivé de l'historique (`attempts` par jour) : le même historique donne toujours le même nombre de cœurs,
 // en local comme en ligne. Seul le compteur d'essais du jour en cours vit à part (clé locale), pour qu'un rejeu
 // commencé coûte son cœur tout de suite, même si la page est rechargée avant la fin du combat.
-import type { DayRecord } from './history'
+import { cmpRec, slotOf, type DayRecord } from './history'
 
 export const MAX_HEARTS = 3
 
+/** `day` = identifiant du combat (battleId : le n°1 garde la clé du jour). */
 const attemptKey = (day: string) => `pokedle:attempt:${day}`
 
 /** Nombre d'essais commencés aujourd'hui (0 = aucun combat lancé). */
@@ -40,7 +41,7 @@ const clampHearts = (n: number) => Math.min(MAX_HEARTS, Math.max(0, n))
 /** Cœurs après avoir joué tous les jours de `history` (jours triés par date). */
 export function heartsAfter(history: DayRecord[]): number {
   let h = MAX_HEARTS
-  for (const r of [...history].sort((a, b) => a.dayKey.localeCompare(b.dayKey))) {
+  for (const r of [...history].sort(cmpRec)) {
     h = clampHearts(h - Math.max(0, (r.attempts ?? 1) - 1))
     if (r.result === 'win') h = clampHearts(h + 1)
   }
@@ -60,10 +61,10 @@ export interface HeartsInfo {
   gained: boolean
 }
 
-/** État des cœurs aujourd'hui. `attemptNo` = compteur local d'essais commencés aujourd'hui. */
-export function heartsInfo(history: DayRecord[], today: string, attemptNo: number): HeartsInfo {
-  const base = heartsAfter(history.filter((r) => r.dayKey < today))
-  const rec = history.find((r) => r.dayKey === today)
+/** État des cœurs pour le combat `slot` du jour. `attemptNo` = compteur local d'essais commencés pour ce combat. */
+export function heartsInfo(history: DayRecord[], today: string, attemptNo: number, slot = 1): HeartsInfo {
+  const base = heartsAfter(history.filter((r) => r.dayKey < today || (r.dayKey === today && slotOf(r) < slot)))
+  const rec = history.find((r) => r.dayKey === today && slotOf(r) === slot)
   const recAttempts = rec ? rec.attempts ?? 1 : 0
   const attempt = Math.max(attemptNo, recAttempts)
   const afterReplays = clampHearts(base - Math.max(0, attempt - 1))

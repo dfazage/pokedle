@@ -133,22 +133,23 @@ export const serverSupportsReplay = () => optional.attempts
 export async function fetchHistory(): Promise<DayRecord[]> {
   if (!supabase) return []
   const { data, error } = await withOptionalColumns((cols) =>
-    supabase!.from('results').select(['day_key', 'result', 'turns', 'trainer', 'gen', 'survivors', 'kos', ...cols].join(', ')).order('day_key', { ascending: true }),
+    supabase!.from('results').select(['day_key', 'slot', 'result', 'turns', 'trainer', 'gen', 'survivors', 'kos', ...cols].join(', ')).order('day_key', { ascending: true }).order('slot', { ascending: true }),
   )
   if (error || !data) return []
   return (data as unknown as Record<string, any>[]).map((r) => ({
-    dayKey: r.day_key, result: r.result, turns: r.turns, trainer: r.trainer, gen: r.gen,
+    dayKey: r.day_key, ...(r.slot > 1 ? { slot: r.slot as number } : {}), result: r.result, turns: r.turns, trainer: r.trainer, gen: r.gen,
     survivors: r.survivors ?? undefined, kos: r.kos ?? undefined, hpLeft: r.hp_left ?? undefined, attempts: r.attempts ?? undefined,
   }))
 }
 
-/** Enregistre le résultat du jour. Le serveur refuse tout autre jour que le jour de jeu courant (12h-12h heure de Paris, `public.game_day()`). Un doublon est refusé, sauf pour un rejeu
+/** Enregistre le résultat d'un combat du jour (`rec.slot`, 1 par défaut). Le serveur refuse tout autre jour que le jour de jeu courant (`public.game_day()`) et un combat pas encore publié. Un doublon est refusé, sauf pour un rejeu
  *  (attempts > 1) qui remplace une défaite du même jour par le nouveau résultat (politique SQL dans supabase/results_attempts.sql). */
 export async function submitResult(rec: DayRecord, choices: string[]): Promise<'ok' | 'duplicate' | 'error'> {
   if (!supabase) return 'error'
   const { data: u } = await supabase.auth.getUser()
   if (!u.user) return 'error'
   const row = {
+    slot: rec.slot ?? 1,
     result: rec.result,
     turns: rec.turns,
     trainer: rec.trainer,
@@ -167,7 +168,7 @@ export async function submitResult(rec: DayRecord, choices: string[]): Promise<'
   if ((rec.attempts ?? 1) <= 1) return 'duplicate'
   // Rejeu : on remplace la défaite enregistrée plus tôt dans la journée (jamais une victoire).
   const upd = await withOptionalColumns((cols) =>
-    supabase!.from('results').update({ ...row, ...extra(cols) }).eq('user_id', u.user!.id).eq('day_key', rec.dayKey).eq('result', 'loss').select('day_key'),
+    supabase!.from('results').update({ ...row, ...extra(cols) }).eq('user_id', u.user!.id).eq('day_key', rec.dayKey).eq('slot', rec.slot ?? 1).eq('result', 'loss').select('day_key'),
   )
   return !upd.error && (upd.data?.length ?? 0) > 0 ? 'ok' : upd.error ? 'error' : 'duplicate'
 }
@@ -234,9 +235,12 @@ async function fetchLeaderRows(): Promise<LeaderRow[]> {
   return error || !data ? [] : (data as LeaderRow[])
 }
 
-export async function fetchWorldStats(day: string): Promise<{ players: number; wins: number } | null> {
+export async function fetchWorldStats(day: string, slot = 1): Promise<{ players: number; wins: number } | null> {
   if (!supabase) return null
-  const { data, error } = await supabase.rpc('daily_stats', { p_day: day })
+  // daily_stats_v2 (supabase/double_battles.sql) compte un combat précis ; repli sur daily_stats (tous les combats du jour) si absent.
+  let res = await supabase.rpc('daily_stats_v2', { p_day: day, p_slot: slot })
+  if (res.error) res = await supabase.rpc('daily_stats', { p_day: day })
+  const { data, error } = res
   const row = Array.isArray(data) ? data[0] : null
   return error || !row ? null : { players: Number(row.players), wins: Number(row.wins) }
 }

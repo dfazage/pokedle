@@ -1,5 +1,5 @@
 import { t } from '../i18n'
-import { msToNextReset } from './rng'
+import { DOUBLE_FROM_KEY, msToNextReset } from './rng'
 
 export const TYPE_COLORS: Record<string, string> = {
   Normal: '#a8a878', Fire: '#f0716b', Water: '#5ba8f0', Grass: '#4ec9a0', Electric: '#f7c948', Ice: '#7fd6e0',
@@ -15,13 +15,19 @@ export function dayNumber(dayKey: string): number {
 }
 
 /** Difficulté d'après le taux de victoire estimé de l'équipe imposée. */
-export function difficulty(rate: number): { stars: number; label: string } {
+export function difficulty(rate: number, dayKey?: string): { stars: number; label: string } {
+  // À partir de DOUBLE_FROM_KEY, les équipes sont équilibrées contre l'IA « niveau 2 » (taux visé plus haut : voir daily.ts) : seuils décalés.
+  if (dayKey !== undefined && dayKey >= DOUBLE_FROM_KEY) {
+    if (rate < 0.62) return { stars: 3, label: t('diff.hard') }
+    if (rate < 0.72) return { stars: 2, label: t('diff.balanced') }
+    return { stars: 1, label: t('diff.easy') }
+  }
   if (rate < 0.42) return { stars: 3, label: t('diff.hard') }
   if (rate < 0.58) return { stars: 2, label: t('diff.balanced') }
   return { stars: 1, label: t('diff.easy') }
 }
 
-/** Millisecondes jusqu'au prochain reset (12h00, heure de Paris). */
+/** Millisecondes jusqu'à la prochaine publication d'un combat (voir msToNextReset). */
 export const msToNextDay = (now = new Date()): number => msToNextReset(now)
 export function fmtCountdown(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000))

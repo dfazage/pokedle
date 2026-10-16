@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { AVATARS } from '../game/avatars'
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
-import type { DayRecord } from '../game/history'
+import { dayResults, recId, slotOf, type DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
@@ -24,6 +24,7 @@ function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreak
         <div className="stack">
           <div className="row" style={{ gap: 8 }}>
             <span className="small muted" style={{ fontWeight: 700 }}>{label(r.dayKey, today)}</span>
+            {slotOf(r) > 1 && <span className="pill">{t('hist.battleN', { n: slotOf(r) })}</span>}
             <span className={win ? 'pill green' : 'pill red'}>{win ? t('hist.win') : t('hist.loss')}</span>
             {(r.attempts ?? 1) > 1 && <span className="pill">{t('hist.attempt', { n: r.attempts })}</span>}
           </div>
@@ -88,7 +89,7 @@ export function History(c: Ctx) {
   useLang()
   const [ty, tm] = displayDay(c.today).split('-').map(Number)
   const [view, setView] = useState({ y: ty, m: tm - 1 })
-  const byDay = useMemo(() => new Map(c.history.map((r) => [r.dayKey, r])), [c.history])
+  const byDay = useMemo(() => dayResults(c.history), [c.history])
   const first = new Date(Date.UTC(view.y, view.m, 1))
   const offset = (first.getUTCDay() + 6) % 7
   const days = new Date(Date.UTC(view.y, view.m + 1, 0)).getUTCDate()
@@ -96,7 +97,7 @@ export function History(c: Ctx) {
   const rate = c.stats.played ? Math.round((c.stats.totalWins / c.stats.played) * 100) : 0
   const recent = [...c.history].reverse().slice(0, 20)
   const [open, setOpen] = useState<string | null>(null)
-  const sel = open ? c.history.find((r) => r.dayKey === open) : undefined
+  const sel = open ? c.history.find((r) => recId(r) === open) : undefined
   return (
     <>
       <div>
@@ -118,7 +119,7 @@ export function History(c: Ctx) {
             const date = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
             const key = keyForDisplayDay(date, (k) => byDay.has(k) || k === c.today) // la clé stockée porte la date de fin du jour de jeu
             const r = byDay.get(key)
-            return <div key={key} className={`d ${r ? (r.result === 'win' ? 'w' : 'l') : ''} ${key === c.today ? 'today' : ''}`}>{i + 1}</div>
+            return <div key={key} className={`d ${r ? (r === 'win' ? 'w' : 'l') : ''} ${key === c.today ? 'today' : ''}`}>{i + 1}</div>
           })}
         </div>
         <div className="row between small muted" style={{ fontWeight: 700 }}>
@@ -130,9 +131,9 @@ export function History(c: Ctx) {
       <h2 className="h2">{t('hist.recent')}</h2>
       {recent.length === 0 && <p className="muted">{t('hist.empty')}</p>}
       {recent.map((r) => (
-        <button key={r.dayKey} type="button" className="card stack hist-card" onClick={() => setOpen(r.dayKey)} aria-label={`${trainerName(r.trainer)} — ${t('hist.detail')}`}>
+        <button key={recId(r)} type="button" className="card stack hist-card" onClick={() => setOpen(recId(r))} aria-label={`${trainerName(r.trainer)} — ${t('hist.detail')}`}>
           <div className="row between">
-            <span className="small" style={{ fontWeight: 700 }}>{label(r.dayKey, c.today)}</span>
+            <span className="small" style={{ fontWeight: 700 }}>{label(r.dayKey, c.today)}{slotOf(r) > 1 ? ` · ${t('hist.battleN', { n: slotOf(r) })}` : ''}</span>
             <span className={r.result === 'win' ? 'pill green' : 'pill red'}>{r.result === 'win' ? t('hist.win') : t('hist.loss')}</span>
           </div>
           <div className="row between" style={{ padding: 12, borderRadius: 16, background: 'var(--surface2)' }}>
@@ -143,14 +144,14 @@ export function History(c: Ctx) {
             <div className="row" style={{ gap: 8 }}>
               <div style={{ textAlign: 'right' }}>
                 <b style={{ fontSize: 22, color: r.result === 'win' ? 'var(--tertiary)' : 'var(--secondary)' }}>{r.survivors ?? (r.result === 'win' ? '≥1' : 0)}/6</b>
-                <div className="muted small">{t('hist.turns', { n: r.turns, p: c.score.byDay.get(r.dayKey)?.points ?? 0 })}</div>
+                <div className="muted small">{t('hist.turns', { n: r.turns, p: c.score.byDay.get(recId(r))?.points ?? 0 })}</div>
               </div>
               <ChevronRight size={18} className="muted" aria-hidden="true" />
             </div>
           </div>
         </button>
       ))}
-      {sel && <BattleDetail r={sel} sc={c.score.byDay.get(sel.dayKey)} today={c.today} onClose={() => setOpen(null)} />}
+      {sel && <BattleDetail r={sel} sc={c.score.byDay.get(recId(sel))} today={c.today} onClose={() => setOpen(null)} />}
     </>
   )
 }

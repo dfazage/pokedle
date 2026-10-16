@@ -2,7 +2,7 @@
 // dresseur, la série en cours et un bonus « sans K.O. ». Tout est dérivé du DayRecord : le même historique donne
 // toujours les mêmes points, en local comme en ligne. Les poids vivent dans SCORING pour être ajustés sans toucher au code.
 import tiers from '../data/tiers.json'
-import { prevDay, type DayRecord } from './history'
+import { cmpRec, prevDay, recId, type DayRecord } from './history'
 
 export const SCORING = {
   /** Points de base selon la classe du dresseur (`class` dans src/data/trainers*.json). */
@@ -84,16 +84,20 @@ export function scoreRecord(r: DayRecord, streak: number): ScoreBreakdown {
   return { points, base, speed, hp, survivors, perf, streak, streakMult, flawless, attempt, attemptMult }
 }
 
+/** `byDay` est indexé par recId (le combat n°1 garde la clé du jour, le n°2 ajoute « ~2 »). La série compte des JOURS gagnés. */
 export function scoreHistory(history: DayRecord[]): ScoreSummary {
   const byDay = new Map<string, ScoreBreakdown>()
   let total = 0
   let run = 0
-  let prev: string | null = null
-  for (const r of [...history].sort((a, b) => a.dayKey.localeCompare(b.dayKey))) {
-    run = r.result === 'win' ? (prev && prevDay(r.dayKey) === prev ? run + 1 : 1) : 0
-    prev = r.result === 'win' ? r.dayKey : null
-    const s = scoreRecord(r, run)
-    byDay.set(r.dayKey, s)
+  let prevWin: string | null = null // dernier jour gagné
+  for (const r of [...history].sort(cmpRec)) {
+    if (r.result === 'win' && r.dayKey !== prevWin) {
+      run = prevWin && prevDay(r.dayKey) === prevWin ? run + 1 : 1
+      prevWin = r.dayKey
+    }
+    // Un jour entièrement perdu casse la série : la victoire suivante repart de 1 (jour non consécutif au dernier jour gagné).
+    const s = scoreRecord(r, r.result === 'win' ? run : 0)
+    byDay.set(recId(r), s)
     total += s.points
   }
   return { total, byDay }

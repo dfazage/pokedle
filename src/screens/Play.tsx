@@ -4,9 +4,15 @@ import { ChevronLeft, ChevronRight, Clock, Flame, Lock, Share2, Shield, Trophy, 
 import type { Ctx } from './types'
 import { classLabel, GEN_INFO, mvName, spName, trainerName } from '../game/fr'
 import { locale, t, tn, useLang } from '../i18n'
+
+/** Heure locale de l'appareil à laquelle s'ouvre le combat n°2 (10:00 UTC). */
+const lockedLocal = () => { const d = new Date(); d.setUTCHours(10, 0, 0, 0); return d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' }) }
 import { dayNumber, difficulty } from '../game/info'
-import { computeStats } from '../game/history'
+import { computeStats, recordFor } from '../game/history'
 import { siteUrl } from '../game/cloud'
+import { battleId } from '../game/rng'
+import { localTimes } from '../ui/Announce'
+import { recId } from '../game/history'
 import { buildShareText, canNativeShare, copyShare, gridFor, shareResult, type ShareOutcome } from '../game/share'
 import { isFormidable } from '../game/scoring'
 import { TrainerImg } from '../game/trainerSprites'
@@ -18,13 +24,14 @@ import { PixelHearts, type HeartAnim } from '../ui/PixelHeart'
 import type { MoveFacts } from '../game/moves'
 
 const stars = (n: number) => '★'.repeat(n) + '☆'.repeat(3 - n)
-const today$ = (c: Ctx) => c.history.find((r) => r.dayKey === c.today)
+const today$ = (c: Ctx) => recordFor(c.history, c.today, c.slot)
+const battleTag = (c: Ctx) => t('home.battleN', { n: c.slot, total: c.slots })
 
 export function Home(c: Ctx) {
   useLang()
   const { challenge: ch, stats } = c
   const gi = GEN_INFO[ch.gen]
-  const diff = difficulty(ch.estimatedWinRate)
+  const diff = difficulty(ch.estimatedWinRate, ch.dayKey)
   const left = useCountdown()
   const done = c.done
   const fire = isFormidable(ch.gen, ch.trainer.name)
@@ -43,12 +50,36 @@ export function Home(c: Ctx) {
       </div>
       <div className="row between">
         <div>
-          <div className="eyebrow">{t('home.daily', { n: dayNumber(c.today) })}</div>
+          <div className="eyebrow">{c.slots > 1 ? `${battleTag(c)} · ` : ''}{t('home.daily', { n: dayNumber(c.today) })}</div>
           <h1 className="title">{t('home.title')}</h1>
         </div>
         <span className="pill"><Clock size={14} /> {left}</span>
       </div>
 
+      {c.slots > 1 && c.slot > 1 && recordFor(c.history, c.today, 1) && (
+        <button type="button" className="card row between" onClick={() => c.onViewResult(1)} style={{ textAlign: 'left' }}>
+          <span className="small" style={{ fontWeight: 700 }}>{t('home.prevBattle', { n: 1, total: c.slots })}</span>
+          <span className="row" style={{ gap: 8 }}>
+            <span className={recordFor(c.history, c.today, 1)!.result === 'win' ? 'pill green' : 'pill red'}>{recordFor(c.history, c.today, 1)!.result === 'win' ? t('hist.win') : t('hist.loss')}</span>
+            <span className="muted small">{t('home.prevSee')}</span>
+            <ChevronRight size={16} className="muted" aria-hidden="true" />
+          </span>
+        </button>
+      )}
+
+      {c.locked ? (
+        <section className="hero">
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <span className="chip">{battleTag(c)}</span>
+          </div>
+          <div className="hero-trainer-txt" style={{ textAlign: 'center', padding: '18px 0' }}>
+            <Lock size={44} style={{ opacity: 0.8 }} />
+            <h2>{t('home.locked.title')}</h2>
+            <p>{localTimes() ? t('home.locked.sub', { local: lockedLocal() }) : t('home.locked.subKL')}</p>
+          </div>
+          <button className="cta" onClick={c.onPlay}>{t('home.locked.cta')} <ArrowRight size={18} /></button>
+        </section>
+      ) : (
       <section className="hero">
         <div className="row" style={{ flexWrap: 'wrap' }}>
           <button className="chip" onClick={() => c.go('guide')}>{t('home.league', { region: gi.region, gen: ch.gen })}</button>
@@ -78,6 +109,7 @@ export function Home(c: Ctx) {
           {done ? t('home.cta.result') : c.inProgress ? t('home.cta.resume') : t('home.cta.start')} <ArrowRight size={18} />
         </button>
       </section>
+      )}
 
       <section className="card" style={{ padding: '12px 14px', display: 'grid', gap: 8 }}>
         <div className="row between">
@@ -122,7 +154,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
   useLang()
   const { challenge: ch } = c
   const gi = GEN_INFO[ch.gen]
-  const diff = difficulty(ch.estimatedWinRate)
+  const diff = difficulty(ch.estimatedWinRate, ch.dayKey)
   const left = useCountdown()
   const trainerTypes = ch.opponentPreview[0]?.types ?? ['Normal']
   const worldRate = c.world && c.world.players ? ((c.world.wins / c.world.players) * 100).toFixed(1) : null
@@ -130,7 +162,7 @@ export function Opponent(c: Ctx & { onBack: () => void }) {
     <>
       <TopBar title="Pokébadle Battle" onBack={c.onBack} />
       <div className="row between">
-        <span className="pill"><span style={{ width: 8, height: 8, borderRadius: 9, background: 'var(--primary)' }} /> {t('opp.daily', { n: dayNumber(c.today) })}</span>
+        <span className="pill"><span style={{ width: 8, height: 8, borderRadius: 9, background: 'var(--primary)' }} /> {c.slots > 1 ? `${battleTag(c)} · ` : ''}{t('opp.daily', { n: dayNumber(c.today) })}</span>
         <span className="pill"><Clock size={14} /> {left}</span>
       </div>
       <section className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
@@ -234,7 +266,7 @@ export function Result(c: Ctx) {
   const rec = today$(c)
   const left = useCountdown()
   const [outcome, setOutcome] = useState<ShareOutcome | null>(null)
-  const gainKey = `pokedle:heartGain:${c.today}`
+  const gainKey = `pokedle:heartGain:${battleId(c.today, c.slot)}`
   // Le cœur gagné apparaît en rebondissant, une seule fois (à l'arrivée sur l'écran juste après le combat).
   const [anim, setAnim] = useState<HeartAnim>(() => {
     if (!rec || rec.result !== 'win' || !c.hearts.gained) return null
@@ -264,17 +296,20 @@ export function Result(c: Ctx) {
   }
   if (!rec) return null
   const win = rec.result === 'win'
-  const sc = c.score.byDay.get(rec.dayKey)
+  // Défaite au combat 1/2 : le combat 2/2 peut encore sauver le jour (donc la série).
+  const atStake = !win && c.slot < c.slots && !recordFor(c.history, c.today, c.slot + 1)
+  const sc = c.score.byDay.get(recId(rec))
   const alive = rec.survivors ?? (win ? 1 : 0)
   const kos = rec.kos ?? (win ? 6 : 0)
-  const prev = computeStats(c.history.filter((r) => r.dayKey !== c.today), c.today).currentStreak
+  const prev = computeStats(c.history.filter((r) => r.dayKey !== c.today), c.today, c.slots).currentStreak
   const text = buildShareText({
     rec,
     dayNo: dayNumber(c.today),
-    grid: gridFor(c.today, rec),
+    grid: gridFor(battleId(c.today, c.slot), rec),
     streak: c.stats.currentStreak,
     points: sc?.points,
     url: siteUrl().replace(/\/$/, ''),
+    battle: c.slots > 1 ? `${c.slot}/${c.slots}` : undefined,
   })
   const flash = (o: ShareOutcome) => {
     setOutcome(o === 'shared' || o === 'cancelled' ? null : o)
@@ -285,7 +320,7 @@ export function Result(c: Ctx) {
   return (
     <>
       <TopBar
-        title={<>{t('res.title')} <span className="pill" style={{ marginLeft: 6 }}>#{dayNumber(c.today)}</span><div className="muted small">{t('res.sub')}</div></>}
+        title={<>{t('res.title')} <span className="pill" style={{ marginLeft: 6 }}>#{dayNumber(c.today)}</span>{c.slots > 1 && <span className="pill" style={{ marginLeft: 6 }}>{battleTag(c)}</span>}<div className="muted small">{t('res.sub')}</div></>}
         onBack={() => c.go('home')}
       />
       <div className="stack" style={{ alignItems: 'center', textAlign: 'center', padding: '8px 0' }}>
@@ -293,16 +328,17 @@ export function Result(c: Ctx) {
           {win ? <Trophy size={56} /> : <HeartCrack size={56} />}
         </span>
         <div className="big-result" style={{ color: win ? 'var(--yellow)' : 'var(--secondary)' }}>{win ? t('res.win') : t('res.loss')}</div>
-        <p className="muted">{win ? t('res.winMsg', { name: trainerName(c.challenge.trainer.name) }) : t('res.lossMsg')}</p>
+        <p className="muted">{win ? t('res.winMsg', { name: trainerName(rec.trainer) }) : t('res.lossMsg')}</p>
       </div>
       <section className="card stack">
         <div className="row between">
-          <span className="pill" style={win ? undefined : { color: 'var(--secondary)' }}>{win ? <><Flame size={14} /> {t('res.streakOn')}</> : <><HeartCrack size={14} /> {t('res.streakBroken')}</>}</span>
+          <span className="pill" style={win ? undefined : { color: 'var(--secondary)' }}>{win ? <><Flame size={14} /> {t('res.streakOn')}</> : atStake ? <><HeartCrack size={14} /> {t('res.streakRisk')}</> : <><HeartCrack size={14} /> {t('res.streakBroken')}</>}</span>
           <b style={{ fontSize: 28 }}>{c.stats.currentStreak} <small className="muted" style={{ fontSize: 12 }}>{tn('res.daysUpper', c.stats.currentStreak)}</small></b>
         </div>
         <WeekStrip history={c.history} today={c.today} />
         {win && <p className="small" style={{ margin: 0 }}>{t('res.week.next', { n: c.stats.currentStreak + 1 })}</p>}
-        {!win && prev > 0 && <p className="muted small">{t('res.prevStreak')} <b>{tn('days', prev)}</b> {t('res.reset')}</p>}
+        {atStake && <p className="small" style={{ margin: 0 }}>{t('res.streakRiskMsg')}</p>}
+        {!win && !atStake && prev > 0 && <p className="muted small">{t('res.prevStreak')} <b>{tn('days', prev)}</b> {t('res.reset')}</p>}
         {win && c.stats.currentStreak >= c.stats.bestStreak && c.stats.currentStreak > 1 && <p className="small" style={{ color: 'var(--tertiary)' }}>{t('res.newRecord')}</p>}
       </section>
       <div className="tiles" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
@@ -368,6 +404,7 @@ export function Result(c: Ctx) {
         <b style={{ fontSize: 36, color: 'var(--primary)', letterSpacing: 2 }}>{left}</b>
         <p className="muted small">{t('res.nextText')}</p>
       </section>
+      {c.slot < c.slots && <button className="btn" onClick={() => c.go('home')} disabled={c.hearts.replayPending}>{t('res.toSecond')} <ArrowRight size={18} /></button>}
       <button className="btn ghost" onClick={() => c.go('leaderboard')}>{t('res.board')}</button>
       <PushAsk win={win} signedIn={!!c.email} />
     </>

@@ -1,4 +1,4 @@
-// Notifications push (Web Push) : « le combat du jour est disponible », envoyées à 12h (Paris) par l'Edge Function
+// Notifications push (Web Push) : « un combat est disponible », envoyées à 12h et 18h (Kuala Lumpur) par l’Edge Function
 // send-daily-push. Le navigateur fournit une souscription (endpoint + clés) que l'on enregistre côté Supabase ; voir
 // supabase/push_subscriptions.sql. Sans VITE_VAPID_PUBLIC_KEY (ou sans Supabase) la fonctionnalité reste cachée.
 import { supabase } from './cloud'
@@ -124,13 +124,4 @@ export async function sendTestNotification(title: string, body: string): Promise
   await reg.showNotification(title, { body, icon: `${import.meta.env.BASE_URL}pwa-192.png`, tag: 'daily-battle-test', data: { url: import.meta.env.BASE_URL } })
 }
 
-/** Prochain rappel (12h à Paris) dans l'heure locale de l'appareil. Les décalages horaires sont des heures entières. */
-export function nextReminder(now = new Date()): Date {
-  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hourCycle: 'h23' })
-  const start = new Date(Math.floor(now.getTime() / 3600000) * 3600000 + 3600000)
-  for (let i = 0; i < 48; i++) {
-    const d = new Date(start.getTime() + i * 3600000)
-    if (Number(fmt.format(d)) === 12) return d
-  }
-  return start
-}
+export { nextReminder, REMINDER_HOURS_UTC } from './reminder'

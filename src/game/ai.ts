@@ -1,8 +1,13 @@
 import { Dex } from '@pkmn/dex'
 import type { Battle } from '@pkmn/sim'
+import { aiChooseSmart } from './aiSmart'
+
+/** Niveau 1 : IA simple (jours avant HARD_FROM, inchangée pour que les combats déjà joués se rejouent à l'identique). Niveau 2 : voir aiSmart.ts. */
+export type AiLevel = 1 | 2
 
 /** IA simple : choisit l'attaque au meilleur dégât estimé, change seulement si forcée. */
-export function aiChoose(battle: Battle, sideIdx: 0 | 1, gen: number): string {
+export function aiChoose(battle: Battle, sideIdx: 0 | 1, gen: number, level: AiLevel = 1): string {
+  if (level === 2) return aiChooseSmart(battle, sideIdx, gen)
   const side = battle.sides[sideIdx]
   const req = side.activeRequest as any
   if (!req) return 'default'

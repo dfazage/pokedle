@@ -8,15 +8,15 @@ import '@fontsource/plus-jakarta-sans/700.css'
 import './ui/theme.css'
 import type { DailyChallenge } from './game/daily'
 import type { BattleSession, BattleView, Step } from './game/session'
-import { computeStats, getRecord, loadHistory, removeRecord, saveRecord, type DayRecord } from './game/history'
+import { computeStats, getRecord, loadHistory, recordFor, removeRecord, saveRecord, slotOf, type DayRecord } from './game/history'
 import { gridFromTeams, saveGrid } from './game/share'
 import { clearAttempt, heartsInfo, loadAttempt, saveAttempt } from './game/hearts'
-import { gameDayKey } from './game/rng'
+import { battleId, gameDayKey, openSlots, slotsPerDay } from './game/rng'
 import { classLabel, GEN_INFO, spName, trainerName } from './game/fr'
 import { t, useLang } from './i18n'
 import { autoUpdate, staleBuild, useUpdateAvailable } from './game/update'
 import { UpdateBanner } from './ui/UpdateBanner'
-import { PrefPoll } from './ui/PrefPoll'
+import { Announce } from './ui/Announce'
 import { dayNumber } from './game/info'
 import { isFormidable, scoreHistory } from './game/scoring'
 import { isAvatar, loadLocalAvatar, saveLocalAvatar } from './game/avatars'
@@ -76,27 +76,35 @@ export default function App() {
 
 function AppScreens() {
   useLang() // re-rendu complet de l'app au changement de langue
-  const today = useMemo(() => gameDayKey(), []) // jour de jeu au chargement ; le passage à 12h (Paris) recharge l'app (voir plus bas)
+  const today = useMemo(() => gameDayKey(), []) // jour de jeu au chargement ; le changement de jour recharge l'app (voir plus bas)
+  const slots = slotsPerDay(today) // combats du jour (2 à partir du 18/10 clé, soit le 17/10 à 12h KL)
+  const openAtLoad = useMemo(() => openSlots(), []) // combats déjà publiés au chargement ; la publication du suivant recharge l'app
   const [theme, setTheme] = useLocalState<'auto' | 'light' | 'dark'>('pokedle:theme', 'auto')
   // Accès à l'app : il faut être connecté.
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [authReady, setAuthReady] = useState(!supabase) // session Supabase restaurée ?
   const [screen, setScreen] = useState<Screen>('onboarding')
-  // Changement de jour de jeu (12h Paris) app ouverte : on recharge pour repartir proprement sur le nouveau jour (défi, essais, historique),
+  // Changement de jour de jeu (12h KL) ou publication du combat n°2 (18h KL) app ouverte : on recharge pour repartir proprement (défi, essais, historique),
   // sauf pendant un combat ou son résultat (la progression est sauvegardée par jour, rien n'est perdu). Contrôle au retour au premier plan et chaque minute.
   useEffect(() => {
     if (['intro', 'battle', 'result', 'reset'].includes(screen)) return
-    const check = () => { if (gameDayKey() !== today) location.reload() }
+    const check = () => { if (gameDayKey() !== today || openSlots() !== openAtLoad) location.reload() }
     check()
     const id = window.setInterval(check, 60_000)
     document.addEventListener('visibilitychange', check)
     return () => { window.clearInterval(id); document.removeEventListener('visibilitychange', check) }
-  }, [screen, today])
-  const [baseChallenge, setChallenge] = useState<DailyChallenge | null>(null)
+  }, [screen, today, openAtLoad])
+  // Combat affiché (1 ou 2) : suit l'état du jour tant qu'on est sur l'accueil, reste fixe pendant un combat / un résultat.
+  const [slot, setSlot] = useState(() => (slots === 2 && loadHistory().some((r) => r.dayKey === today && slotOf(r) === 1) ? 2 : 1))
+  const bid = battleId(today, slot) // identifiant du combat affiché (clés de stockage local)
+  const locked = slot > openAtLoad // combat pas encore publié
+  const buildSlot = locked ? 1 : slot
+  const [challenges, setChallenges] = useState<Record<number, DailyChallenge>>({})
+  const baseChallenge = challenges[buildSlot] ?? null
   const [rerollTick, setRerollTick] = useState(0)
-  const [order, setOrder] = useState<number[] | null>(() => loadOrder(today))
+  const [order, setOrder] = useState<number[] | null>(() => loadOrder(bid))
   const [history, setHistory] = useState<DayRecord[]>(() => loadHistory())
-  const [attemptNo, setAttemptNo] = useState(() => loadAttempt(today)) // essais commencés aujourd'hui (1 = essai offert)
+  const [attemptNo, setAttemptNo] = useState(() => loadAttempt(bid)) // essais commencés pour ce combat (1 = essai offert)
   const [email, setEmail] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [username, setUsername] = useState<string | null>(null)
@@ -104,6 +112,8 @@ function AppScreens() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [replayOk, setReplayOk] = useState(true) // le serveur sait enregistrer un rejeu (supabase/results_attempts.sql appliqué)
   const [rows, setRows] = useState<LeaderRow[]>([])
+  const slotRef = useRef(slot)
+  slotRef.current = slot
   const [world, setWorld] = useState<{ players: number; wins: number } | null>(null)
   const [view, setView] = useState<BattleView | null>(null)
   const [queue, setQueue] = useState<Step[]>([])
@@ -147,7 +157,7 @@ function AppScreens() {
     setHistory(await fetchHistory())
     setReplayOk(serverSupportsReplay())
     setRows(await fetchLeaderboard())
-    setWorld(await fetchWorldStats(today))
+    setWorld(await fetchWorldStats(today, slotRef.current))
   }, [today])
   useEffect(() => {
     if (!supabase) return
@@ -200,6 +210,13 @@ function AppScreens() {
     return () => sub.subscription.unsubscribe()
   }, [today, refreshCloud])
 
+  // Autre combat affiché : ordre d'équipe, essais et statistiques mondiales de ce combat.
+  useEffect(() => {
+    setOrder(loadOrder(bid))
+    setAttemptNo(loadAttempt(bid))
+    if (supabase) void fetchWorldStats(today, slot).then(setWorld)
+  }, [bid, today, slot])
+
   // Reset « pour tous » décidé par un admin : on vide l'état local du jour si le numéro de reset a changé.
   useEffect(() => {
     if (!supabase) return
@@ -230,8 +247,9 @@ function AppScreens() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today, refreshCloud])
 
-  // Calcul du défi du jour (quelques secondes sur mobile) : on laisse l'écran se dessiner avant.
+  // Calcul du défi du combat affiché (quelques secondes sur mobile) : on laisse l'écran se dessiner avant. Un défi déjà calculé est conservé.
   useEffect(() => {
+    if (challenges[buildSlot]) return
     let cancelled = false
     ;(async () => {
       const [daily, sess, stale] = await Promise.all([import('./game/daily'), import('./game/session'), staleBuild()])
@@ -241,13 +259,14 @@ function AppScreens() {
       await new Promise((r) => setTimeout(r, 30))
       if (!cancelled) {
         const salt = await fetchDailySalt(today)
-        if (!cancelled) setChallenge(daily.buildDaily(today, { salt }))
+        if (!cancelled) setChallenges((cur) => ({ ...cur, [buildSlot]: daily.buildDaily(today, { salt, slot: buildSlot }) }))
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [today, rerollTick])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today, rerollTick, buildSlot])
 
   const finish = useCallback(
     (s: BattleSession) => {
@@ -255,6 +274,7 @@ function AppScreens() {
       if (!v.ended || !v.result) return
       const rec: DayRecord = {
         dayKey: today,
+        ...(slot > 1 ? { slot } : {}),
         trainer: s.challenge.trainer.name,
         gen: s.challenge.gen,
         result: v.result,
@@ -262,18 +282,18 @@ function AppScreens() {
         survivors: v.player.team.filter((m) => !m.fainted).length,
         kos: v.opponent.team.filter((m) => m.fainted).length,
         hpLeft: Math.round((100 * v.player.team.reduce((a, m) => a + Math.max(0, m.hp), 0)) / Math.max(1, v.player.team.reduce((a, m) => a + m.maxhp, 0))),
-        attempts: Math.max(1, loadAttempt(today)),
+        attempts: Math.max(1, loadAttempt(bid)),
       }
       // Copie locale (invité / hors ligne) : un rejeu remplace la défaite du jour, jamais une victoire.
-      const ex = getRecord(today)
+      const ex = getRecord(today, slot)
       if (!ex || (ex.result === 'loss' && (ex.attempts ?? 1) < (rec.attempts ?? 1))) {
         saveRecord(rec)
-        saveGrid(today, gridFromTeams(v.player.team, v.opponent.team)) // détail par Pokémon pour la grille de partage
+        saveGrid(bid, gridFromTeams(v.player.team, v.opponent.team)) // détail par Pokémon pour la grille de partage
       }
       if (signedIn.current) submitResult(rec, choices.current).then(refreshCloud)
       else setHistory(loadHistory())
     },
-    [today, refreshCloud],
+    [today, slot, bid, refreshCloud],
   )
 
   const startBattle = useCallback(() => {
@@ -281,11 +301,11 @@ function AppScreens() {
     const { BattleSession, formatSteps } = engine.current
     const s = new BattleSession(challenge)
     session.current = s
-    if (!loadAttempt(today)) {
-      saveAttempt(today, 1) // 1er essai du jour : offert
+    if (!loadAttempt(bid)) {
+      saveAttempt(bid, 1) // 1er essai du combat : offert
       setAttemptNo(1)
     }
-    const saved = loadChoices(today)
+    const saved = loadChoices(bid)
     choices.current = []
     const intro = formatSteps(s.drainLog())
     for (const c of saved) {
@@ -307,7 +327,7 @@ function AppScreens() {
     setScreen(saved.length ? 'battle' : 'intro') // nouveau combat : petite intro avant l'arène
     startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name), challenge.trainer.id)) // lancé par le clic sur « Lancer le combat »
     finish(s)
-  }, [challenge, today, finish])
+  }, [challenge, bid, finish])
 
   // La musique s'arrête quand on quitte le combat, et en fondu une fois le dernier message lu.
   const battleOver = !!view?.ended && !queue.length && !pending
@@ -333,7 +353,7 @@ function AppScreens() {
     const s = session.current
     if (!s) return
     choices.current.push(choice)
-    saveChoices(today, choices.current)
+    saveChoices(bid, choices.current)
     const before = s.view()
     setQueue(engine.current!.formatSteps(s.choose(choice), before))
     setPending(s.view()) // l'écran se met à jour une fois le texte lu
@@ -355,9 +375,9 @@ function AppScreens() {
   const onReplay = () => {
     const info = hearts
     if (!info.canReplay) return
-    saveAttempt(today, info.attempt + 1)
+    saveAttempt(bid, info.attempt + 1)
     setAttemptNo(info.attempt + 1)
-    saveChoices(today, [])
+    saveChoices(bid, [])
     choices.current = []
     session.current = null
     setView(null)
@@ -382,6 +402,20 @@ function AppScreens() {
     if ((await updateAvatar(id)) === 'ok') setRows(await fetchLeaderboard()) // le classement affiche la nouvelle icône
   }
 
+  /** Efface l'état local (progression, ordre, essais) des deux combats du jour. */
+  const clearLocalBattles = () => {
+    for (let n = 1; n <= 2; n++) {
+      const id = battleId(today, n)
+      try {
+        localStorage.removeItem(progressKey(id))
+        localStorage.removeItem(orderKey(id))
+      } catch {
+        /* ignore */
+      }
+      clearAttempt(id)
+    }
+  }
+
   const adminReroll = async () => {
     if (!isAdmin) return
     if (!window.confirm(t('adm.confirmReroll'))) return
@@ -389,13 +423,7 @@ function AppScreens() {
       window.alert(t('adm.rerollFail'))
       return
     }
-    try {
-      localStorage.removeItem(progressKey(today))
-      localStorage.removeItem(orderKey(today))
-    } catch {
-      /* ignore */
-    }
-    clearAttempt(today)
+    clearLocalBattles()
     setAttemptNo(0)
     session.current = null
     choices.current = []
@@ -403,21 +431,16 @@ function AppScreens() {
     setView(null)
     setQueue([])
     setPending(null)
-    setChallenge(null)
+    setChallenges({})
     setRerollTick((n) => n + 1)
     setScreen('home')
   }
 
   const resetLocalToday = () => {
-    try {
-      localStorage.removeItem(progressKey(today))
-      localStorage.removeItem(orderKey(today))
-    } catch {
-      /* ignore */
-    }
-    clearAttempt(today)
+    clearLocalBattles()
     setAttemptNo(0)
     removeRecord(today)
+    setSlot(1)
     session.current = null
     choices.current = []
     setOrder(null)
@@ -451,15 +474,10 @@ function AppScreens() {
       window.alert(t('adm.resetFail'))
       return
     }
-    try {
-      localStorage.removeItem(progressKey(today))
-      localStorage.removeItem(orderKey(today))
-    } catch {
-      /* ignore */
-    }
-    clearAttempt(today)
+    clearLocalBattles()
     setAttemptNo(0)
     removeRecord(today)
+    setSlot(1)
     session.current = null
     choices.current = []
     setOrder(null)
@@ -479,16 +497,27 @@ function AppScreens() {
     }
   }
 
-  const stats = computeStats(history, today)
+  const stats = computeStats(history, today, slots)
   const score = useMemo(() => scoreHistory(history), [history])
-  const baseHearts = heartsInfo(history, today, attemptNo)
+  const baseHearts = heartsInfo(history, today, attemptNo, slot)
   // Connecté mais serveur sans la colonne `attempts` : un rejeu ne pourrait pas être enregistré, on le désactive.
   const hearts = isSignedIn && !replayOk ? { ...baseHearts, canReplay: false } : baseHearts
   // Une défaite suivie d'un rejeu payé n'est plus « terminée » tant que le rejeu n'est pas fini.
-  const done = history.some((r) => r.dayKey === today) && !hearts.replayPending
-  const inProgress = !done && loadChoices(today).length > 0
+  const done = !!recordFor(history, today, slot) && !hearts.replayPending
+  const inProgress = !done && !locked && loadChoices(bid).length > 0
+  // Combat à afficher sur l'accueil : le n°2 dès que le n°1 est terminé (le n°1 en rejeu en cours reste le n°1).
+  const h1 = heartsInfo(history, today, slot === 1 ? attemptNo : loadAttempt(battleId(today, 1)), 1)
+  const activeSlot = slots === 2 && !!recordFor(history, today, 1) && !h1.replayPending ? 2 : 1
+  useEffect(() => {
+    if (screen === 'home' && slot !== activeSlot) setSlot(activeSlot)
+  }, [screen, slot, activeSlot])
+  const viewResult = (n: number) => {
+    setSlot(n)
+    setScreen('result')
+  }
   const onPlay = () => {
-    if (done) setScreen('result')
+    if (locked) viewResult(1)
+    else if (done) setScreen('result')
     else if (inProgress) startBattle()
     else setScreen('opponent')
   }
@@ -533,12 +562,12 @@ function AppScreens() {
     ;[cur[from], cur[to]] = [cur[to], cur[from]]
     setOrder(cur)
     try {
-      localStorage.setItem(orderKey(today), JSON.stringify(cur))
+      localStorage.setItem(orderKey(bid), JSON.stringify(cur))
     } catch {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, challenge, history, stats, score, username, avatar, onAvatar: chooseAvatar, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, slot, slots, locked, onViewResult: viewResult, challenge, history, stats, score, username, avatar, onAvatar: chooseAvatar, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done || locked, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
 
   if (screen === 'intro')
@@ -590,7 +619,7 @@ function AppScreens() {
       {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
-      <PrefPoll userId={userId} hold={screen !== 'home' || showUpdate} />
+      <Announce userId={userId} hold={screen !== 'home' || showUpdate} />
       <span hidden>{dayNumber(today)}</span>
     </main>
   )

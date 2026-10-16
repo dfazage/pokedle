@@ -1,6 +1,6 @@
 // Bande « ta semaine » de l'écran Résultat : les 6 derniers jours jusqu'à aujourd'hui, puis demain (à jouer).
 // Module pur (aucune dépendance React / DOM) pour rester testable avec scripts/test_week.ts.
-import { prevDay, type DayRecord } from './history'
+import { dayResults, prevDay, type DayRecord } from './history'
 import { addDays, displayDay, LAUNCH_DAY } from './rng'
 
 export type WeekState = 'win' | 'loss' | 'none' | 'tomorrow'
@@ -18,7 +18,7 @@ export function nextDay(key: string): string {
 
 /** 7 cases : J-5 … aujourd'hui, puis demain. Un jour sans combat (ou pas encore joué) est « none ». */
 export function weekCells(history: DayRecord[], today: string): WeekCell[] {
-  const byDay = new Map(history.map((r) => [r.dayKey, r.result]))
+  const byDay = dayResults(history)
   const days: string[] = [today]
   for (let i = 0; i < 5; i++) days.unshift(prevDay(days[0]))
   const cells: WeekCell[] = days.map((dayKey) => ({ dayKey, state: byDay.get(dayKey) ?? 'none', isToday: dayKey === today }))
@@ -71,7 +71,7 @@ export function isoWeek(key: string): number {
 const keysFor = (label: string): string[] => (label === LAUNCH_DAY ? [LAUNCH_DAY, addDays(label, 1)] : [addDays(label, 1)])
 
 export function calendarWeek(history: DayRecord[], today: string): CalWeek {
-  const byDay = new Map(history.map((r) => [r.dayKey, r.result]))
+  const byDay = dayResults(history)
   const todayLabel = displayDay(today)
   const from = mondayOf(todayLabel)
   const cells: CalCell[] = []

@@ -33,6 +33,8 @@ export interface Ctx {
   hearts: HeartsInfo
   /** Dépense 1 cœur et relance le combat du jour après une défaite. */
   onReplay: () => void
+  /** Entraînement : rejoue le combat `slot` d'un jour passé, sans rien enregistrer. */
+  onPractice: (dayKey: string, slot: number) => void
   go: (s: Screen) => void
   onPlay: () => void
   /** Ordre de l'équipe du joueur (modifiable tant que le combat n'a pas commencé). */

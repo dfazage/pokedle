@@ -580,6 +580,9 @@ h1, h2, h3, p { margin: 0; }
 [data-theme='dark'] .prefpoll-ok { color: #6fdcb9; }
 .prefpoll-thanks .prefpoll-title { margin: 0; font-size: 17px; }
 .prefpoll-thanks .prefpoll-body { margin-top: 2px; }
+.announce-strip .d { border-radius: 10px; font-size: 12px; }
+.announce-strip .d.pick { box-shadow: 0 0 0 2px var(--violet); }
+.prefpoll-opts .btn { padding: 13px; }
 @media (prefers-reduced-motion: reduce) { .prefpoll { animation: none; } }
 
 /* Verre du classement étendu à toutes les pages : cartes translucides sur halos de couleur (halos : <div className="app-glow"> dans App.tsx ; le classement garde les siens). */

@@ -676,7 +676,7 @@ function AppScreens() {
       {screen === 'reminders' && <Reminders {...ctx} onBack={() => setScreen('settings')} />}
       {screen === 'admin' && isAdmin && <Admin {...ctx} onBack={() => setScreen('settings')} />}
       {showNav && <BottomNav screen={screen} go={setScreen} onPlay={onPlay} />}
-      <Announce userId={userId} hold={screen !== 'home' || showUpdate} />
+      <Announce userId={userId} hold={screen !== 'home' || showUpdate} onTry={() => setScreen('history')} />
       <span hidden>{dayNumber(today)}</span>
     </main>
   )

@@ -123,6 +123,11 @@ function AppScreens() {
   const session = useRef<BattleSession | null>(null)
   const choices = useRef<string[]>([])
   const engine = useRef<Engine | null>(null)
+  // Mode entraînement : défi d'un jour passé rejoué depuis l'Historique. Rien n'est enregistré (ni résultat, ni cœurs, ni points, ni série).
+  const [practice, setPractice] = useState<DailyChallenge | null>(null)
+  const [practiceLoading, setPracticeLoading] = useState(false)
+  const practiceRef = useRef<DailyChallenge | null>(null)
+  practiceRef.current = practice
   const { available: updateAvailable } = useUpdateAvailable() // le serveur publie une autre version que celle qui tourne
   const [updateLater, setUpdateLater] = useState(false)
 
@@ -174,6 +179,7 @@ function AppScreens() {
         setView(null)
         setQueue([])
         setPending(null)
+        setPractice(null)
         setAvatar(null)
         setHistory(loadHistory())
         setScreen((s) => (s === 'battle' || s === 'intro' || s === 'result' || s === 'team' || s === 'opponent' ? 'home' : s))
@@ -296,16 +302,11 @@ function AppScreens() {
     [today, slot, bid, refreshCloud],
   )
 
-  const startBattle = useCallback(() => {
-    if (!challenge || !engine.current) return
-    const { BattleSession, formatSteps } = engine.current
-    const s = new BattleSession(challenge)
+  /** Lance un combat sur `ch` en rejouant les choix `saved` (reprise d'un combat en cours). */
+  const launch = useCallback((ch: DailyChallenge, saved: string[]) => {
+    const { BattleSession, formatSteps } = engine.current!
+    const s = new BattleSession(ch)
     session.current = s
-    if (!loadAttempt(bid)) {
-      saveAttempt(bid, 1) // 1er essai du combat : offert
-      setAttemptNo(1)
-    }
-    const saved = loadChoices(bid)
     choices.current = []
     const intro = formatSteps(s.drainLog())
     for (const c of saved) {
@@ -325,17 +326,57 @@ function AppScreens() {
       setView({ ...v, player: { ...v.player, active: null }, opponent: { ...v.opponent, active: null } })
     }
     setScreen(saved.length ? 'battle' : 'intro') // nouveau combat : petite intro avant l'arène
-    startMusic(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name), challenge.trainer.id)) // lancé par le clic sur « Lancer le combat »
-    finish(s)
-  }, [challenge, bid, finish])
+    startMusic(musicFor(ch.trainer.class, ch.gen, isFormidable(ch.gen, ch.trainer.name), ch.trainer.id)) // lancé par le clic sur « Lancer le combat »
+    return s
+  }, [])
+
+  const startBattle = useCallback(() => {
+    if (!challenge || !engine.current) return
+    setPractice(null)
+    if (!loadAttempt(bid)) {
+      saveAttempt(bid, 1) // 1er essai du combat : offert
+      setAttemptNo(1)
+    }
+    finish(launch(challenge, loadChoices(bid)))
+  }, [challenge, bid, finish, launch])
+
+  /** Entraînement : rejoue le combat `slot` d'un jour passé (même dresseur et mêmes équipes que ce jour-là, re-tirage admin compris). */
+  const onPractice = useCallback(async (dayKey: string, n: number) => {
+    if (dayKey >= today || practiceLoading) return
+    setPracticeLoading(true)
+    try {
+      const [daily, sess] = await Promise.all([import('./game/daily'), import('./game/session')])
+      engine.current ??= { BattleSession: sess.BattleSession, formatLog: sess.formatLog, formatSteps: sess.formatSteps }
+      const salt = await fetchDailySalt(dayKey)
+      await new Promise((r) => setTimeout(r, 30)) // laisse l'écran de préparation se dessiner (calcul de quelques secondes sur mobile)
+      const ch = daily.buildDaily(dayKey, { salt, slot: n })
+      setPractice(ch)
+      practiceRef.current = ch
+      launch(ch, [])
+    } finally {
+      setPracticeLoading(false)
+    }
+  }, [today, practiceLoading, launch])
+
+  /** Fin de l'entraînement : retour à l'Historique, le combat du jour n'est pas touché. */
+  const exitPractice = () => {
+    session.current = null
+    choices.current = []
+    setPractice(null)
+    setView(null)
+    setQueue([])
+    setPending(null)
+    setScreen('history')
+  }
 
   // La musique s'arrête quand on quitte le combat, et en fondu une fois le dernier message lu.
   const battleOver = !!view?.ended && !queue.length && !pending
   // Victoire : le morceau de victoire démarre et continue sur l'écran de résultat ; défaite : fondu simple.
   useEffect(() => { if (screen !== 'intro' && screen !== 'battle' && screen !== 'result') stopMusic(0.6) }, [screen])
   useEffect(() => {
-    if (!battleOver || !challenge) return
-    if (view?.result === 'win') playVictory(musicFor(challenge.trainer.class, challenge.gen, isFormidable(challenge.gen, challenge.trainer.name), challenge.trainer.id))
+    const ch = practiceRef.current ?? challenge
+    if (!battleOver || !ch) return
+    if (view?.result === 'win') playVictory(musicFor(ch.trainer.class, ch.gen, isFormidable(ch.gen, ch.trainer.name), ch.trainer.id))
     else stopMusic(1.5)
   }, [battleOver]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -353,17 +394,21 @@ function AppScreens() {
     const s = session.current
     if (!s) return
     choices.current.push(choice)
-    saveChoices(bid, choices.current)
+    if (!practiceRef.current) saveChoices(bid, choices.current) // entraînement : rien n'est sauvegardé
     const before = s.view()
     setQueue(engine.current!.formatSteps(s.choose(choice), before))
     setPending(s.view()) // l'écran se met à jour une fois le texte lu
-    finish(s)
+    if (!practiceRef.current) finish(s)
     bump((n) => n + 1)
   }
 
   const forfeit = () => {
     const s = session.current
     if (!s || s.view().ended) return
+    if (practiceRef.current) {
+      exitPractice() // entraînement : quitter sans rien compter
+      return
+    }
     if (!window.confirm(t('battle.forfeitConfirm'))) return
     s.forfeit()
     setQueue([{ text: t('b.fled'), wait: 1000 }])
@@ -567,32 +612,44 @@ function AppScreens() {
       /* ignore */
     }
   }
-  const ctx: Ctx = { today, slot, slots, locked, onViewResult: viewResult, challenge, history, stats, score, username, avatar, onAvatar: chooseAvatar, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done || locked, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll }
+  const ctx: Ctx = { today, slot, slots, locked, onViewResult: viewResult, challenge, history, stats, score, username, avatar, onAvatar: chooseAvatar, onRename: rename, email, world, inProgress, go: setScreen, onPlay, moveMon, orderLocked: inProgress || done || locked, done, hearts, onReplay, isAdmin, onAdminReset: adminReset, onAdminReroll: adminReroll, onAdminResetAll: adminResetAll, onPractice: (d, n) => void onPractice(d, n) }
   const back = () => setScreen(entered ? 'home' : 'onboarding')
+  const bc = practice ?? challenge // défi du combat affiché (entraînement ou combat du jour)
+
+  if (practiceLoading)
+    return (
+      <main className="app center">
+        <div className="splash-orb" />
+        <p className="muted">{t('practice.preparing')}</p>
+      </main>
+    )
 
   if (screen === 'intro')
-    return <BattleIntro challenge={challenge} boosted={isFormidable(challenge.gen, challenge.trainer.name)} onDone={() => setScreen('battle')} />
+    return <BattleIntro challenge={bc} boosted={isFormidable(bc.gen, bc.trainer.name)} onDone={() => setScreen('battle')} />
 
   if (screen === 'battle' && view) {
     const over = view.ended && !queue.length && !pending
-    const gi = GEN_INFO[challenge.gen]
+    const gi = GEN_INFO[bc.gen]
     return (
       <div className="arena" data-theme="dark">
         <main className="app nonav">
           <TopBar
-            title={<>{trainerName(challenge.trainer.name)}<div className="muted small">{classLabel(challenge.trainer)} · {gi.game}</div></>}
+            title={<>{trainerName(bc.trainer.name)}<div className="muted small">{classLabel(bc.trainer)} · {gi.game}</div></>}
             right={<span className="pill">{t('battle.turn', { n: view.turn })}</span>}
           />
+          {practice && <div className="practice-banner">{t('practice.banner', { d: dayNumber(practice.dayKey) })}</div>}
           <BattleScreen view={view} queue={queue} onAdvance={advance} onMove={(slot) => act(`move ${slot}`)} onSwitch={(idx) => act(`switch ${idx + 1}`)} onForfeit={forfeit} />
           <div className="stack" style={{ gap: 8 }}>
-            {([[t('battle.you'), view.player.team], [trainerName(challenge.trainer.name), view.opponent.team]] as const).map(([who, team]) => (
+            {([[t('battle.you'), view.player.team], [trainerName(bc.trainer.name), view.opponent.team]] as const).map(([who, team]) => (
               <div key={who} className="squad">
                 <span className="muted small" style={{ width: 72, fontWeight: 700 }}>{who}</span>
                 {team.map((m) => <span key={m.idx} className={m.fainted ? 'ko' : undefined} title={spName(m.name)} style={{ display: 'contents' }}><MonOrb types={m.types} size={26} /></span>)}
               </div>
             ))}
           </div>
-          {over && <button className="btn" onClick={() => setScreen('result')}>{t('battle.seeResult')}</button>}
+          {over && (practice
+            ? <button className="btn" onClick={exitPractice}>{t('practice.back')}</button>
+            : <button className="btn" onClick={() => setScreen('result')}>{t('battle.seeResult')}</button>)}
         </main>
       </div>
     )

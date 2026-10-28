@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react'
 import { AVATARS } from '../game/avatars'
-import { CalendarDays, Check, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
+import { CalendarDays, Check, RotateCcw, ChevronLeft, ChevronRight, Crown, Flame, LogIn, LogOut, Moon, Monitor, Pencil, Camera, Star, Sun, X, Trophy, Layers, ShieldCheck } from 'lucide-react'
 import type { Ctx } from './types'
-import { dayResults, recId, slotOf, type DayRecord } from '../game/history'
+import { dayResults, recId, recordFor, slotOf, type DayRecord } from '../game/history'
 import type { ScoreBreakdown } from '../game/scoring'
 import type { LeaderRow } from '../game/cloud'
 import { supabase } from '../game/cloud'
 import { pushConfigured } from '../game/push'
 import { RemindersEntry } from './Reminders'
 import { GEN_INFO, trainerName } from '../game/fr'
-import { displayDay, keyForDisplayDay } from '../game/rng'
+import { displayDay, keyForDisplayDay, LAUNCH_DAY, slotsPerDay } from '../game/rng'
+import { dayNumber } from '../game/info'
 import { Avatar, TopBar } from '../ui/kit'
 import { locale, pick, t, tn, useLang } from '../i18n'
 
-function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreakdown; today: string; onClose: () => void }) {
+function BattleDetail({ r, sc, today, onClose, onPractice }: { r: DayRecord; sc?: ScoreBreakdown; today: string; onClose: () => void; onPractice: (dayKey: string, slot: number) => void }) {
   const win = r.result === 'win'
   const alive = r.survivors ?? (win ? 1 : 0)
   const kos = r.kos ?? (win ? 6 : 0)
@@ -62,6 +63,53 @@ function BattleDetail({ r, sc, today, onClose }: { r: DayRecord; sc?: ScoreBreak
               )}
             </section>
           )}
+          {r.dayKey < today && <PracticeButton onClick={() => onPractice(r.dayKey, slotOf(r))} />}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Bouton « Rejouer ce combat » (entraînement) + rappel que rien ne compte. */
+function PracticeButton({ onClick }: { onClick: () => void }) {
+  return (
+    <div className="stack" style={{ gap: 6 }}>
+      <button className="btn violet" onClick={onClick}><RotateCcw size={18} /> {t('practice.replay')}</button>
+      <p className="muted small" style={{ textAlign: 'center', margin: 0 }}>{t('practice.note')}</p>
+    </div>
+  )
+}
+
+/** Jour passé touché dans le calendrier : ses combats (joués ou non), chacun rejouable en entraînement. */
+function DaySheet({ dayKey, history, today, onClose, onPractice }: { dayKey: string; history: DayRecord[]; today: string; onClose: () => void; onPractice: (dayKey: string, slot: number) => void }) {
+  const n = slotsPerDay(dayKey)
+  return (
+    <div className="sheet-bg" onClick={onClose} role="dialog" aria-modal="true" aria-label={t('practice.dayTitle', { d: dayNumber(dayKey) })}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+        <button className="iconbtn sheet-x" onClick={onClose} aria-label={t('party.close')}><X size={20} /></button>
+        <div className="stack">
+          <div>
+            <span className="small muted" style={{ fontWeight: 700 }}>{label(dayKey, today)}</span>
+            <h2 className="h2" style={{ margin: 0, fontSize: 26 }}>{t('practice.dayTitle', { d: dayNumber(dayKey) })}</h2>
+          </div>
+          {Array.from({ length: n }, (_, i) => {
+            const slot = i + 1
+            const r = recordFor(history, dayKey, slot)
+            return (
+              <section key={slot} className="card stack" style={{ gap: 10 }}>
+                <div className="row between">
+                  <div>
+                    {n > 1 && <div className="small muted" style={{ fontWeight: 700 }}>{t('hist.battleN', { n: slot })}</div>}
+                    <b style={{ fontSize: 18 }}>{r ? trainerName(r.trainer) : t('practice.notPlayed')}</b>
+                    {r && <div className="muted small">{t('hist.gen', { n: r.gen, game: GEN_INFO[r.gen]?.game })}</div>}
+                  </div>
+                  {r && <span className={r.result === 'win' ? 'pill green' : 'pill red'}>{r.result === 'win' ? t('hist.win') : t('hist.loss')}</span>}
+                </div>
+                <button className="btn violet" onClick={() => onPractice(dayKey, slot)}><RotateCcw size={18} /> {t('practice.replay')}</button>
+              </section>
+            )
+          })}
+          <p className="muted small" style={{ textAlign: 'center', margin: 0 }}>{t('practice.note')}</p>
         </div>
       </div>
     </div>
@@ -98,6 +146,7 @@ export function History(c: Ctx) {
   const recent = [...c.history].reverse().slice(0, 20)
   const [open, setOpen] = useState<string | null>(null)
   const sel = open ? c.history.find((r) => recId(r) === open) : undefined
+  const [dayOpen, setDayOpen] = useState<string | null>(null)
   return (
     <>
       <div>
@@ -119,7 +168,11 @@ export function History(c: Ctx) {
             const date = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(i + 1).padStart(2, '0')}`
             const key = keyForDisplayDay(date, (k) => byDay.has(k) || k === c.today) // la clé stockée porte la date de fin du jour de jeu
             const r = byDay.get(key)
-            return <div key={key} className={`d ${r ? (r === 'win' ? 'w' : 'l') : ''} ${key === c.today ? 'today' : ''}`}>{i + 1}</div>
+            const cls = `d ${r ? (r === 'win' ? 'w' : 'l') : ''} ${key === c.today ? 'today' : ''}`
+            // Jour passé (depuis le lancement) : touchable pour rejouer son combat en entraînement.
+            if (key < c.today && key >= LAUNCH_DAY)
+              return <button key={key} type="button" className={`${cls} past`} onClick={() => setDayOpen(key)} aria-label={`${label(key, c.today)} — ${t('practice.replay')}`}>{i + 1}</button>
+            return <div key={key} className={cls}>{i + 1}</div>
           })}
         </div>
         <div className="row between small muted" style={{ fontWeight: 700 }}>
@@ -127,6 +180,7 @@ export function History(c: Ctx) {
           <span style={{ color: 'var(--tertiary)' }}>{tn('hist.wins', c.stats.totalWins)} ({rate}%)</span>
           <span style={{ color: 'var(--yellow)' }}>{t('hist.record', { n: c.stats.bestStreak })}</span>
         </div>
+        <p className="muted small" style={{ margin: 0, textAlign: 'center' }}><RotateCcw size={12} style={{ verticalAlign: -1 }} /> {t('practice.hint')}</p>
       </section>
       <h2 className="h2">{t('hist.recent')}</h2>
       {recent.length === 0 && <p className="muted">{t('hist.empty')}</p>}
@@ -151,7 +205,8 @@ export function History(c: Ctx) {
           </div>
         </button>
       ))}
-      {sel && <BattleDetail r={sel} sc={c.score.byDay.get(recId(sel))} today={c.today} onClose={() => setOpen(null)} />}
+      {sel && <BattleDetail r={sel} sc={c.score.byDay.get(recId(sel))} today={c.today} onClose={() => setOpen(null)} onPractice={c.onPractice} />}
+      {dayOpen && <DaySheet dayKey={dayOpen} history={c.history} today={c.today} onClose={() => setDayOpen(null)} onPractice={c.onPractice} />}
     </>
   )
 }

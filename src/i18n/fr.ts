@@ -448,6 +448,14 @@ export const fr = {
 
   // ── App / combat (écran) ──
   'app.preparing': 'Préparation du combat du jour…',
+  'practice.preparing': 'Préparation de l’entraînement…',
+  'practice.banner': 'Entraînement · défi n°{d} · aucun point, aucune série',
+  'practice.back': 'Retour à l’historique',
+  'practice.replay': 'Rejouer ce combat',
+  'practice.note': 'Mode entraînement : le combat ne compte pas (ni points, ni série, ni cœurs).',
+  'practice.notPlayed': 'Non joué',
+  'practice.dayTitle': 'Défi n°{d}',
+  'practice.hint': 'Touche un jour passé pour rejouer son combat.',
   'battle.turn': 'Tour {n}',
   'battle.you': 'Toi',
   'battle.seeResult': 'Voir mon résultat',

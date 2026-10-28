@@ -449,6 +449,14 @@ export const en: Record<keyof typeof fr, string> = {
 
   // ── App / battle (screen) ──
   'app.preparing': 'Preparing today’s battle…',
+  'practice.preparing': 'Preparing practice…',
+  'practice.banner': 'Practice · challenge #{d} · no points, no streak',
+  'practice.back': 'Back to history',
+  'practice.replay': 'Replay this battle',
+  'practice.note': 'Practice mode: this battle doesn’t count (no points, streak or hearts).',
+  'practice.notPlayed': 'Not played',
+  'practice.dayTitle': 'Challenge #{d}',
+  'practice.hint': 'Tap a past day to replay its battle.',
   'battle.turn': 'Turn {n}',
   'battle.you': 'You',
   'battle.seeResult': 'View my result',

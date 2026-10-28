@@ -185,6 +185,10 @@ h1, h2, h3, p { margin: 0; }
 .cal .d.today { outline: 2px solid var(--primary); }
 .cal .h { text-align: center; font-size: 11px; font-weight: 800; color: var(--muted); }
 .cal .d.empty { background: transparent; }
+.cal button.d.past { cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; border: 0; padding: 0; transition: transform 0.12s ease; }
+.cal button.d.past.w, .cal button.d.past.l { border-width: 1px; border-style: solid; }
+.cal button.d.past:active { transform: scale(0.92); }
+.practice-banner { text-align: center; font-size: 12px; font-weight: 800; letter-spacing: 0.02em; padding: 6px 12px; border-radius: 999px; background: rgba(139, 108, 217, 0.22); border: 1px solid rgba(139, 108, 217, 0.55); color: #cbb8ff; }
 .tabs { display: flex; padding: 4px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); }
 .tabs button { flex: 1; padding: 10px; border-radius: 999px; font-weight: 800; font-size: 14px; color: var(--muted); }
 .tabs button.on { background: var(--primary); color: var(--on-primary); }
